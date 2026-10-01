@@ -20,8 +20,11 @@
     "issues": "https://github.com/p0x38/fucking-useless-mod-v2/issues"
   },
   "license": "All-Rights-Reserved",
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
+    "main": [
+      "me.p0x38.fabric.FuckingUselessModFabric"
+    ],
     "client": [
       "me.p0x38.fabric.client.FuckingUselessModFabricClient"
     ],
