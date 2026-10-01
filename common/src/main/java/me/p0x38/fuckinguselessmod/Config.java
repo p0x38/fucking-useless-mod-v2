@@ -279,7 +279,7 @@ public final class Config {
 
         @ConfigOption(name = "Leet Speak Rules", category = "Leet Speak")
         public List<String> leetSpeakRules = new ArrayList<>(List.of(
-                "a=4", "e=3", "i=1", "o=0", "s=5", "t=7"
+                "a=>4", "e=>3", "i=>1", "o=>0", "s=>5", "t=>7"
         ));
 
         @ConfigOption(name = "Enable Gamer Slang", category = "Gamer Slang")
@@ -297,9 +297,9 @@ public final class Config {
 
         @ConfigOption(name = "Gamer Slang Rules", category = "Gamer Slang")
         public List<String> gamerSlangRules = new ArrayList<>(List.of(
-                "you=u", "your=ur", "are=r", "why=y", "people=ppl",
-                "please=pls", "thanks=thx", "thank=thx", "because=cuz",
-                "before=b4", "really=rly", "probably=prolly"
+                "\\byou\\b=>u", "\\byour\\b=>ur", "\\bare\\b=>r", "\\bwhy\\b=>y", "\\bpeople\\b=>ppl",
+                "\\bplease\\b=>pls", "\\bthanks\\b=>thx", "\\bthank\\b=>thx", "\\bbecause\\b=>cuz",
+                "\\bbefore\\b=>b4", "\\breally\\b=>rly", "\\bprobably\\b=>prolly"
         ));
 
         @ConfigOption(name = "Enable Text Speak", category = "Text Speak")
@@ -317,12 +317,12 @@ public final class Config {
 
         @ConfigOption(name = "Text Speak Rules", category = "Text Speak")
         public List<String> textSpeakRules = new ArrayList<>(List.of(
-                "see you=c u", "see=c", "you=u", "are=r", "why=y",
-                "be right back=brb", "as soon as possible=asap",
-                "laughing out loud=lol", "by the way=btw",
-                "in my opinion=imo", "for your information=fyi",
-                "I don't know=idk", "oh my god=omg", "right now=rn",
-                "to be honest=tbh", "because=bc", "without=w/o"
+                "\\bsee you\\b=>c u", "\\bsee\\b=>c", "\\byou\\b=>u", "\\bare\\b=>r", "\\bwhy\\b=>y",
+                "\\bbe right back\\b=>brb", "\\bas soon as possible\\b=>asap",
+                "\\blaughing out loud\\b=>lol", "\\bby the way\\b=>btw",
+                "\\bin my opinion\\b=>imo", "\\bfor your information\\b=>fyi",
+                "\\bI don't know\\b=>idk", "\\boh my god\\b=>omg", "\\bright now\\b=>rn",
+                "\\bto be honest\\b=>tbh", "\\bbecause\\b=>bc", "\\bwithout\\b=>w/o"
         ));
 
         @ConfigOption(name = "Enable Lolcat", category = "Lolcat")
@@ -340,9 +340,9 @@ public final class Config {
 
         @ConfigOption(name = "Lolcat Rules", category = "Lolcat")
         public List<String> lolcatRules = new ArrayList<>(List.of(
-                "the=teh", "this=dis", "that=dat", "what=wat",
-                "with=wit", "is=iz", "my=mah", "I am=I can haz",
-                "has=haz", "have=hav"
+                "\\bthe\\b=>teh", "\\bthis\\b=>dis", "\\bthat\\b=>dat", "\\bwhat\\b=>wat",
+                "\\bwith\\b=>wit", "\\bis\\b=>iz", "\\bmy\\b=>mah", "\\bI am\\b=>I can haz",
+                "\\bhas\\b=>haz", "\\bhave\\b=>hav"
         ));
 
         @ConfigOption(name = "Presets", category = "Effects")
