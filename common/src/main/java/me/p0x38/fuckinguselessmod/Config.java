@@ -353,6 +353,9 @@ public final class Config {
         @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
 
+        @ConfigOption(name = "Enable Sentence End Effects", category = "Effects")
+        public boolean sentenceEndEffectsEnabled = true;
+
         @ConfigOption(name = "Sentence End Effects", category = "Effects")
         public List<SentenceEndEffect> sentenceEndEffects =
                 new ArrayList<>(List.of(

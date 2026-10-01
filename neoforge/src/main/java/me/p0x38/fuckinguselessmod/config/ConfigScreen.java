@@ -9,6 +9,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -99,7 +101,11 @@ public final class ConfigScreen {
         }
 
         if (List.class.isAssignableFrom(type)) {
-            addStringList(category, entries, config, field, label, tooltip);
+            if (getEnumListType(field) != null) {
+                addEnumList(category, entries, config, field, label, tooltip);
+            } else {
+                addStringList(category, entries, config, field, label, tooltip);
+            }
             return;
         }
 
@@ -261,6 +267,68 @@ public final class ConfigScreen {
         } catch (IllegalAccessException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void addEnumList(
+            ConfigCategory category,
+            ConfigEntryBuilder entries,
+            Config.Data config,
+            Field field,
+            Component label,
+            Component tooltip
+    ) {
+        try {
+            Class<? extends Enum> enumClass = getEnumListType(field);
+            List<?> value = (List<?>) field.get(config);
+            List<String> editableValue = new ArrayList<>();
+
+            if (value != null) {
+                for (Object item : value) {
+                    if (item instanceof Enum<?> enumValue) {
+                        editableValue.add(enumValue.name());
+                    }
+                }
+            }
+
+            category.addEntry(
+                    entries.startStrList(label, editableValue)
+                            .setTooltip(tooltip)
+                            .setDefaultValue(new ArrayList<>(editableValue))
+                            .setSaveConsumer(newValue -> {
+                                try {
+                                    List<Enum> parsed = new ArrayList<>();
+                                    for (String name : newValue) {
+                                        for (Enum enumValue : enumClass.getEnumConstants()) {
+                                            if (enumValue.name().equalsIgnoreCase(name)) {
+                                                parsed.add(enumValue);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    field.set(config, parsed);
+                                } catch (IllegalAccessException exception) {
+                                    throw new RuntimeException(exception);
+                                }
+                            })
+                            .build()
+            );
+        } catch (IllegalAccessException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Class<? extends Enum> getEnumListType(Field field) {
+        Type genericType = field.getGenericType();
+        if (!(genericType instanceof ParameterizedType parameterizedType)) {
+            return null;
+        }
+        Type elementType = parameterizedType.getActualTypeArguments()[0];
+        if (!(elementType instanceof Class<?> elementClass) || !elementClass.isEnum()) {
+            return null;
+        }
+        return (Class<? extends Enum>) elementClass;
     }
 
     private static void addStringList(

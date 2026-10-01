@@ -4,6 +4,8 @@ import me.p0x38.fuckinguselessmod.Config;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -79,7 +81,7 @@ public final class ConfigToml {
             }
 
             try {
-                Object parsed = parseValue(raw, field.getType(), field.getGenericType().getTypeName());
+                Object parsed = parseValue(raw, field.getType(), field.getGenericType());
                 if (parsed != null) {
                     field.set(data, parsed);
                 }
@@ -140,6 +142,10 @@ public final class ConfigToml {
             case "presets" -> output.append(
                     "# Preset IDs are applied in list order.\n"
             );
+            case "sentenceEndEffects" -> {
+                output.append("# Sentence-end effects are applied from left to right.\n");
+                output.append("# Valid values: TILDE, ELLIPSIS, EXCLAMATION\n");
+            }
             default -> {
             }
         }
@@ -156,7 +162,11 @@ public final class ConfigToml {
 
         if (value instanceof List<?> list) {
             return list.stream()
-                    .map(item -> quote(String.valueOf(item)))
+                    .map(item -> quote(
+                            item instanceof Enum<?> enumValue
+                                    ? enumValue.name()
+                                    : String.valueOf(item)
+                    ))
                     .collect(java.util.stream.Collectors.joining(
                             ", ",
                             "[",
@@ -191,7 +201,7 @@ public final class ConfigToml {
     private static Object parseValue(
             String raw,
             Class<?> type,
-            String genericType
+            Type genericType
     ) {
         String value = raw.trim();
 
@@ -230,8 +240,17 @@ public final class ConfigToml {
         }
 
         if (List.class.isAssignableFrom(type)
-                && genericType.endsWith("java.lang.String>")) {
-            return parseStringArray(value);
+                && genericType instanceof ParameterizedType parameterizedType) {
+            Type elementType = parameterizedType.getActualTypeArguments()[0];
+
+            if (elementType == String.class) {
+                return parseStringArray(value);
+            }
+
+            if (elementType instanceof Class<?> elementClass
+                    && elementClass.isEnum()) {
+                return parseEnumArray(value, elementClass);
+            }
         }
 
         return null;

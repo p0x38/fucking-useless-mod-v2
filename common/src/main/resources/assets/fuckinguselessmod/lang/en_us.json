@@ -106,5 +106,9 @@
   "text.fuckinguselessmod.config.value.text_case.uppercase": "Uppercase",
   "text.fuckinguselessmod.config.value.block_mode.dynamic": "Dynamic",
   "text.fuckinguselessmod.config.value.block_mode.full_width": "Full Width",
-  "text.fuckinguselessmod.config.value.block_mode.random": "Random"
+  "text.fuckinguselessmod.config.value.block_mode.random": "Random",
+  "text.fuckinguselessmod.config.option.sentenceEndEffectsEnabled": "Enable Sentence End Effects",
+  "text.fuckinguselessmod.config.option.sentenceEndEffects": "Sentence End Effects",
+  "text.fuckinguselessmod.config.description.sentenceEndEffectsEnabled": "Enable or disable all sentence-ending effects.",
+  "text.fuckinguselessmod.config.description.sentenceEndEffects": "Ordered list of sentence-ending effects. Entries are applied from left to right. Use TILDE, ELLIPSIS, or EXCLAMATION."
 }

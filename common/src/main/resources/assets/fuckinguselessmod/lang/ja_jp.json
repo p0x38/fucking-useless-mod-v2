@@ -106,5 +106,9 @@
   "text.fuckinguselessmod.config.value.text_case.uppercase": "大文字",
   "text.fuckinguselessmod.config.value.block_mode.dynamic": "動的",
   "text.fuckinguselessmod.config.value.block_mode.full_width": "全角",
-  "text.fuckinguselessmod.config.value.block_mode.random": "ランダム"
+  "text.fuckinguselessmod.config.value.block_mode.random": "ランダム",
+  "text.fuckinguselessmod.config.option.sentenceEndEffectsEnabled": "文末エフェクトを有効化",
+  "text.fuckinguselessmod.config.option.sentenceEndEffects": "文末エフェクト",
+  "text.fuckinguselessmod.config.description.sentenceEndEffectsEnabled": "文末エフェクト全体を有効または無効にします。",
+  "text.fuckinguselessmod.config.description.sentenceEndEffects": "文末エフェクトを適用する順番です。リストの上から順に適用されます。TILDE、ELLIPSIS、EXCLAMATIONを指定できます。"
 }
