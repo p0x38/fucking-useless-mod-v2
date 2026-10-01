@@ -257,7 +257,7 @@ public final class Uwuifier {
                 Character.toChars(firstCodePoint)
         );
 
-        return (first + "-").repeat(count) + word;
+        return (first + "-").repeat(count);
     }
 
     private static String randomValue(
