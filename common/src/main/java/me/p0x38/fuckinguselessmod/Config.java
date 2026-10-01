@@ -345,6 +345,32 @@ public final class Config {
                 "\\bhas\\b=>haz", "\\bhave\\b=>hav"
         ));
 
+        @ConfigOption(name = "Effect Rule Syntax", category = "Effects")
+        public String effectRuleSyntax =
+                "condition::regex=>replacement";
+
+        @ConfigOption(name = "Effect Rule Conditions", category = "Effects")
+        public List<String> effectRuleConditionExamples = new ArrayList<>(List.of(
+                "always",
+                "changed",
+                "unchanged",
+                "empty",
+                "nonempty",
+                "contains:<regex>",
+                "not_contains:<regex>",
+                "matches:<regex>",
+                "not_matches:<regex>",
+                "starts_with:<text>",
+                "ends_with:<text>",
+                "original_contains:<regex>",
+                "original_matches:<regex>",
+                "has_uppercase",
+                "has_lowercase",
+                "has_digit",
+                "has_whitespace",
+                "has_punctuation"
+        ));
+
         @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
 
