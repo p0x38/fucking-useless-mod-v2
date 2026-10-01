@@ -19,7 +19,7 @@ class SentenceEndEffectsTest {
         );
 
         assertEquals(
-                "Hello.~...! World?~...!",
+                "Hello~...! World~...!",
                 SentenceEndEffects.apply("Hello. World?", config)
         );
     }
@@ -35,7 +35,7 @@ class SentenceEndEffectsTest {
         );
 
         assertEquals(
-                "Hello....~! World?...~!",
+                "Hello...~! World...~!",
                 SentenceEndEffects.apply("Hello. World?", config)
         );
     }
