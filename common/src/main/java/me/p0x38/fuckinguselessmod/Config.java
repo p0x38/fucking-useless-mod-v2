@@ -344,56 +344,7 @@ public final class Config {
                 "\\bwith\\b=>wit", "\\bis\\b=>iz", "\\bmy\\b=>mah", "\\bI am\\b=>I can haz",
                 "\\bhas\\b=>haz", "\\bhave\\b=>hav"
         ));
-
-        @ConfigOption(name = "Effect Rule Syntax", category = "Effects")
-        public String effectRuleSyntax =
-                "condition::regex=>replacement";
-
-        @ConfigOption(name = "Effect Rule Conditions", category = "Effects")
-        public List<String> effectRuleConditionExamples = new ArrayList<>(List.of(
-                "always",
-                "never",
-                "random",
-                "random:0.25",
-                "changed",
-                "unchanged",
-                "empty",
-                "nonempty",
-                "contains:<regex>",
-                "not_contains:<regex>",
-                "regex:<regex>",
-                "matches:<regex>",
-                "regex_matches:<regex>",
-                "not_matches:<regex>",
-                "regex_not_matches:<regex>",
-                "contains_text:<text>",
-                "not_contains_text:<text>",
-                "starts_with:<text>",
-                "ends_with:<text>",
-                "original_contains:<regex>",
-                "original_matches:<regex>",
-                "original_regex:<regex>",
-                "original_regex_matches:<regex>",
-                "length:>10",
-                "word_count:>=3",
-                "line_count:>1",
-                "has_uppercase",
-                "has_lowercase",
-                "has_digit",
-                "has_letter",
-                "has_non_ascii",
-                "has_whitespace",
-                "has_punctuation",
-                "has_question",
-                "has_exclamation",
-                "has_line_break",
-                "is_url",
-                "is_mention",
-                "is_hashtag",
-                "not:contains:<regex>"
-        ));
-
-        @ConfigOption(name = "Presets", category = "Effects")
+\n        @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
 
         public void clamp() {
