@@ -97,17 +97,26 @@ public final class Uwuifier {
 
             appendGapWithEffect(
                     gap,
-                    word,
                     output,
                     config,
                     random
             );
 
-            if (random.nextFloat() >= config.uwuifierWordChance) {
-                output.append(word);
-            } else {
-                output.append(transformWord(word, config));
+            boolean blacklisted = isBlacklisted(word, config);
+            String transformed = word;
+
+            if (!blacklisted
+                    && random.nextFloat() < config.uwuifierWordChance) {
+                transformed = transformWord(word, config);
             }
+
+            if (!blacklisted
+                    && config.uwuifierStutterEnabled
+                    && random.nextFloat() < config.uwuifierStutterChance) {
+                output.append(makeStutter(transformed, random));
+            }
+
+            output.append(transformed);
 
             last = matcher.end();
         }
@@ -117,7 +126,6 @@ public final class Uwuifier {
 
     private static void appendGapWithEffect(
             String gap,
-            String word,
             StringBuilder output,
             Config.Data config,
             Random random
@@ -139,7 +147,7 @@ public final class Uwuifier {
         String separator = gap.substring(separatorStart);
         output.append(separator);
 
-        String effect = chooseSpaceEffect(config, random, word);
+        String effect = chooseSpaceEffect(config, random);
 
         if (effect != null) {
             output.append(effect).append(separator);
@@ -217,8 +225,7 @@ public final class Uwuifier {
 
     private static String chooseSpaceEffect(
             Config.Data config,
-            Random random,
-            String word
+            Random random
     ) {
         float roll = random.nextFloat();
 
@@ -238,12 +245,44 @@ public final class Uwuifier {
 
         roll -= config.uwuifierActionChance;
 
-        if (config.uwuifierStutterEnabled
-                && roll < config.uwuifierStutterChance) {
-            return makeStutter(word, random);
+        return null;
+    }
+
+    private static int chooseStutterCount(Random random) {
+        int roll = random.nextInt(100);
+
+        if (roll < 70) {
+            return 1;
         }
 
-        return null;
+        if (roll < 90) {
+            return 2;
+        }
+
+        if (roll < 98) {
+            return 3;
+        }
+
+        return 4;
+    }
+
+    private static boolean isBlacklisted(
+            String word,
+            Config.Data config
+    ) {
+        if (config.uwuifierBlacklist == null
+                || config.uwuifierBlacklist.isEmpty()) {
+            return false;
+        }
+
+        for (String blacklisted : config.uwuifierBlacklist) {
+            if (blacklisted != null
+                    && word.equalsIgnoreCase(blacklisted.trim())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static String makeStutter(String word, Random random) {
@@ -251,7 +290,7 @@ public final class Uwuifier {
             return null;
         }
 
-        int count = random.nextInt(1, 3);
+        int count = chooseStutterCount(random);
         int firstCodePoint = word.codePointAt(0);
         String first = new String(
                 Character.toChars(firstCodePoint)
