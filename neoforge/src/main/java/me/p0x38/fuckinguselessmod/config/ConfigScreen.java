@@ -52,13 +52,7 @@ public final class ConfigScreen {
                     )
             );
 
-            addField(
-                    category,
-                    entries,
-                    config,
-                    field,
-                    option
-            );
+            addField(category, entries, config, field, option);
         }
 
         builder.setSavingRunnable(() -> {
@@ -79,30 +73,33 @@ public final class ConfigScreen {
         Component label = Component.translatable(
                 "text.fuckinguselessmod.config.option." + field.getName()
         );
+        Component tooltip = Component.translatable(
+                "text.fuckinguselessmod.config.description." + field.getName()
+        );
         Class<?> type = field.getType();
 
         if (type == boolean.class) {
-            addBoolean(category, entries, config, field, label);
+            addBoolean(category, entries, config, field, label, tooltip);
             return;
         }
 
         if (type == int.class) {
-            addInt(category, entries, config, field, label, option);
+            addInt(category, entries, config, field, label, tooltip, option);
             return;
         }
 
         if (type == float.class) {
-            addFloat(category, entries, config, field, label, option);
+            addFloat(category, entries, config, field, label, tooltip, option);
             return;
         }
 
         if (type.isEnum()) {
-            addEnum(category, entries, config, field, label);
+            addEnum(category, entries, config, field, label, tooltip);
             return;
         }
 
         if (List.class.isAssignableFrom(type)) {
-            addStringList(category, entries, config, field, label);
+            addStringList(category, entries, config, field, label, tooltip);
             return;
         }
 
@@ -119,13 +116,15 @@ public final class ConfigScreen {
             ConfigEntryBuilder entries,
             Config.Data config,
             Field field,
-            Component label
+            Component label,
+            Component tooltip
     ) {
         try {
             boolean value = field.getBoolean(config);
 
             category.addEntry(
                     entries.startBooleanToggle(label, value)
+                            .setTooltip(tooltip)
                             .setDefaultValue(value)
                             .setSaveConsumer(newValue -> {
                                 try {
@@ -147,12 +146,14 @@ public final class ConfigScreen {
             Config.Data config,
             Field field,
             Component label,
+            Component tooltip,
             ConfigOption option
     ) {
         try {
             int value = field.getInt(config);
 
             var builder = entries.startIntField(label, value)
+                    .setTooltip(tooltip)
                     .setDefaultValue(value);
 
             if (option.hasMin()) {
@@ -185,12 +186,14 @@ public final class ConfigScreen {
             Config.Data config,
             Field field,
             Component label,
+            Component tooltip,
             ConfigOption option
     ) {
         try {
             float value = field.getFloat(config);
 
             var builder = entries.startFloatField(label, value)
+                    .setTooltip(tooltip)
                     .setDefaultValue(value);
 
             if (option.hasMin()) {
@@ -223,7 +226,8 @@ public final class ConfigScreen {
             ConfigEntryBuilder entries,
             Config.Data config,
             Field field,
-            Component label
+            Component label,
+            Component tooltip
     ) {
         try {
             E value = (E) field.get(config);
@@ -235,6 +239,7 @@ public final class ConfigScreen {
                                     enumClass,
                                     value
                             )
+                            .setTooltip(tooltip)
                             .setDefaultValue(value)
                             .setSaveConsumer(newValue -> {
                                 try {
@@ -255,7 +260,8 @@ public final class ConfigScreen {
             ConfigEntryBuilder entries,
             Config.Data config,
             Field field,
-            Component label
+            Component label,
+            Component tooltip
     ) {
         try {
             @SuppressWarnings("unchecked")
@@ -267,6 +273,7 @@ public final class ConfigScreen {
 
             category.addEntry(
                     entries.startStrList(label, editableValue)
+                            .setTooltip(tooltip)
                             .setDefaultValue(
                                     new ArrayList<>(editableValue)
                             )
@@ -289,26 +296,5 @@ public final class ConfigScreen {
 
     private static String translationKeyPart(String value) {
         return value.toLowerCase(Locale.ROOT).replace(' ', '_');
-    }
-
-    private static String humanize(String value) {
-        StringBuilder result = new StringBuilder();
-
-        for (int i = 0; i < value.length(); i++) {
-            char character = value.charAt(i);
-
-            if (i == 0) {
-                result.append(Character.toUpperCase(character));
-                continue;
-            }
-
-            if (Character.isUpperCase(character)) {
-                result.append(' ');
-            }
-
-            result.append(character);
-        }
-
-        return result.toString();
     }
 }
