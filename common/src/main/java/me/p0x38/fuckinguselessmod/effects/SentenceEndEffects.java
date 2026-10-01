@@ -29,7 +29,7 @@ public final class SentenceEndEffects {
         int last = 0;
 
         while (matcher.find()) {
-            output.append(input, last, matcher.end());
+            output.append(input, last, matcher.start());
 
             for (Config.SentenceEndEffect effect : config.sentenceEndEffects) {
                 output.append(marker(effect));
