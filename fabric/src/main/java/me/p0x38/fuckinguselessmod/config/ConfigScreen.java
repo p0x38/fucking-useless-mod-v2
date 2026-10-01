@@ -2,9 +2,9 @@ package me.p0x38.fuckinguselessmod.config;
 
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.ConfigManager;
-import me.shedaniel.cloth.clothconfig2.api.ConfigBuilder;
-import me.shedaniel.cloth.clothconfig2.api.ConfigCategory;
-import me.shedaniel.cloth.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import me.shedaniel.clothconfig2.api.ConfigCategory;
+import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
