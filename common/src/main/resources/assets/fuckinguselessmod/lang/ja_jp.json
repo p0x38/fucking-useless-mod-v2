@@ -17,5 +17,17 @@
   "text.fuckinguselessmod.config.option.blocksEnabled": "ブロック効果を有効化",
   "text.fuckinguselessmod.config.option.blockChance": "ブロック発生確率",
   "text.fuckinguselessmod.config.option.maxLength": "最大文字数",
-  "text.fuckinguselessmod.config.option.presets": "プリセット"
+  "text.fuckinguselessmod.config.option.presets": "プリセット",
+  "text.fuckinguselessmod.config.description.enabled": "チャットの変換処理を有効または無効にします。",
+  "text.fuckinguselessmod.config.description.mode": "チャットメッセージをどのように変換するかを選択します。",
+  "text.fuckinguselessmod.config.description.blockMode": "ブロック効果を有効にしたときのブロック文字の選び方を選択します。",
+  "text.fuckinguselessmod.config.description.encodingPipeline": "Encodeモードで使用するエンコード処理を選択します。処理の順番が結果に影響します。",
+  "text.fuckinguselessmod.config.description.bitRotation": "ビット回転処理でビットを何桁回転させるかを指定します。範囲: 0〜7。",
+  "text.fuckinguselessmod.config.description.xorKey": "ビット単位のXOR処理に使用するバイト値を指定します。範囲: 0〜255。",
+  "text.fuckinguselessmod.config.description.zalgoEnabled": "変換後のテキストにZalgoを適用します。",
+  "text.fuckinguselessmod.config.description.zalgoChance": "変換メッセージにZalgoを適用する確率です。範囲: 0.0〜1.0。",
+  "text.fuckinguselessmod.config.description.blocksEnabled": "変換後のテキストにブロック文字の効果を適用できるようにします。",
+  "text.fuckinguselessmod.config.description.blockChance": "変換メッセージにブロック文字の効果を適用する確率です。範囲: 0.0〜1.0。",
+  "text.fuckinguselessmod.config.description.maxLength": "変換後のメッセージの最大文字数です。範囲: 1〜256。",
+  "text.fuckinguselessmod.config.description.presets": "変換後のテキストに適用するプリセットです。利用可能なプリセット名を指定してください。"
 }
