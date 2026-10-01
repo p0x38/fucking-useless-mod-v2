@@ -29,5 +29,7 @@
   "text.fuckinguselessmod.config.description.blocksEnabled": "Allow block-character effects to appear in transformed text.",
   "text.fuckinguselessmod.config.description.blockChance": "Chance for a block-character effect to be applied to a transformed message. Range: 0.0-1.0.",
   "text.fuckinguselessmod.config.description.maxLength": "Maximum length of the transformed message. Range: 1-256.",
-  "text.fuckinguselessmod.config.description.presets": "Presets to apply to transformed text. Entries must match available preset names."
+  "text.fuckinguselessmod.config.description.presets": "Presets to apply to transformed text. Entries must match available preset names.",
+  "text.fuckinguselessmod.config.option.uwuifierEnabled": "Enable Uwuifier",
+  "text.fuckinguselessmod.config.description.uwuifierEnabled": "Apply the dedicated Uwuifier transformation to chat messages."
 }
