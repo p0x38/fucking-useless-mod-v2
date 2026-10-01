@@ -89,6 +89,44 @@ class UwuifierTest {
         );
     }
 
+    @Test
+    void blacklistWordsAreNotTransformed() {
+        Config.Data config = config();
+        config.uwuifierBlacklist = List.of("rawr", "lol", "lmao");
+        config.uwuifierReplaceRl = true;
+
+        assertEquals(
+                "rawr lol lmao",
+                Uwuifier.apply("rawr lol lmao", config)
+        );
+    }
+
+    @Test
+    void nVowelTransformationPreservesTheVowel() {
+        Config.Data config = config();
+        config.uwuifierReplaceNVowel = true;
+
+        assertEquals(
+                "nyah",
+                Uwuifier.apply("nah", config)
+        );
+    }
+
+    @Test
+    void stutterIsAppliedToTransformedWord() {
+        Config.Data config = config();
+        config.uwuifierReplaceNVowel = true;
+        config.uwuifierStutterEnabled = true;
+        config.uwuifierStutterChance = 1.0f;
+
+        String result = Uwuifier.apply("nah", config);
+
+        assertTrue(
+                result.matches("n-(?:n-){0,3}nyah"),
+                result
+        );
+    }
+
     private static Config.Data config() {
         Config.Data config = new Config.Data();
         config.uwuifierReplaceRl = false;
