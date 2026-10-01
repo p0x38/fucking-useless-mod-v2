@@ -29,5 +29,7 @@
   "text.fuckinguselessmod.config.description.blocksEnabled": "変換後のテキストにブロック文字の効果を適用できるようにします。",
   "text.fuckinguselessmod.config.description.blockChance": "変換メッセージにブロック文字の効果を適用する確率です。範囲: 0.0〜1.0。",
   "text.fuckinguselessmod.config.description.maxLength": "変換後のメッセージの最大文字数です。範囲: 1〜256。",
-  "text.fuckinguselessmod.config.description.presets": "変換後のテキストに適用するプリセットです。利用可能なプリセット名を指定してください。"
+  "text.fuckinguselessmod.config.description.presets": "変換後のテキストに適用するプリセットです。利用可能なプリセット名を指定してください。",
+  "text.fuckinguselessmod.config.option.uwuifierEnabled": "Uwuifierを有効化",
+  "text.fuckinguselessmod.config.description.uwuifierEnabled": "チャットメッセージに専用のUwuifier変換を適用します。"
 }
