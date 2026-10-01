@@ -8,12 +8,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Uwuifier {
-    private static final Pattern WORD =
-            Pattern.compile("[\\p{L}\\p{N}]+(?:['’-][\\p{L}\\p{N}]+)*");
-    private static final Pattern URL =
-            Pattern.compile("(?i)^(?:[a-z][a-z0-9+.-]*://|www\\.)");
-    private static final Pattern MENTION =
-            Pattern.compile("^[@#].+");
+    private static final Pattern TOKEN = Pattern.compile(
+            "(?i)(?:[a-z][a-z0-9+.-]*://\\S+|www\\.\\S+)|"
+                    + "(?:[\\p{L}\\p{N}_.+-]+@[\\p{L}\\p{N}.-]+)|"
+                    + "(?:[@#][\\p{L}\\p{N}_-]+)|"
+                    + "[\\p{L}\\p{N}]+(?:['’-][\\p{L}\\p{N}]+)*"
+    );
+    private static final Pattern PROTECTED_TOKEN = Pattern.compile(
+            "(?i)(?:[a-z][a-z0-9+.-]*://|www\\.)|"
+                    + "[\\p{L}\\p{N}_.+-]+@[\\p{L}\\p{N}.-]+|"
+                    + "^[@#]"
+    );
     private static final Pattern N_VOWEL =
             Pattern.compile("n([aeiou])", Pattern.CASE_INSENSITIVE);
     private static final Pattern EXCLAMATION =
@@ -39,19 +44,19 @@ public final class Uwuifier {
             Config.Data config,
             Random random
     ) {
-        Matcher matcher = WORD.matcher(input);
+        Matcher matcher = TOKEN.matcher(input);
         StringBuilder output = new StringBuilder(input.length());
 
         int last = 0;
         while (matcher.find()) {
             output.append(input, last, matcher.start());
 
-            String word = matcher.group();
-            if (isProtected(word)
+            String token = matcher.group();
+            if (isProtected(token)
                     || random.nextFloat() > config.uwuifierWordChance) {
-                output.append(word);
+                output.append(token);
             } else {
-                output.append(transformWord(word, config));
+                output.append(transformWord(token, config));
             }
 
             last = matcher.end();
@@ -164,7 +169,7 @@ public final class Uwuifier {
     }
 
     private static String readNextToken(String input, int start) {
-        Matcher matcher = WORD.matcher(input);
+        Matcher matcher = TOKEN.matcher(input);
         if (!matcher.find(start)) {
             return "";
         }
@@ -208,15 +213,6 @@ public final class Uwuifier {
         return null;
     }
 
-    private static String applySingleWordEffect(
-            String input,
-            Config.Data config,
-            Random random,
-            int index
-    ) {
-        return input;
-    }
-
     private static String makeStutter(String word, Random random) {
         if (word.isEmpty() || isProtected(word)) {
             return null;
@@ -231,8 +227,8 @@ public final class Uwuifier {
         return (first + "-").repeat(count) + word;
     }
 
-    private static boolean isProtected(String word) {
-        return URL.matcher(word).find() || MENTION.matcher(word).find();
+    private static boolean isProtected(String token) {
+        return PROTECTED_TOKEN.matcher(token).find();
     }
 
     private static String randomValue(List<String> values, Random random) {
@@ -248,9 +244,14 @@ public final class Uwuifier {
             String from,
             String to
     ) {
-        Pattern pattern = Pattern.compile(Pattern.quote(from), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(
+                Pattern.quote(from),
+                Pattern.CASE_INSENSITIVE
+        );
         Matcher matcher = pattern.matcher(input);
-        return matcher.replaceAll(match -> preserveCase(to, match.group()));
+        return matcher.replaceAll(
+                match -> preserveCase(to, match.group())
+        );
     }
 
     private static String preserveCase(String replacement, String source) {
@@ -262,9 +263,13 @@ public final class Uwuifier {
             return replacement.toLowerCase();
         }
 
-        if (Character.isUpperCase(source.charAt(0))) {
-            return Character.toUpperCase(replacement.charAt(0))
-                    + replacement.substring(1);
+        if (Character.isUpperCase(source.codePointAt(0))) {
+            int firstCodePoint = replacement.codePointAt(0);
+            int upperCodePoint = Character.toUpperCase(firstCodePoint);
+            return new String(Character.toChars(upperCodePoint))
+                    + replacement.substring(
+                            replacement.offsetByCodePoints(0, 1)
+                    );
         }
 
         return replacement;

@@ -8,6 +8,7 @@ import me.p0x38.fuckinguselessmod.config.ConfigToml;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public final class ConfigManager {
     private static final Gson GSON = new GsonBuilder()
@@ -52,14 +53,12 @@ public final class ConfigManager {
 
                 data.clamp();
                 Config.set(data);
-                save();
 
-                try {
+                if (save()) {
                     Files.deleteIfExists(LEGACY_CONFIG_PATH);
-                } catch (IOException exception) {
+                } else {
                     System.err.println(
-                            "[Fucking Useless Mod] Failed to remove legacy JSON config: "
-                                    + exception.getMessage()
+                            "[Fucking Useless Mod] Keeping legacy JSON config because TOML migration failed."
                     );
                 }
                 return;
@@ -76,19 +75,51 @@ public final class ConfigManager {
         }
     }
 
-    public static void save() {
+    public static boolean save() {
+        Path temporaryPath = CONFIG_PATH.resolveSibling(
+                CONFIG_PATH.getFileName() + ".tmp"
+        );
+
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
 
             Files.writeString(
-                    CONFIG_PATH,
+                    temporaryPath,
                     ConfigToml.serialize(Config.get())
             );
+
+            try {
+                Files.move(
+                        temporaryPath,
+                        CONFIG_PATH,
+                        StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE
+                );
+            } catch (java.nio.file.AtomicMoveNotSupportedException exception) {
+                Files.move(
+                        temporaryPath,
+                        CONFIG_PATH,
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+            }
+
+            return true;
         } catch (IOException | RuntimeException exception) {
             System.err.println(
                     "[Fucking Useless Mod] Failed to save config"
             );
             exception.printStackTrace();
+
+            try {
+                Files.deleteIfExists(temporaryPath);
+            } catch (IOException cleanupException) {
+                System.err.println(
+                        "[Fucking Useless Mod] Failed to clean up temporary config: "
+                                + cleanupException.getMessage()
+                );
+            }
+
+            return false;
         }
     }
 }
