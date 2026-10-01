@@ -12,7 +12,7 @@ public final class Lolcat {
             return input;
         }
 
-        String result = ReplacementRules.applyWords(
+        String result = ReplacementRules.applyRegex(
                 input,
                 config.lolcatRules,
                 true
