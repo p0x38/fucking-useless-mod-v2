@@ -1,6 +1,6 @@
 package me.p0x38.neoforge;
 
-import me.p0x38.fuckinguselessmod.ChatTransformer;
+import me.p0x38.fuckinguselessmod.transformers.ChatTransformer;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.config.ConfigScreen;
 import net.neoforged.api.distmarker.Dist;
