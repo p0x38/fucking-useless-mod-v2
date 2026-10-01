@@ -7,6 +7,7 @@ modId = "fuckinguselessmod"
 version = "${version}"
 displayName = "Fucking Useless Mod"
 authors = "p0x38"
+logoFile = "assets/fuckinguselessmod/icon.png"
 description = '''
 Literally it adds some fucking useless stuffs!
 '''

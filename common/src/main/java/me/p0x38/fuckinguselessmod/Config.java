@@ -59,6 +59,12 @@ public final class Config {
         }
     }
 
+    public enum SentenceEndEffect {
+        TILDE,
+        ELLIPSIS,
+        EXCLAMATION
+    }
+
     private Config() {
     }
 
@@ -346,6 +352,14 @@ public final class Config {
         ));
         @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
+
+        @ConfigOption(name = "Sentence End Effects", category = "Effects")
+        public List<SentenceEndEffect> sentenceEndEffects =
+                new ArrayList<>(List.of(
+                        SentenceEndEffect.TILDE,
+                        SentenceEndEffect.ELLIPSIS,
+                        SentenceEndEffect.EXCLAMATION
+                ));
 
         public void clamp() {
             zalgoChance = Math.clamp(zalgoChance, 0.0f, 1.0f);

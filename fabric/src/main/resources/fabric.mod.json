@@ -4,6 +4,7 @@
   "version": "${version}",
   "name": "Fucking Useless Mod",
   "description": "Literally it adds some fucking useless stuffs!",
+  "icon": "assets/fuckinguselessmod/icon.png",
   "authors": [
     {
       "name": "p0x38",
