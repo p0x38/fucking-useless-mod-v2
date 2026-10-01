@@ -7,7 +7,7 @@ public final class EffectProcessor {
     }
 
     public static String apply(String input, Config.Data config) {
-        String result = input;
+        String result = TextCaseEffect.apply(input, config);
 
         if (config.leetSpeakEnabled) {
             result = LeetSpeak.apply(result, config);
