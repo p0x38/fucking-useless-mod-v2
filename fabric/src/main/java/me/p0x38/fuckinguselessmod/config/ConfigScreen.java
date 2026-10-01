@@ -126,6 +126,14 @@ public final class ConfigScreen {
                     entries.startBooleanToggle(label, value)
                             .setTooltip(tooltip)
                             .setDefaultValue(value)
+                            .setEnumNameProvider(enumValue ->
+                                    Component.translatable(
+                                            enumTranslationKey(
+                                                    field.getName(),
+                                                    enumValue
+                                            )
+                                    )
+                            )
                             .setSaveConsumer(newValue -> {
                                 try {
                                     field.setBoolean(config, newValue);
@@ -296,5 +304,22 @@ public final class ConfigScreen {
 
     private static String translationKeyPart(String value) {
         return value.toLowerCase(Locale.ROOT).replace(' ', '_');
+    }
+
+    private static String enumTranslationKey(
+            String fieldName,
+            Enum<?> value
+    ) {
+        return "text.fuckinguselessmod.config.value."
+                + toSnakeCase(fieldName)
+                + "."
+                + toSnakeCase(value.name());
+    }
+
+    private static String toSnakeCase(String value) {
+        return value
+                .replaceAll("([a-z])([A-Z])", "$1_$2")
+                .replace('-', '_')
+                .toLowerCase(Locale.ROOT);
     }
 }
