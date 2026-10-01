@@ -206,7 +206,7 @@ public final class RuleCondition {
         return input.endsWith(value);
     }
 
-    private static int compareNumeric(int actual, String expression) {
+    private static boolean compareNumeric(int actual, String expression) {
         String value = expression.trim();
         String operator = "=";
 

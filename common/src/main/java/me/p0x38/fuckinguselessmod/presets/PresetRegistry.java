@@ -24,6 +24,10 @@ public final class PresetRegistry {
                     .resolve("fuckinguselessmod")
                     .resolve("presets");
 
+    static {
+        register(BuiltinPresets.UWUIFY);
+    }
+
     private PresetRegistry() {
     }
 
@@ -81,16 +85,6 @@ public final class PresetRegistry {
                         "[Fucking Useless Mod] Invalid preset: " + path
                 );
                 return;
-            }
-
-            for (PresetRule rule : file.rules()) {
-                if (rule == null) {
-                    throw new IllegalArgumentException(
-                            "Preset contains a null rule"
-                    );
-                }
-
-                rule.validate();
             }
 
             TextPreset preset = new RegexPreset(
