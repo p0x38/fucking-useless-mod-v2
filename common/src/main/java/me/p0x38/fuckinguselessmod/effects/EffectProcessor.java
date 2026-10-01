@@ -3,8 +3,6 @@ package me.p0x38.fuckinguselessmod.effects;
 import me.p0x38.fuckinguselessmod.Config;
 
 public final class EffectProcessor {
-    private static final TextEffect UWUIFIER = Uwuifier::apply;
-
     private EffectProcessor() {
     }
 
@@ -12,7 +10,7 @@ public final class EffectProcessor {
         String result = input;
 
         if (config.uwuifierEnabled) {
-            result = UWUIFIER.apply(result);
+            result = Uwuifier.apply(result, config);
         }
 
         return result;
