@@ -29,10 +29,8 @@ dependencies {
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
 
     // Cloth Config is used by the platform-specific config screen.
-    modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:$rootProject.cloth_config_version") {
-        exclude group: "net.fabricmc.fabric-api"
-    }
-    modRuntimeOnly("me.shedaniel.cloth:cloth-config-fabric:$rootProject.cloth_config_version") {
+    // modApi puts the API on both compile and runtime classpaths.
+    modApi("me.shedaniel.cloth:cloth-config-fabric:$rootProject.cloth_config_version") {
         exclude group: "net.fabricmc.fabric-api"
     }
 
