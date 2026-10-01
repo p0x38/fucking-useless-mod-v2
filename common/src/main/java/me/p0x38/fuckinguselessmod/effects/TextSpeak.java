@@ -12,10 +12,10 @@ public final class TextSpeak {
             return input;
         }
 
-        return ReplacementRules.applyWords(
+        return ReplacementRules.applyRegex(
                 input,
                 config.textSpeakRules,
-                true
+                false
         );
     }
 }
