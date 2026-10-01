@@ -138,6 +138,16 @@ public final class Config {
         @ConfigOption(name = "Replace You with Yuo", category = "Uwuifier")
         public boolean uwuifierReplaceYou = false;
 
+        @ConfigOption(
+                name = "Word Transformation Chance",
+                category = "Uwuifier",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float uwuifierWordChance = 1.0f;
+
         @ConfigOption(name = "Enable Stutter", category = "Uwuifier")
         public boolean uwuifierStutterEnabled = false;
 
@@ -196,6 +206,28 @@ public final class Config {
                 "x3"
         ));
 
+        @ConfigOption(name = "Enable Exclamations", category = "Uwuifier")
+        public boolean uwuifierExclamationsEnabled = false;
+
+        @ConfigOption(
+                name = "Exclamation Chance",
+                category = "Uwuifier",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float uwuifierExclamationChance = 1.0f;
+
+        @ConfigOption(name = "Exclamations", category = "Uwuifier")
+        public List<String> uwuifierExclamations = new ArrayList<>(List.of(
+                "!?",
+                "?!!",
+                "?!?!",
+                "!!11",
+                "?!?"
+        ));
+
         @ConfigOption(name = "Enable Zalgo", category = "Zalgo")
         public boolean zalgoEnabled = true;
 
@@ -238,12 +270,16 @@ public final class Config {
         public void clamp() {
             zalgoChance = Math.clamp(zalgoChance, 0.0f, 1.0f);
             blockChance = Math.clamp(blockChance, 0.0f, 1.0f);
+            uwuifierWordChance =
+                    Math.clamp(uwuifierWordChance, 0.0f, 1.0f);
             uwuifierStutterChance =
                     Math.clamp(uwuifierStutterChance, 0.0f, 1.0f);
             uwuifierActionChance =
                     Math.clamp(uwuifierActionChance, 0.0f, 1.0f);
             uwuifierEmoticonChance =
                     Math.clamp(uwuifierEmoticonChance, 0.0f, 1.0f);
+            uwuifierExclamationChance =
+                    Math.clamp(uwuifierExclamationChance, 0.0f, 1.0f);
             maxLength = Math.clamp(maxLength, 1, 256);
             bitRotation = Math.clamp(bitRotation, 0, 7);
             xorKey = Math.clamp(xorKey, 0, 255);
