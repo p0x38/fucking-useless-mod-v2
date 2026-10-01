@@ -1,0 +1,8 @@
+# プロジェクトの除外パス
+/.gradle/
+/build/
+/common/build/
+/fabric/.gradle/
+/fabric/build/
+/neoforge/.gradle/
+/neoforge/build/
