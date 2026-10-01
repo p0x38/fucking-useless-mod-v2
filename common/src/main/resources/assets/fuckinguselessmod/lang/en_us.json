@@ -1,0 +1,21 @@
+{
+  "text.fuckinguselessmod.config.title": "Fucking Useless Mod Configuration",
+  "text.fuckinguselessmod.config.category.general": "General",
+  "text.fuckinguselessmod.config.category.blocks": "Blocks",
+  "text.fuckinguselessmod.config.category.encoding": "Encoding",
+  "text.fuckinguselessmod.config.category.zalgo": "Zalgo",
+  "text.fuckinguselessmod.config.category.limits": "Limits",
+  "text.fuckinguselessmod.config.category.effects": "Effects",
+  "text.fuckinguselessmod.config.option.enabled": "Enabled",
+  "text.fuckinguselessmod.config.option.mode": "Mode",
+  "text.fuckinguselessmod.config.option.blockMode": "Block Mode",
+  "text.fuckinguselessmod.config.option.encodingPipeline": "Encoding Pipeline",
+  "text.fuckinguselessmod.config.option.bitRotation": "Bit Rotation",
+  "text.fuckinguselessmod.config.option.xorKey": "XOR Key",
+  "text.fuckinguselessmod.config.option.zalgoEnabled": "Enable Zalgo",
+  "text.fuckinguselessmod.config.option.zalgoChance": "Zalgo Chance",
+  "text.fuckinguselessmod.config.option.blocksEnabled": "Enable Blocks",
+  "text.fuckinguselessmod.config.option.blockChance": "Block Chance",
+  "text.fuckinguselessmod.config.option.maxLength": "Maximum Length",
+  "text.fuckinguselessmod.config.option.presets": "Presets"
+}

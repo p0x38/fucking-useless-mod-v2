@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public final class ConfigScreen {
@@ -44,7 +45,10 @@ public final class ConfigScreen {
             ConfigCategory category = categories.computeIfAbsent(
                     option.category(),
                     name -> builder.getOrCreateCategory(
-                            Component.literal(name)
+                            Component.translatable(
+                                    "text.fuckinguselessmod.config.category."
+                                            + translationKeyPart(name)
+                            )
                     )
             );
 
@@ -72,11 +76,9 @@ public final class ConfigScreen {
             Field field,
             ConfigOption option
     ) {
-        String name = option.name().isBlank()
-                ? humanize(field.getName())
-                : option.name();
-
-        Component label = Component.literal(name);
+        Component label = Component.translatable(
+                "text.fuckinguselessmod.config.option." + field.getName()
+        );
         Class<?> type = field.getType();
 
         if (type == boolean.class) {
@@ -283,6 +285,10 @@ public final class ConfigScreen {
         } catch (IllegalAccessException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    private static String translationKeyPart(String value) {
+        return value.toLowerCase(Locale.ROOT).replace(' ', '_');
     }
 
     private static String humanize(String value) {
