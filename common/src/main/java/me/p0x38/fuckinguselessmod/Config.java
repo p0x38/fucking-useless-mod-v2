@@ -154,6 +154,17 @@ public final class Config {
         )
         public float uwuifierWordChance = 1.0f;
 
+        @ConfigOption(name = "Blacklist Words", category = "Uwuifier")
+        public List<String> uwuifierBlacklist = new ArrayList<>(List.of(
+                "rawr",
+                "lol",
+                "lmao",
+                "uwu",
+                "owo",
+                "nya",
+                "meow"
+        ));
+
         @ConfigOption(name = "Enable Stutter", category = "Uwuifier")
         public boolean uwuifierStutterEnabled = false;
 
