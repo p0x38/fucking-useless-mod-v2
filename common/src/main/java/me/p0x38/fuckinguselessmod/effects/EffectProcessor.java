@@ -25,6 +25,8 @@ public final class EffectProcessor {
             result = Uwuifier.apply(result, config);
         }
 
+        result = SentenceEndEffects.apply(result, config);
+
         return result;
     }
 }
