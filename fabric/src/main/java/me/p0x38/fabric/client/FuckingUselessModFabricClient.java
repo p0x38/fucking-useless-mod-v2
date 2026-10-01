@@ -1,6 +1,6 @@
 package me.p0x38.fabric.client;
 
-import me.p0x38.fuckinguselessmod.ChatTransformer;
+import me.p0x38.fuckinguselessmod.transformers.ChatTransformer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 
