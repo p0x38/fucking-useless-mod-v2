@@ -126,14 +126,6 @@ public final class ConfigScreen {
                     entries.startBooleanToggle(label, value)
                             .setTooltip(tooltip)
                             .setDefaultValue(value)
-                            .setEnumNameProvider(enumValue ->
-                                    Component.translatable(
-                                            enumTranslationKey(
-                                                    field.getName(),
-                                                    enumValue
-                                            )
-                                    )
-                            )
                             .setSaveConsumer(newValue -> {
                                 try {
                                     field.setBoolean(config, newValue);
@@ -249,6 +241,14 @@ public final class ConfigScreen {
                             )
                             .setTooltip(tooltip)
                             .setDefaultValue(value)
+                            .setEnumNameProvider(enumValue ->
+                                    Component.translatable(
+                                            enumTranslationKey(
+                                                    field.getName(),
+                                                    enumValue
+                                            )
+                                    )
+                            )
                             .setSaveConsumer(newValue -> {
                                 try {
                                     field.set(config, newValue);
