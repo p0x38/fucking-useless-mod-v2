@@ -12,7 +12,7 @@ public final class LeetSpeak {
             return input;
         }
 
-        return ReplacementRules.applyLiteral(
+        return ReplacementRules.applyRegex(
                 input,
                 config.leetSpeakRules,
                 false
