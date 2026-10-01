@@ -4,7 +4,7 @@ import me.p0x38.fuckinguselessmod.transformers.ChatTransformer;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.config.ConfigScreen;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.EventBus;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientChatEvent;
@@ -14,7 +14,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 public final class FuckingUselessModNeoForge {
     public FuckingUselessModNeoForge(
             ModContainer container,
-            EventBus modBus
+            IEventBus modBus
     ) {
         FuckingUselessMod.init();
 
