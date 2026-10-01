@@ -9,14 +9,14 @@
       "name": "p0x38",
       "contact": {
         "homepage": "https://github.com/p0x38",
-        "sources": "https://github.com/p0x38/fucking-useless-mod"
+        "sources": "https://github.com/p0x38/fucking-useless-mod-v2"
       }
     }
   ],
   "contact": {
-    "sources": "https://github.com/p0x38/fucking-useless-mod",
-    "homepage": "https://github.com/p0x38/fucking-useless-mod",
-    "issues": "https://github.com/p0x38/fucking-useless-mod/issues"
+    "sources": "https://github.com/p0x38/fucking-useless-mod-v2",
+    "homepage": "https://github.com/p0x38/fucking-useless-mod-v2",
+    "issues": "https://github.com/p0x38/fucking-useless-mod-v2/issues"
   },
   "license": "All-Rights-Reserved",
   "environment": "client",
