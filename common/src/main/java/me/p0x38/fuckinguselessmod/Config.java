@@ -97,6 +97,9 @@ public final class Config {
         )
         public int xorKey = 38;
 
+        @ConfigOption(name = "Enable Uwuifier", category = "Effects")
+        public boolean uwuifierEnabled = true;
+
         @ConfigOption(name = "Enable Zalgo", category = "Zalgo")
         public boolean zalgoEnabled = true;
 
@@ -134,9 +137,7 @@ public final class Config {
         public int maxLength = 256;
 
         @ConfigOption(name = "Presets", category = "Effects")
-        public List<String> presets = new ArrayList<>(List.of(
-                "uwuify"
-        ));
+        public List<String> presets = new ArrayList<>();
 
         public void clamp() {
             zalgoChance = Math.clamp(zalgoChance, 0.0f, 1.0f);
