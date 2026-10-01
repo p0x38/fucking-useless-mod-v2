@@ -52,15 +52,16 @@ public final class ConfigManager {
 
                 data.clamp();
                 Config.set(data);
-                save();
 
-                try {
-                    Files.deleteIfExists(LEGACY_CONFIG_PATH);
-                } catch (IOException exception) {
-                    System.err.println(
-                            "[Fucking Useless Mod] Failed to remove legacy JSON config: "
-                                    + exception.getMessage()
-                    );
+                if (save()) {
+                    try {
+                        Files.deleteIfExists(LEGACY_CONFIG_PATH);
+                    } catch (IOException exception) {
+                        System.err.println(
+                                "[Fucking Useless Mod] Failed to remove legacy JSON config: "
+                                        + exception.getMessage()
+                        );
+                    }
                 }
                 return;
             }
@@ -76,19 +77,31 @@ public final class ConfigManager {
         }
     }
 
-    public static void save() {
+    /**
+     * Saves the configuration only when its serialized contents have changed.
+     *
+     * @return true if the configuration is present on disk with the desired
+     *         contents after this call, false if saving failed
+     */
+    public static boolean save() {
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
 
-            Files.writeString(
-                    CONFIG_PATH,
-                    ConfigToml.serialize(Config.get())
-            );
+            String serialized = ConfigToml.serialize(Config.get());
+
+            if (Files.exists(CONFIG_PATH)
+                    && serialized.equals(Files.readString(CONFIG_PATH))) {
+                return true;
+            }
+
+            Files.writeString(CONFIG_PATH, serialized);
+            return true;
         } catch (IOException | RuntimeException exception) {
             System.err.println(
                     "[Fucking Useless Mod] Failed to save config"
             );
             exception.printStackTrace();
+            return false;
         }
     }
 }
