@@ -8,20 +8,14 @@ public final class Lolcat {
 
     public static String apply(String input, Config.Data config) {
         if (!config.lolcatEnabled
-                || Math.random() > config.lolcatChance) {
+                || Math.random() >= config.lolcatChance) {
             return input;
         }
 
-        String result = ReplacementRules.applyRegex(
+        return ReplacementRules.applyRegex(
                 input,
                 config.lolcatRules,
                 true
         );
-
-        if (!result.isEmpty() && !result.endsWith("!!!")) {
-            result += "!!!";
-        }
-
-        return result;
     }
 }

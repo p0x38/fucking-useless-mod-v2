@@ -10,15 +10,21 @@ import java.util.regex.Pattern;
 public final class Uwuifier {
     private static final Pattern WORD =
             Pattern.compile("[\\p{L}\\p{N}]+(?:['’-][\\p{L}\\p{N}]+)*");
-    private static final Pattern URL =
-            Pattern.compile("(?i)^(?:[a-z][a-z0-9+.-]*://|www\\.)");
-    private static final Pattern MENTION =
-            Pattern.compile("^[@#].+");
+    private static final Pattern PROTECTED =
+            Pattern.compile(
+                    "(?i)(?:"
+                            + "\\b[a-z][a-z0-9+.-]*://[^\\s<>]+"
+                            + "|\\bwww\\.[^\\s<>]+"
+                            + "|\\b[\\p{L}\\p{N}._%+-]+@[\\p{L}\\p{N}.-]+\\.[A-Za-z]{2,}\\b"
+                            + "|(?<![\\p{L}\\p{N}])[@#][\\p{L}\\p{N}_.-]+"
+                            + ")"
+            );
     private static final Pattern N_VOWEL =
             Pattern.compile("n([aeiou])", Pattern.CASE_INSENSITIVE);
     private static final Pattern EXCLAMATION =
             Pattern.compile("[!?]+$");
-    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+    private static final Pattern WHITESPACE =
+            Pattern.compile("\\s+");
 
     private Uwuifier() {
     }
@@ -29,26 +35,75 @@ public final class Uwuifier {
         }
 
         Random random = new Random();
-        String result = transformWords(input, config, random);
-        result = transformExclamations(result, config, random);
-        return transformSpaces(result, config, random);
+        String result = transformWordsAndSpaces(input, config, random);
+        return transformExclamations(result, config, random);
     }
 
-    private static String transformWords(
+    private static String transformWordsAndSpaces(
             String input,
             Config.Data config,
             Random random
     ) {
-        Matcher matcher = WORD.matcher(input);
-        StringBuilder output = new StringBuilder(input.length());
+        Matcher protectedMatcher = PROTECTED.matcher(input);
+        StringBuilder output = new StringBuilder(input.length() + 32);
 
+        int lastProtected = 0;
+
+        while (protectedMatcher.find()) {
+            appendTransformedSegment(
+                    input,
+                    lastProtected,
+                    protectedMatcher.start(),
+                    output,
+                    config,
+                    random
+            );
+
+            output.append(protectedMatcher.group());
+            lastProtected = protectedMatcher.end();
+        }
+
+        appendTransformedSegment(
+                input,
+                lastProtected,
+                input.length(),
+                output,
+                config,
+                random
+        );
+
+        return output.toString();
+    }
+
+    private static void appendTransformedSegment(
+            String input,
+            int start,
+            int end,
+            StringBuilder output,
+            Config.Data config,
+            Random random
+    ) {
+        if (start >= end) {
+            return;
+        }
+
+        String segment = input.substring(start, end);
+        Matcher matcher = WORD.matcher(segment);
         int last = 0;
-        while (matcher.find()) {
-            output.append(input, last, matcher.start());
 
+        while (matcher.find()) {
+            String gap = segment.substring(last, matcher.start());
             String word = matcher.group();
-            if (isProtected(word)
-                    || random.nextFloat() > config.uwuifierWordChance) {
+
+            appendGapWithEffect(
+                    gap,
+                    word,
+                    output,
+                    config,
+                    random
+            );
+
+            if (random.nextFloat() >= config.uwuifierWordChance) {
                 output.append(word);
             } else {
                 output.append(transformWord(word, config));
@@ -57,11 +112,49 @@ public final class Uwuifier {
             last = matcher.end();
         }
 
-        output.append(input, last, input.length());
-        return output.toString();
+        output.append(segment, last, segment.length());
     }
 
-    private static String transformWord(String word, Config.Data config) {
+    private static void appendGapWithEffect(
+            String gap,
+            String word,
+            StringBuilder output,
+            Config.Data config,
+            Random random
+    ) {
+        if (gap.isEmpty() || !endsWithWhitespace(gap)) {
+            output.append(gap);
+            return;
+        }
+
+        int separatorStart = gap.length();
+
+        while (separatorStart > 0
+                && Character.isWhitespace(gap.charAt(separatorStart - 1))) {
+            separatorStart--;
+        }
+
+        output.append(gap, 0, separatorStart);
+
+        String separator = gap.substring(separatorStart);
+        output.append(separator);
+
+        String effect = chooseSpaceEffect(config, random, word);
+
+        if (effect != null) {
+            output.append(effect).append(separator);
+        }
+    }
+
+    private static boolean endsWithWhitespace(String input) {
+        return !input.isEmpty()
+                && Character.isWhitespace(input.charAt(input.length() - 1));
+    }
+
+    private static String transformWord(
+            String word,
+            Config.Data config
+    ) {
         String result = word;
 
         if (config.uwuifierReplaceRl) {
@@ -71,9 +164,12 @@ public final class Uwuifier {
 
         if (config.uwuifierReplaceNVowel) {
             Matcher matcher = N_VOWEL.matcher(result);
-            result = matcher.replaceAll(match -> preserveCase(
-                    "ny", match.group(1)
-            ));
+            result = matcher.replaceAll(match ->
+                    preserveCase(
+                            "ny" + match.group(1),
+                            match.group()
+                    )
+            );
         }
 
         if (config.uwuifierReplaceOve) {
@@ -103,7 +199,7 @@ public final class Uwuifier {
 
         Matcher matcher = EXCLAMATION.matcher(input);
         if (!matcher.find()
-                || random.nextFloat() > config.uwuifierExclamationChance) {
+                || random.nextFloat() >= config.uwuifierExclamationChance) {
             return input;
         }
 
@@ -119,69 +215,11 @@ public final class Uwuifier {
         return input.substring(0, matcher.start()) + replacement;
     }
 
-    private static String transformSpaces(
-            String input,
-            Config.Data config,
-            Random random
-    ) {
-        Matcher matcher = WHITESPACE.matcher(input);
-        StringBuilder output = new StringBuilder(input.length() + 32);
-
-        int last = 0;
-
-        while (matcher.find()) {
-            String word = input.substring(last, matcher.start());
-
-            if (!word.isEmpty()) {
-                output.append(word);
-            }
-
-            String separator = matcher.group();
-
-            output.append(separator);
-
-            if (matcher.end() < input.length()) {
-                String nextWord = readNextToken(input, matcher.end());
-
-                if (!nextWord.isEmpty()) {
-                    String effect = chooseSpaceEffect(
-                            config,
-                            random,
-                            nextWord
-                    );
-
-                    if (effect != null) {
-                        output.append(effect).append(separator);
-                    }
-                }
-            }
-
-            last = matcher.end();
-        }
-
-        output.append(input, last, input.length());
-        return output.toString();
-    }
-
-    private static String readNextToken(String input, int start) {
-        Matcher matcher = WORD.matcher(input);
-        if (!matcher.find(start)) {
-            return "";
-        }
-
-        return matcher.group();
-    }
-
     private static String chooseSpaceEffect(
             Config.Data config,
             Random random,
             String word
     ) {
-        if (word.isBlank() || isProtected(word)
-                || word.matches("[.!?,;:]+")) {
-            return null;
-        }
-
         float roll = random.nextFloat();
 
         if (config.uwuifierEmoticonsEnabled
@@ -208,17 +246,8 @@ public final class Uwuifier {
         return null;
     }
 
-    private static String applySingleWordEffect(
-            String input,
-            Config.Data config,
-            Random random,
-            int index
-    ) {
-        return input;
-    }
-
     private static String makeStutter(String word, Random random) {
-        if (word.isEmpty() || isProtected(word)) {
+        if (word.isEmpty()) {
             return null;
         }
 
@@ -231,11 +260,10 @@ public final class Uwuifier {
         return (first + "-").repeat(count) + word;
     }
 
-    private static boolean isProtected(String word) {
-        return URL.matcher(word).find() || MENTION.matcher(word).find();
-    }
-
-    private static String randomValue(List<String> values, Random random) {
+    private static String randomValue(
+            List<String> values,
+            Random random
+    ) {
         if (values == null || values.isEmpty()) {
             return null;
         }
@@ -248,12 +276,21 @@ public final class Uwuifier {
             String from,
             String to
     ) {
-        Pattern pattern = Pattern.compile(Pattern.quote(from), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(
+                Pattern.quote(from),
+                Pattern.CASE_INSENSITIVE
+        );
         Matcher matcher = pattern.matcher(input);
-        return matcher.replaceAll(match -> preserveCase(to, match.group()));
+
+        return matcher.replaceAll(
+                match -> preserveCase(to, match.group())
+        );
     }
 
-    private static String preserveCase(String replacement, String source) {
+    private static String preserveCase(
+            String replacement,
+            String source
+    ) {
         if (source.equals(source.toUpperCase())) {
             return replacement.toUpperCase();
         }
