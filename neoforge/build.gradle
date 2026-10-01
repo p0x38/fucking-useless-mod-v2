@@ -27,10 +27,12 @@ dependencies {
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
 
     modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
-    modImplementation "me.shedaniel.cloth:cloth-config-neoforge:$rootProject.cloth_config_neoforge_version"
+    modImplementation "me.shedaniel.cloth:cloth-config-neoforge:$rootProject.cloth_config_version"
 
     modRuntimeOnly "me.djtheredstoner:DevAuth-neoforge:$rootProject.devauth_version"
-    modRuntimeOnly "maven.modrinth:AANobbMI:$rootProject.sodium_neoforge_version"
+
+    // Sodium 0.8.14 for NeoForge 1.21.11.
+    modRuntimeOnly "curse.maven:sodium-394468:8756611"
 
     common(project(path: ':common', configuration: 'namedElements')) {
         transitive = false

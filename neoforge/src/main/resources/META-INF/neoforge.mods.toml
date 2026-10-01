@@ -1,38 +1,40 @@
 modLoader = "javafml"
-loaderVersion = "[1,)"
-#issueTrackerURL = ""
-license = "Insert License Here"
+loaderVersion = "[4,)"
+license = "All-Rights-Reserved"
 
 [[mods]]
-modId = "fulm"
+modId = "fuckinguselessmod"
 version = "${version}"
 displayName = "Fucking Useless Mod"
-authors = "Me!"
+authors = "p0x38"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+Literally it adds some fucking useless stuffs!
 '''
-#logoFile = ""
 
-[[dependencies.fulm]]
+[[dependencies.fuckinguselessmod]]
 modId = "neoforge"
 type = "required"
 versionRange = "[21.11,)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"
 
-[[dependencies.fulm]]
+[[dependencies.fuckinguselessmod]]
 modId = "minecraft"
 type = "required"
 versionRange = "[1.21.11,)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"
 
-[[dependencies.fulm]]
+[[dependencies.fuckinguselessmod]]
 modId = "architectury"
 type = "required"
 versionRange = "[19.0.1,)"
 ordering = "AFTER"
-side = "BOTH"
+side = "CLIENT"
 
-[[mixins]]
-config = "fulm.mixins.json"
+[[dependencies.fuckinguselessmod]]
+modId = "cloth-config"
+type = "required"
+versionRange = "[21.11,)"
+ordering = "AFTER"
+side = "CLIENT"

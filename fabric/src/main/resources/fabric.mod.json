@@ -1,38 +1,41 @@
 {
   "schemaVersion": 1,
-  "id": "fulm",
+  "id": "fuckinguselessmod",
   "version": "${version}",
   "name": "Fucking Useless Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Literally it adds some fucking useless stuffs!",
   "authors": [
-    "Me!"
+    {
+      "name": "p0x38",
+      "contact": {
+        "homepage": "https://github.com/p0x38",
+        "sources": "https://github.com/p0x38/fucking-useless-mod"
+      }
+    }
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/p0x38/fucking-useless-mod",
+    "homepage": "https://github.com/p0x38/fucking-useless-mod",
+    "issues": "https://github.com/p0x38/fucking-useless-mod/issues"
   },
-  "license": "CC0-1.0",
-  "icon": "assets/fulm/icon.png",
-  "environment": "*",
+  "license": "All-Rights-Reserved",
+  "environment": "client",
   "entrypoints": {
-    "main": [
-      "me.p0x38.fabric.ExampleModFabric"
-    ],
     "client": [
-      "me.p0x38.fabric.client.ExampleModFabricClient"
+      "me.p0x38.fabric.client.FuckingUselessModFabricClient"
+    ],
+    "modmenu": [
+      "me.p0x38.fuckinguselessmod.ModMenuIntegration"
     ]
   },
-  "mixins": [
-    "fulm.mixins.json"
-  ],
   "depends": {
-    "fabricloader": ">=0.19.5",
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
     "minecraft": "~1.21.11",
     "java": ">=21",
     "architectury": ">=19.0.1",
-    "fabric-api": "*"
-  },
-  "suggests": {
-    "another-mod": "*"
+    "cloth-config": "*",
+    "modmenu": "*",
+    "placeholder-api": "*"
   }
 }

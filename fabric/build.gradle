@@ -28,18 +28,19 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
 
-    modImplementation("me.shedaniel.cloth:cloth-config-fabric:$rootProject.cloth_config_fabric_version") {
+    modImplementation("me.shedaniel.cloth:cloth-config-fabric:$rootProject.cloth_config_version") {
         exclude group: "net.fabricmc.fabric-api"
     }
 
-    modImplementation "maven.modrinth:mOgUt4GM:cLkYaVuL"
-    modImplementation "maven.modrinth:eXts2L7r:$rootProject.placeholder_api_version"
+    modImplementation "com.terraformersmc:modmenu:$rootProject.modmenu_version"
 
-    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:$rootProject.devauth_version") {
-        exclude group: "net.fabricmc", module: "fabric-loader"
-    }
+    // Text Placeholder API 2.8.2+1.21.10 supports Minecraft 1.21.11.
+    modImplementation "curse.maven:text-placeholder-api-1037459:7562935"
 
-    modRuntimeOnly "maven.modrinth:AANobbMI:$rootProject.sodium_fabric_version"
+    modRuntimeOnly "me.djtheredstoner:DevAuth-fabric:$rootProject.devauth_version"
+
+    // Sodium 0.8.14 for Fabric 1.21.11.
+    modRuntimeOnly "curse.maven:sodium-394468:8756612"
 
     common(project(path: ':common', configuration: 'namedElements')) {
         transitive = false
