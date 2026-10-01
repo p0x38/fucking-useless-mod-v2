@@ -17,5 +17,17 @@
   "text.fuckinguselessmod.config.option.blocksEnabled": "Enable Blocks",
   "text.fuckinguselessmod.config.option.blockChance": "Block Chance",
   "text.fuckinguselessmod.config.option.maxLength": "Maximum Length",
-  "text.fuckinguselessmod.config.option.presets": "Presets"
+  "text.fuckinguselessmod.config.option.presets": "Presets",
+  "text.fuckinguselessmod.config.description.enabled": "Enable or disable the mod's chat transformations.",
+  "text.fuckinguselessmod.config.description.mode": "Choose how transformed text is applied to chat messages.",
+  "text.fuckinguselessmod.config.description.blockMode": "Choose how block characters are selected when block effects are enabled.",
+  "text.fuckinguselessmod.config.description.encodingPipeline": "Choose the encoding steps used in Encode mode. The order of the steps matters.",
+  "text.fuckinguselessmod.config.description.bitRotation": "Number of bit positions to rotate during the bit rotation step. Range: 0-7.",
+  "text.fuckinguselessmod.config.description.xorKey": "Byte value used by the bitwise XOR encoding step. Range: 0-255.",
+  "text.fuckinguselessmod.config.description.zalgoEnabled": "Apply Zalgo corruption to transformed text.",
+  "text.fuckinguselessmod.config.description.zalgoChance": "Chance for Zalgo corruption to be applied to a transformed message. Range: 0.0-1.0.",
+  "text.fuckinguselessmod.config.description.blocksEnabled": "Allow block-character effects to appear in transformed text.",
+  "text.fuckinguselessmod.config.description.blockChance": "Chance for a block-character effect to be applied to a transformed message. Range: 0.0-1.0.",
+  "text.fuckinguselessmod.config.description.maxLength": "Maximum length of the transformed message. Range: 1-256.",
+  "text.fuckinguselessmod.config.description.presets": "Presets to apply to transformed text. Entries must match available preset names."
 }
