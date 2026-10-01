@@ -295,6 +295,35 @@ public final class ConfigToml {
         return value;
     }
 
+    private static List<?> parseEnumArray(
+            String value,
+            Class<?> enumType
+    ) {
+        List<String> names = parseStringArray(value);
+        List<Object> result = new ArrayList<>();
+
+        for (String name : names) {
+            Object matched = null;
+
+            for (Object constant : enumType.getEnumConstants()) {
+                if (((Enum<?>) constant).name().equalsIgnoreCase(name)) {
+                    matched = constant;
+                    break;
+                }
+            }
+
+            if (matched == null) {
+                throw new IllegalArgumentException(
+                        "Unknown enum value: " + name
+                );
+            }
+
+            result.add(matched);
+        }
+
+        return result;
+    }
+
     private static List<String> parseStringArray(String value) {
         if (!value.startsWith("[") || !value.endsWith("]")) {
             throw new IllegalArgumentException("Expected TOML array");
