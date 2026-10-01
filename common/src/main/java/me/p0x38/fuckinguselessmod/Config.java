@@ -25,6 +25,23 @@ public final class Config {
         }
     }
 
+    public enum TextCase {
+        PRESERVE("Preserve"),
+        LOWERCASE("Lowercase"),
+        UPPERCASE("Uppercase");
+
+        private final String displayName;
+
+        TextCase(String displayName) {
+            this.displayName = displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
     public enum BlockMode {
         DYNAMIC("Dynamic"),
         FULL_WIDTH("Full Width"),
@@ -59,6 +76,9 @@ public final class Config {
 
         @ConfigOption(name = "Mode", category = "General")
         public Mode mode = Mode.REPLACE;
+
+        @ConfigOption(name = "Text Case", category = "Text Case")
+        public TextCase textCase = TextCase.PRESERVE;
 
         @ConfigOption(name = "Block Mode", category = "Blocks")
         public BlockMode blockMode = BlockMode.DYNAMIC;
@@ -99,6 +119,82 @@ public final class Config {
 
         @ConfigOption(name = "Enable Uwuifier", category = "Effects")
         public boolean uwuifierEnabled = true;
+
+        @ConfigOption(name = "Replace R/L with W", category = "Uwuifier")
+        public boolean uwuifierReplaceRl = true;
+
+        @ConfigOption(
+                name = "Replace N + Vowel with Ny + Vowel",
+                category = "Uwuifier"
+        )
+        public boolean uwuifierReplaceNVowel = true;
+
+        @ConfigOption(name = "Replace Ove with Uv", category = "Uwuifier")
+        public boolean uwuifierReplaceOve = true;
+
+        @ConfigOption(name = "Replace Th with D", category = "Uwuifier")
+        public boolean uwuifierReplaceTh = false;
+
+        @ConfigOption(name = "Replace You with Yuo", category = "Uwuifier")
+        public boolean uwuifierReplaceYou = false;
+
+        @ConfigOption(name = "Enable Stutter", category = "Uwuifier")
+        public boolean uwuifierStutterEnabled = false;
+
+        @ConfigOption(
+                name = "Stutter Chance",
+                category = "Uwuifier",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float uwuifierStutterChance = 0.20f;
+
+        @ConfigOption(name = "Enable Action Texts", category = "Uwuifier")
+        public boolean uwuifierActionsEnabled = false;
+
+        @ConfigOption(
+                name = "Action Text Chance",
+                category = "Uwuifier",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float uwuifierActionChance = 0.15f;
+
+        @ConfigOption(name = "Action Texts", category = "Uwuifier")
+        public List<String> uwuifierActionTexts = new ArrayList<>(List.of(
+                "*boops*",
+                "*wiggles*",
+                "*happy noises*",
+                "*pounces*",
+                "*tail wags*"
+        ));
+
+        @ConfigOption(name = "Enable Emoticons", category = "Uwuifier")
+        public boolean uwuifierEmoticonsEnabled = false;
+
+        @ConfigOption(
+                name = "Emoticon Chance",
+                category = "Uwuifier",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float uwuifierEmoticonChance = 0.25f;
+
+        @ConfigOption(name = "Emoticons", category = "Uwuifier")
+        public List<String> uwuifierEmoticons = new ArrayList<>(List.of(
+                ":3",
+                "OwO",
+                "UwU",
+                "^w^",
+                ">w<",
+                "x3"
+        ));
 
         @ConfigOption(name = "Enable Zalgo", category = "Zalgo")
         public boolean zalgoEnabled = true;
@@ -142,6 +238,12 @@ public final class Config {
         public void clamp() {
             zalgoChance = Math.clamp(zalgoChance, 0.0f, 1.0f);
             blockChance = Math.clamp(blockChance, 0.0f, 1.0f);
+            uwuifierStutterChance =
+                    Math.clamp(uwuifierStutterChance, 0.0f, 1.0f);
+            uwuifierActionChance =
+                    Math.clamp(uwuifierActionChance, 0.0f, 1.0f);
+            uwuifierEmoticonChance =
+                    Math.clamp(uwuifierEmoticonChance, 0.0f, 1.0f);
             maxLength = Math.clamp(maxLength, 1, 256);
             bitRotation = Math.clamp(bitRotation, 0, 7);
             xorKey = Math.clamp(xorKey, 0, 255);
