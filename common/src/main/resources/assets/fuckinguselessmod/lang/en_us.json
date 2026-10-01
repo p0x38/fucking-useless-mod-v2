@@ -110,5 +110,6 @@
   "text.fuckinguselessmod.config.option.sentenceEndEffectsEnabled": "Enable Sentence End Effects",
   "text.fuckinguselessmod.config.option.sentenceEndEffects": "Sentence End Effects",
   "text.fuckinguselessmod.config.description.sentenceEndEffectsEnabled": "Enable or disable all sentence-ending effects.",
-  "text.fuckinguselessmod.config.description.sentenceEndEffects": "Ordered list of sentence-ending effects. Entries are applied from left to right. Use TILDE, ELLIPSIS, or EXCLAMATION."
+  "text.fuckinguselessmod.config.description.sentenceEndEffects": "Ordered list of sentence-ending effects. Entries are applied from left to right. Use TILDE, ELLIPSIS, or EXCLAMATION.",
+  "modmenu.nameTranslation.fuckinguselessmod": "Fucking Useless Mod"
 }

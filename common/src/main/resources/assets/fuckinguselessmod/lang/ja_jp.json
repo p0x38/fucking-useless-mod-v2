@@ -110,5 +110,6 @@
   "text.fuckinguselessmod.config.option.sentenceEndEffectsEnabled": "文末エフェクトを有効化",
   "text.fuckinguselessmod.config.option.sentenceEndEffects": "文末エフェクト",
   "text.fuckinguselessmod.config.description.sentenceEndEffectsEnabled": "文末エフェクト全体を有効または無効にします。",
-  "text.fuckinguselessmod.config.description.sentenceEndEffects": "文末エフェクトを適用する順番です。リストの上から順に適用されます。TILDE、ELLIPSIS、EXCLAMATIONを指定できます。"
+  "text.fuckinguselessmod.config.description.sentenceEndEffects": "文末エフェクトを適用する順番です。リストの上から順に適用されます。TILDE、ELLIPSIS、EXCLAMATIONを指定できます。",
+  "modmenu.nameTranslation.fuckinguselessmod": "需要のないクソMOD"
 }

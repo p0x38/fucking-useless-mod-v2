@@ -1,5 +1,6 @@
 package me.p0x38.fuckinguselessmod;
 
+import me.p0x38.fuckinguselessmod.entity.ModEntities;
 import me.p0x38.fuckinguselessmod.presets.PresetRegistry;
 
 public final class FuckingUselessMod {
@@ -11,5 +12,7 @@ public final class FuckingUselessMod {
     public static void init() {
         PresetRegistry.loadExternal();
         ConfigManager.load();
+
+        ModEntities.USELESS_ENTITY.toString();
     }
 }
