@@ -290,7 +290,7 @@ public final class Config {
                 category = "Gamer Slang",
                 hasMin = true,
                 min = 0.0,
-                hasMax = 1.0,
+                hasMax = true,
                 max = 1.0
         )
         public float gamerSlangChance = 1.0f;
