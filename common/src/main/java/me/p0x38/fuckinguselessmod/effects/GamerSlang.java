@@ -12,10 +12,10 @@ public final class GamerSlang {
             return input;
         }
 
-        return ReplacementRules.applyWords(
+        return ReplacementRules.applyRegex(
                 input,
                 config.gamerSlangRules,
-                true
+                false
         );
     }
 }
