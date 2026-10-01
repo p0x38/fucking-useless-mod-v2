@@ -24,10 +24,6 @@ public final class PresetRegistry {
                     .resolve("fuckinguselessmod")
                     .resolve("presets");
 
-    static {
-        register(BuiltinPresets.UWUIFY);
-    }
-
     private PresetRegistry() {
     }
 
