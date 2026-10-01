@@ -2,7 +2,10 @@ package me.p0x38.fuckinguselessmod.effects;
 
 import me.p0x38.fuckinguselessmod.Config;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,16 +28,12 @@ public final class SentenceEndEffects {
         StringBuilder output = new StringBuilder(
                 input.length() + config.sentenceEndEffects.size() * 4
         );
-
+        Random random = new Random();
         int last = 0;
 
         while (matcher.find()) {
             output.append(input, last, matcher.start());
-
-            for (Config.SentenceEndEffect effect : config.sentenceEndEffects) {
-                output.append(marker(effect));
-            }
-
+            output.append(buildEffects(config.sentenceEndEffects, random));
             last = matcher.end();
         }
 
@@ -42,11 +41,34 @@ public final class SentenceEndEffects {
         return output.toString();
     }
 
-    private static String marker(Config.SentenceEndEffect effect) {
-        return switch (effect) {
-            case TILDE -> "~";
-            case ELLIPSIS -> "...";
-            case EXCLAMATION -> "!";
-        };
+    private static String buildEffects(
+            List<Config.SentenceEndEffect> configured,
+            Random random
+    ) {
+        List<Config.SentenceEndEffect> selected = new ArrayList<>();
+
+        for (Config.SentenceEndEffect effect : configured) {
+            if (random.nextBoolean()) {
+                selected.add(effect);
+            }
+        }
+
+        if (selected.isEmpty()) {
+            return "";
+        }
+
+        Collections.shuffle(selected, random);
+
+        StringBuilder result = new StringBuilder();
+
+        for (Config.SentenceEndEffect effect : selected) {
+            switch (effect) {
+                case TILDE -> result.append("~");
+                case ELLIPSIS -> result.append("...");
+                case EXCLAMATION -> result.append("!");
+            }
+        }
+
+        return result.toString();
     }
 }
