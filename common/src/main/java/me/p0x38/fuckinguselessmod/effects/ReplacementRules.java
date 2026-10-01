@@ -24,7 +24,12 @@ public final class ReplacementRules {
         for (String rule : rules) {
             ParsedRule parsed = parse(rule);
 
-            if (parsed == null) {
+            if (parsed == null || !RuleCondition.evaluate(
+                    parsed.condition(),
+                    input,
+                    result,
+                    caseInsensitive
+            )) {
                 continue;
             }
 
@@ -92,10 +97,11 @@ public final class ReplacementRules {
             return null;
         }
 
-        return new ParsedRule(regex, replacement);
+        return new ParsedRule(condition, regex, replacement);
     }
 
     private record ParsedRule(
+            String condition,
             String regex,
             String replacement
     ) {
