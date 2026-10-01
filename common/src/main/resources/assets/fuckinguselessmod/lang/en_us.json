@@ -65,5 +65,13 @@
   "text.fuckinguselessmod.config.uwuifierWordChance": "Chance for each eligible word to receive Uwuifier word transformations.",
   "text.fuckinguselessmod.config.uwuifierExclamationsEnabled": "Replace trailing ! and ? punctuation with randomized Uwuifier-style combinations.",
   "text.fuckinguselessmod.config.uwuifierExclamationChance": "Chance of changing trailing exclamation/question punctuation.",
-  "text.fuckinguselessmod.config.uwuifierExclamations": "Random punctuation combinations used by the exclamation effect."
+  "text.fuckinguselessmod.config.uwuifierExclamations": "Random punctuation combinations used by the exclamation effect.",
+  "text.fuckinguselessmod.config.leetSpeakEnabled": "Convert letters into common leetspeak substitutions such as 4, 3, 1, 0, 5 and 7.",
+  "text.fuckinguselessmod.config.leetSpeakChance": "Chance of applying Leet Speak to a message.",
+  "text.fuckinguselessmod.config.gamerSlangEnabled": "Replace common words with gaming and internet slang such as \"u\", \"ur\", \"rly\" and \"pls\".",
+  "text.fuckinguselessmod.config.gamerSlangChance": "Chance of applying Gamer Slang to a message.",
+  "text.fuckinguselessmod.config.textSpeakEnabled": "Use texting and chat abbreviations such as \"brb\", \"btw\", \"idk\", \"omg\" and \"rn\".",
+  "text.fuckinguselessmod.config.textSpeakChance": "Chance of applying Text Speak to a message.",
+  "text.fuckinguselessmod.config.lolcatEnabled": "Give text a classic Lolcat-style spelling and grammar flavor.",
+  "text.fuckinguselessmod.config.lolcatChance": "Chance of applying Lolcat conversion to a message."
 }
