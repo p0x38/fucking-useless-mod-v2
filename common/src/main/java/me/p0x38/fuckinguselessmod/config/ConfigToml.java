@@ -175,7 +175,7 @@ public final class ConfigToml {
             char character = value.charAt(i);
             switch (character) {
                 case '\\' -> result.append("\\\\");
-                case '"' -> result.append("\\"");
+                case '"' -> result.append("\\\"");
                 case '\n' -> result.append("\\n");
                 case '\r' -> result.append("\\r");
                 case '\t' -> result.append("\\t");
@@ -239,8 +239,8 @@ public final class ConfigToml {
 
     private static String parseString(String value) {
         if (value.length() >= 2
-                && value.startsWith(""")
-                && value.endsWith(""")) {
+                && value.startsWith("\"")
+                && value.endsWith("\"")) {
             String body = value.substring(1, value.length() - 1);
             StringBuilder result = new StringBuilder(body.length());
 
@@ -305,7 +305,7 @@ public final class ConfigToml {
             char character = value.charAt(i);
 
             if (quoted) {
-                if (character == quote && (quote == '\'' || i == 0 || value.charAt(i - 1) != '\\')) {
+                if (character == quote && (quote == '\'' || value.charAt(i - 1) != '\\')) {
                     quoted = false;
                 }
                 continue;
@@ -335,7 +335,7 @@ public final class ConfigToml {
                 continue;
             }
 
-            if (pending.length() > 0) {
+            if (!pending.isEmpty()) {
                 pending.append(' ').append(stripped);
             } else {
                 pending.append(stripped);
@@ -381,7 +381,7 @@ public final class ConfigToml {
             char character = line.charAt(i);
 
             if (quoted) {
-                if (character == quote && (quote == '\'' || i == 0 || line.charAt(i - 1) != '\\')) {
+                if (character == quote && (quote == '\'' || line.charAt(i - 1) != '\\')) {
                     quoted = false;
                 }
                 continue;
@@ -406,7 +406,7 @@ public final class ConfigToml {
             char character = line.charAt(i);
 
             if (quoted) {
-                if (character == quote && (quote == '\'' || i == 0 || line.charAt(i - 1) != '\\')) {
+                if (character == quote && (quote == '\'' || line.charAt(i - 1) != '\\')) {
                     quoted = false;
                 }
             } else if (character == '"' || character == '\'') {
@@ -429,7 +429,7 @@ public final class ConfigToml {
             char character = statement.charAt(i);
 
             if (quoted) {
-                if (character == quote && (quote == '\'' || i == 0 || statement.charAt(i - 1) != '\\')) {
+                if (character == quote && (quote == '\'' || statement.charAt(i - 1) != '\\')) {
                     quoted = false;
                 }
                 continue;

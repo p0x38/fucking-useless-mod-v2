@@ -18,6 +18,7 @@ public final class Uwuifier {
             Pattern.compile("n([aeiou])", Pattern.CASE_INSENSITIVE);
     private static final Pattern EXCLAMATION =
             Pattern.compile("[!?]+$");
+    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
     private Uwuifier() {
     }
@@ -123,29 +124,52 @@ public final class Uwuifier {
             Config.Data config,
             Random random
     ) {
-        String[] words = input.split("(\\\\s+)", -1);
-        if (words.length <= 1) {
-            return applySingleWordEffect(input, config, random, 0);
-        }
-
+        Matcher matcher = WHITESPACE.matcher(input);
         StringBuilder output = new StringBuilder(input.length() + 32);
 
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i];
+        int last = 0;
 
-            if (i > 0 && !word.isEmpty()) {
-                String effect = chooseSpaceEffect(config, random, word);
-                if (effect != null) {
-                    output.append(' ').append(effect).append(' ');
-                } else {
-                    output.append(' ');
+        while (matcher.find()) {
+            String word = input.substring(last, matcher.start());
+
+            if (!word.isEmpty()) {
+                output.append(word);
+            }
+
+            String separator = matcher.group();
+
+            output.append(separator);
+
+            if (matcher.end() < input.length()) {
+                String nextWord = readNextToken(input, matcher.end());
+
+                if (!nextWord.isEmpty()) {
+                    String effect = chooseSpaceEffect(
+                            config,
+                            random,
+                            nextWord
+                    );
+
+                    if (effect != null) {
+                        output.append(effect).append(separator);
+                    }
                 }
             }
 
-            output.append(word);
+            last = matcher.end();
         }
 
+        output.append(input, last, input.length());
         return output.toString();
+    }
+
+    private static String readNextToken(String input, int start) {
+        Matcher matcher = WORD.matcher(input);
+        if (!matcher.find(start)) {
+            return "";
+        }
+
+        return matcher.group();
     }
 
     private static String chooseSpaceEffect(

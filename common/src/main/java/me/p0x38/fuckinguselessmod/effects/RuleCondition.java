@@ -12,6 +12,9 @@ public final class RuleCondition {
     private static final Pattern WORD = Pattern.compile(
             "[\\p{L}\\p{N}]+(?:['’-][\\p{L}\\p{N}]+)*"
     );
+    private static final Pattern LINE_BREAK = Pattern.compile(
+            "\\R"
+    );
 
     private RuleCondition() {
     }
@@ -59,7 +62,7 @@ public final class RuleCondition {
             );
             case "has_question" -> current.indexOf('?') >= 0;
             case "has_exclamation" -> current.indexOf('!') >= 0;
-            case "has_line_break" -> current.indexOf('\n') >= 0 || current.indexOf('\r') >= 0;
+            case "has_line_break" -> LINE_BREAK.matcher(current).find();
             case "is_url" -> URL.matcher(current.trim()).find();
             case "is_mention" -> current.trim().startsWith("@");
             case "is_hashtag" -> current.trim().startsWith("#");
@@ -245,7 +248,7 @@ public final class RuleCondition {
             return 0;
         }
 
-        return input.split("\R", -1).length;
+        return input.split("\r", -1).length;
     }
 
     private static Pattern compile(String regex, boolean caseInsensitive) {

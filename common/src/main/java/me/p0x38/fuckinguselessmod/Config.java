@@ -344,7 +344,7 @@ public final class Config {
                 "\\bwith\\b=>wit", "\\bis\\b=>iz", "\\bmy\\b=>mah", "\\bI am\\b=>I can haz",
                 "\\bhas\\b=>haz", "\\bhave\\b=>hav"
         ));
-\n        @ConfigOption(name = "Presets", category = "Effects")
+        @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
 
         public void clamp() {
