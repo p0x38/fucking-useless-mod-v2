@@ -61,5 +61,9 @@
   "text.fuckinguselessmod.config.option.uwuifierEmoticonChance": "Emoticon Chance",
   "text.fuckinguselessmod.config.description.uwuifierEmoticonChance": "Chance of appending an emoticon. Range: 0.0-1.0.",
   "text.fuckinguselessmod.config.option.uwuifierEmoticons": "Emoticons",
-  "text.fuckinguselessmod.config.description.uwuifierEmoticons": "List of emoticons that can be randomly appended when emoticons are enabled."
+  "text.fuckinguselessmod.config.description.uwuifierEmoticons": "List of emoticons that can be randomly appended when emoticons are enabled.",
+  "text.fuckinguselessmod.config.uwuifierWordChance": "Chance for each eligible word to receive Uwuifier word transformations.",
+  "text.fuckinguselessmod.config.uwuifierExclamationsEnabled": "Replace trailing ! and ? punctuation with randomized Uwuifier-style combinations.",
+  "text.fuckinguselessmod.config.uwuifierExclamationChance": "Chance of changing trailing exclamation/question punctuation.",
+  "text.fuckinguselessmod.config.uwuifierExclamations": "Random punctuation combinations used by the exclamation effect."
 }
