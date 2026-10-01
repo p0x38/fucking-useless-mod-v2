@@ -264,6 +264,58 @@ public final class Config {
         )
         public int maxLength = 256;
 
+        @ConfigOption(name = "Enable Leet Speak", category = "Leet Speak")
+        public boolean leetSpeakEnabled = false;
+
+        @ConfigOption(
+                name = "Leet Speak Chance",
+                category = "Leet Speak",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float leetSpeakChance = 1.0f;
+
+        @ConfigOption(name = "Enable Gamer Slang", category = "Gamer Slang")
+        public boolean gamerSlangEnabled = false;
+
+        @ConfigOption(
+                name = "Gamer Slang Chance",
+                category = "Gamer Slang",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float gamerSlangChance = 1.0f;
+
+        @ConfigOption(name = "Enable Text Speak", category = "Text Speak")
+        public boolean textSpeakEnabled = false;
+
+        @ConfigOption(
+                name = "Text Speak Chance",
+                category = "Text Speak",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float textSpeakChance = 1.0f;
+
+        @ConfigOption(name = "Enable Lolcat", category = "Lolcat")
+        public boolean lolcatEnabled = false;
+
+        @ConfigOption(
+                name = "Lolcat Chance",
+                category = "Lolcat",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float lolcatChance = 1.0f;
+
         @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
 
@@ -280,6 +332,14 @@ public final class Config {
                     Math.clamp(uwuifierEmoticonChance, 0.0f, 1.0f);
             uwuifierExclamationChance =
                     Math.clamp(uwuifierExclamationChance, 0.0f, 1.0f);
+            leetSpeakChance =
+                    Math.clamp(leetSpeakChance, 0.0f, 1.0f);
+            gamerSlangChance =
+                    Math.clamp(gamerSlangChance, 0.0f, 1.0f);
+            textSpeakChance =
+                    Math.clamp(textSpeakChance, 0.0f, 1.0f);
+            lolcatChance =
+                    Math.clamp(lolcatChance, 0.0f, 1.0f);
             maxLength = Math.clamp(maxLength, 1, 256);
             bitRotation = Math.clamp(bitRotation, 0, 7);
             xorKey = Math.clamp(xorKey, 0, 255);
