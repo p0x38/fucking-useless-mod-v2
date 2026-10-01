@@ -223,7 +223,11 @@ public final class Uwuifier {
         }
 
         int count = random.nextInt(1, 3);
-        String first = word.substring(0, 1);
+        int firstCodePoint = word.codePointAt(0);
+        String first = new String(
+                Character.toChars(firstCodePoint)
+        );
+
         return (first + "-").repeat(count) + word;
     }
 
