@@ -12,7 +12,7 @@ public final class EffectProcessor {
         String result = input;
 
         if (config.uwuifierEnabled) {
-            result = UWUIFIER.apply(result, config);
+            result = UWUIFIER.apply(result);
         }
 
         return result;
