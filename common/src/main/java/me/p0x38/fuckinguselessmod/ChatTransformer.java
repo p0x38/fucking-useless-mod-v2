@@ -39,6 +39,10 @@ public final class ChatTransformer {
             case ENCODE -> encodeMode(input, config);
         };
 
+        if (config.uwuifierEnabled) {
+            result = Uwuifier.apply(result);
+        }
+
         return PresetProcessor.apply(result, config);
     }
 
