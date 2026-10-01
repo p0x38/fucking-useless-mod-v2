@@ -57,7 +57,7 @@ class UwuifierTest {
         String result = Uwuifier.apply("hello stuff", config);
 
         assertTrue(
-                result.matches("hello s-(?:s-)?stuff stuff"),
+                result.matches("hello s-(?:s-)?stuff"),
                 result
         );
     }
@@ -71,7 +71,7 @@ class UwuifierTest {
         String result = Uwuifier.apply("hello 𝒶bc", config);
 
         assertTrue(
-                result.matches("hello 𝒶-(?:𝒶-)?𝒶bc 𝒶bc"),
+                result.matches("hello 𝒶-(?:𝒶-)?𝒶bc"),
                 result
         );
     }
@@ -84,7 +84,7 @@ class UwuifierTest {
 
         assertTrue(
                 Uwuifier.apply("hello, world!", config)
-                        .matches("hello, w-(?:w-)?world world!"),
+                        .matches("hello, w-(?:w-)?world!"),
                 "Unexpected transformation"
         );
     }
