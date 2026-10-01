@@ -277,6 +277,11 @@ public final class Config {
         )
         public float leetSpeakChance = 1.0f;
 
+        @ConfigOption(name = "Leet Speak Rules", category = "Leet Speak")
+        public List<String> leetSpeakRules = new ArrayList<>(List.of(
+                "a=4", "e=3", "i=1", "o=0", "s=5", "t=7"
+        ));
+
         @ConfigOption(name = "Enable Gamer Slang", category = "Gamer Slang")
         public boolean gamerSlangEnabled = false;
 
@@ -285,10 +290,17 @@ public final class Config {
                 category = "Gamer Slang",
                 hasMin = true,
                 min = 0.0,
-                hasMax = true,
+                hasMax = 1.0,
                 max = 1.0
         )
         public float gamerSlangChance = 1.0f;
+
+        @ConfigOption(name = "Gamer Slang Rules", category = "Gamer Slang")
+        public List<String> gamerSlangRules = new ArrayList<>(List.of(
+                "you=u", "your=ur", "are=r", "why=y", "people=ppl",
+                "please=pls", "thanks=thx", "thank=thx", "because=cuz",
+                "before=b4", "really=rly", "probably=prolly"
+        ));
 
         @ConfigOption(name = "Enable Text Speak", category = "Text Speak")
         public boolean textSpeakEnabled = false;
@@ -303,6 +315,16 @@ public final class Config {
         )
         public float textSpeakChance = 1.0f;
 
+        @ConfigOption(name = "Text Speak Rules", category = "Text Speak")
+        public List<String> textSpeakRules = new ArrayList<>(List.of(
+                "see you=c u", "see=c", "you=u", "are=r", "why=y",
+                "be right back=brb", "as soon as possible=asap",
+                "laughing out loud=lol", "by the way=btw",
+                "in my opinion=imo", "for your information=fyi",
+                "I don't know=idk", "oh my god=omg", "right now=rn",
+                "to be honest=tbh", "because=bc", "without=w/o"
+        ));
+
         @ConfigOption(name = "Enable Lolcat", category = "Lolcat")
         public boolean lolcatEnabled = false;
 
@@ -315,6 +337,13 @@ public final class Config {
                 max = 1.0
         )
         public float lolcatChance = 1.0f;
+
+        @ConfigOption(name = "Lolcat Rules", category = "Lolcat")
+        public List<String> lolcatRules = new ArrayList<>(List.of(
+                "the=teh", "this=dis", "that=dat", "what=wat",
+                "with=wit", "is=iz", "my=mah", "I am=I can haz",
+                "has=haz", "have=hav"
+        ));
 
         @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
