@@ -2,13 +2,15 @@ package me.p0x38.fuckinguselessmod.effects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public final class ReplacementRules {
     private ReplacementRules() {
     }
 
-    public static List<String> applyLiteral(
+    public static String applyRegex(
             String input,
             List<String> rules,
             boolean caseInsensitive
@@ -20,66 +22,36 @@ public final class ReplacementRules {
         }
 
         for (String rule : rules) {
-            int separator = rule == null ? -1 : rule.indexOf('=');
+            ParsedRule parsed = parse(rule);
 
-            if (separator <= 0) {
+            if (parsed == null) {
                 continue;
             }
 
-            String from = rule.substring(0, separator);
-            String to = rule.substring(separator + 1);
+            try {
+                int flags = caseInsensitive
+                        ? Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+                        : 0;
 
-            if (from.isEmpty()) {
-                continue;
+                Pattern pattern = Pattern.compile(
+                        parsed.regex(),
+                        flags
+                );
+
+                result = pattern.matcher(result).replaceAll(
+                        parsed.replacement()
+                );
+            } catch (PatternSyntaxException exception) {
+                System.err.println(
+                        "[Fucking Useless Mod] Invalid effect regex: "
+                                + parsed.regex()
+                );
+            } catch (IllegalArgumentException exception) {
+                System.err.println(
+                        "[Fucking Useless Mod] Invalid effect replacement: "
+                                + exception.getMessage()
+                );
             }
-
-            Pattern pattern = Pattern.compile(
-                    Pattern.quote(from),
-                    caseInsensitive ? Pattern.CASE_INSENSITIVE_UNICODE : 0
-            );
-            result = pattern.matcher(result).replaceAll(
-                    java.util.regex.Matcher.quoteReplacement(to)
-            );
-        }
-
-        return result;
-    }
-
-    public static String applyWords(
-            String input,
-            List<String> rules,
-            boolean caseInsensitive
-    ) {
-        String result = input;
-
-        if (rules == null) {
-            return result;
-        }
-
-        for (String rule : rules) {
-            int separator = rule == null ? -1 : rule.indexOf('=');
-
-            if (separator <= 0) {
-                continue;
-            }
-
-            String from = rule.substring(0, separator).trim();
-            String to = rule.substring(separator + 1);
-
-            if (from.isEmpty()) {
-                continue;
-            }
-
-            String flags = caseInsensitive
-                    ? "(?iu)"
-                    : "";
-
-            Pattern pattern = Pattern.compile(
-                    flags + "\\b" + Pattern.quote(from) + "\\b"
-            );
-            result = pattern.matcher(result).replaceAll(
-                    java.util.regex.Matcher.quoteReplacement(to)
-            );
         }
 
         return result;
@@ -94,5 +66,38 @@ public final class ReplacementRules {
         }
 
         return new ArrayList<>(rules);
+    }
+
+    private static ParsedRule parse(String rule) {
+        if (rule == null || rule.isBlank()) {
+            return null;
+        }
+
+        int separator = rule.indexOf("=>");
+
+        if (separator < 0) {
+            separator = rule.indexOf('=');
+        }
+
+        if (separator <= 0) {
+            return null;
+        }
+
+        String regex = rule.substring(0, separator).trim();
+        String replacement = rule.substring(
+                separator + (rule.startsWith("=>", separator) ? 2 : 1)
+        );
+
+        if (regex.isEmpty()) {
+            return null;
+        }
+
+        return new ParsedRule(regex, replacement);
+    }
+
+    private record ParsedRule(
+            String regex,
+            String replacement
+    ) {
     }
 }
