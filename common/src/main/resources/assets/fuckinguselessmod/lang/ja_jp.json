@@ -65,5 +65,13 @@
   "text.fuckinguselessmod.config.uwuifierWordChance": "変換対象となる各単語にUwuifierの単語変換を適用する確率です。",
   "text.fuckinguselessmod.config.uwuifierExclamationsEnabled": "文末の「!」や「?」をUwuifier風のランダムな組み合わせに変換します。",
   "text.fuckinguselessmod.config.uwuifierExclamationChance": "文末の感嘆符・疑問符を変換する確率です。",
-  "text.fuckinguselessmod.config.uwuifierExclamations": "感嘆符変換でランダムに使用される句読点パターンの一覧です。"
+  "text.fuckinguselessmod.config.uwuifierExclamations": "感嘆符変換でランダムに使用される句読点パターンの一覧です。",
+  "text.fuckinguselessmod.config.leetSpeakEnabled": "4、3、1、0、5、7などを使った一般的なLeet Speak風の文字変換を行います。",
+  "text.fuckinguselessmod.config.leetSpeakChance": "メッセージにLeet Speak変換を適用する確率です。",
+  "text.fuckinguselessmod.config.gamerSlangEnabled": "「u」「ur」「rly」「pls」などのゲーム・インターネット系スラングに置換します。",
+  "text.fuckinguselessmod.config.gamerSlangChance": "メッセージにゲーマースラング変換を適用する確率です。",
+  "text.fuckinguselessmod.config.textSpeakEnabled": "「brb」「btw」「idk」「omg」「rn」などのチャット・SMS系略語を使用します。",
+  "text.fuckinguselessmod.config.textSpeakChance": "メッセージにTxt spk変換を適用する確率です。",
+  "text.fuckinguselessmod.config.lolcatEnabled": "古典的なLolcat風のスペルや言い回しに変換します。",
+  "text.fuckinguselessmod.config.lolcatChance": "メッセージにLolcat変換を適用する確率です。"
 }
