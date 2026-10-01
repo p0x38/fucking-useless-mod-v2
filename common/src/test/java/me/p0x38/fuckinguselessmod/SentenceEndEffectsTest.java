@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SentenceEndEffectsTest {
     @Test
-    void appliesEffectsInConfiguredOrder() {
+    void randomlySelectsAndCombinesConfiguredEffects() {
         Config.Data config = new Config.Data();
         config.sentenceEndEffectsEnabled = true;
         config.sentenceEndEffects = List.of(
@@ -18,26 +18,33 @@ class SentenceEndEffectsTest {
                 Config.SentenceEndEffect.EXCLAMATION
         );
 
-        assertEquals(
-                "Hello~...! World~...!",
-                SentenceEndEffects.apply("Hello. World?", config)
-        );
+        for (int i = 0; i < 100; i++) {
+            String result = SentenceEndEffects.apply("Hello.", config);
+
+            assertTrue(
+                    result.matches("Hello(?:~|\\.{3}|!|~\\.{3}|~!|\\.{3}~|\\.{3}!|!~|!\\.{3}|~\\.{3}!|~!\\.{3}|\\.{3}~!|\\.{3}!~|!~\\.{3}|!\\.{3}~)?"),
+                    result
+            );
+        }
     }
 
     @Test
-    void supportsDifferentOrder() {
+    void replacesExistingSentencePunctuation() {
         Config.Data config = new Config.Data();
         config.sentenceEndEffectsEnabled = true;
         config.sentenceEndEffects = List.of(
-                Config.SentenceEndEffect.ELLIPSIS,
                 Config.SentenceEndEffect.TILDE,
-                Config.SentenceEndEffect.EXCLAMATION
+                Config.SentenceEndEffect.ELLIPSIS
         );
 
-        assertEquals(
-                "Hello...~! World...~!",
-                SentenceEndEffects.apply("Hello. World?", config)
-        );
+        for (int i = 0; i < 50; i++) {
+            String result = SentenceEndEffects.apply("Hello. World?", config);
+
+            assertTrue(
+                    result.matches("Hello(?:~|\\.{3}|~\\.{3}|\\.{3}~)? World(?:~|\\.{3}|~\\.{3}|\\.{3}~)?"),
+                    result
+            );
+        }
     }
 
     @Test
@@ -45,9 +52,9 @@ class SentenceEndEffectsTest {
         Config.Data config = new Config.Data();
         config.sentenceEndEffectsEnabled = false;
 
-        assertEquals(
-                "Hello. World?",
+        assertTrue(
                 SentenceEndEffects.apply("Hello. World?", config)
+                        .equals("Hello. World?")
         );
     }
 
@@ -55,9 +62,8 @@ class SentenceEndEffectsTest {
     void leavesTextWithoutSentenceEndUntouched() {
         Config.Data config = new Config.Data();
 
-        assertEquals(
-                "Hello",
-                SentenceEndEffects.apply("Hello", config)
+        assertTrue(
+                SentenceEndEffects.apply("Hello", config).equals("Hello")
         );
     }
 }
