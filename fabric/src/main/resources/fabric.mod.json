@@ -32,6 +32,9 @@
       "me.p0x38.fuckinguselessmod.ModMenuIntegration"
     ]
   },
+  "mixins": [
+    "fuckinguselessmod.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
@@ -41,8 +44,5 @@
     "cloth-config": "*",
     "modmenu": "*",
     "placeholder-api": "*"
-  },
-  "mixins": [
-    "fuckinguselessmod.mixins.json"
-  ]
+  }
 }
