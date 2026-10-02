@@ -146,6 +146,11 @@ public final class ConfigToml {
                 output.append("# Sentence-end effects are applied from left to right.\n");
                 output.append("# Valid values: TILDE, ELLIPSIS, EXCLAMATION\n");
             }
+            case "dialogueSoundPool" -> {
+                output.append("# Sound indices refer to dialogtxt/t_<index>.ogg.\n");
+                output.append("# Duplicate indices increase that sound's selection weight.\n");
+                output.append("# Invalid indices are ignored; an empty valid pool uses all 69 sounds.\n");
+            }
             default -> {
             }
         }

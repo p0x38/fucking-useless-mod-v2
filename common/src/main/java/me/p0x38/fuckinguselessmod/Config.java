@@ -59,6 +59,18 @@ public final class Config {
         }
     }
 
+    public enum DialoguePlaybackMode {
+        CHARACTER,
+        WORD,
+        MESSAGE
+    }
+
+    public enum DialogueSeedMode {
+        UUID,
+        UUID_MESSAGE,
+        UUID_MESSAGE_COUNTER
+    }
+
     public enum SentenceEndEffect {
         TILDE,
         ELLIPSIS,
@@ -361,6 +373,108 @@ public final class Config {
                 "\\bwith\\b=>wit", "\\bis\\b=>iz", "\\bmy\\b=>mah", "\\bI am\\b=>I can haz",
                 "\\bhas\\b=>haz", "\\bhave\\b=>hav"
         ));
+        @ConfigOption(name = "Enable Dialogue Sounds", category = "Dialogue")
+        public boolean dialogueSoundsEnabled = false;
+
+        @ConfigOption(name = "Playback Mode", category = "Dialogue")
+        public DialoguePlaybackMode dialoguePlaybackMode =
+                DialoguePlaybackMode.CHARACTER;
+
+        @ConfigOption(
+                name = "Sound Chance",
+                category = "Dialogue",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float dialogueSoundChance = 1.0f;
+
+        @ConfigOption(
+                name = "Minimum Interval",
+                category = "Dialogue",
+                hasMin = true,
+                min = 1,
+                hasMax = true,
+                max = 20
+        )
+        public int dialogueIntervalMin = 2;
+
+        @ConfigOption(
+                name = "Maximum Interval",
+                category = "Dialogue",
+                hasMin = true,
+                min = 1,
+                hasMax = true,
+                max = 20
+        )
+        public int dialogueIntervalMax = 2;
+
+        @ConfigOption(
+                name = "Volume",
+                category = "Dialogue",
+                hasMin = true,
+                min = 0.0,
+                hasMax = true,
+                max = 1.0
+        )
+        public float dialogueVolume = 0.5f;
+
+        @ConfigOption(
+                name = "Minimum Pitch",
+                category = "Dialogue",
+                hasMin = true,
+                min = 0.5,
+                hasMax = true,
+                max = 2.0
+        )
+        public float dialoguePitchMin = 0.9f;
+
+        @ConfigOption(
+                name = "Maximum Pitch",
+                category = "Dialogue",
+                hasMin = true,
+                min = 0.5,
+                hasMax = true,
+                max = 2.0
+        )
+        public float dialoguePitchMax = 1.1f;
+
+        @ConfigOption(name = "Randomize Pitch", category = "Dialogue")
+        public boolean dialogueRandomizePitch = true;
+
+        @ConfigOption(name = "Skip Whitespace", category = "Dialogue")
+        public boolean dialogueSkipWhitespace = true;
+
+        @ConfigOption(name = "Skip Punctuation", category = "Dialogue")
+        public boolean dialogueSkipPunctuation = true;
+
+        @ConfigOption(name = "Skip Numbers", category = "Dialogue")
+        public boolean dialogueSkipNumbers = false;
+
+        @ConfigOption(
+                name = "Maximum Sounds Per Message",
+                category = "Dialogue",
+                hasMin = true,
+                min = 0,
+                hasMax = true,
+                max = 256
+        )
+        public int dialogueMaxSoundsPerMessage = 0;
+
+        @ConfigOption(name = "Don't Repeat Previous Sound", category = "Dialogue")
+        public boolean dialogueAvoidRepeats = true;
+
+        @ConfigOption(name = "Queue Messages", category = "Dialogue")
+        public boolean dialogueQueueMessages = true;
+
+        @ConfigOption(name = "Seed Mode", category = "Dialogue")
+        public DialogueSeedMode dialogueSeedMode =
+                DialogueSeedMode.UUID_MESSAGE_COUNTER;
+
+        @ConfigOption(name = "Sound Pool", category = "Dialogue")
+        public List<String> dialogueSoundPool = createDialogueSoundPool();
+
         @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
 
@@ -374,6 +488,14 @@ public final class Config {
                         SentenceEndEffect.ELLIPSIS,
                         SentenceEndEffect.EXCLAMATION
                 ));
+
+        private static List<String> createDialogueSoundPool() {
+            List<String> pool = new ArrayList<>();
+            for (int index = 0; index < 69; index++) {
+                pool.add(String.valueOf(index));
+            }
+            return pool;
+        }
 
         public void clamp() {
             zalgoChance = Math.clamp(zalgoChance, 0.0f, 1.0f);
@@ -399,6 +521,26 @@ public final class Config {
             maxLength = Math.clamp(maxLength, 1, 256);
             bitRotation = Math.clamp(bitRotation, 0, 7);
             xorKey = Math.clamp(xorKey, 0, 255);
+            dialogueSoundChance =
+                    Math.clamp(dialogueSoundChance, 0.0f, 1.0f);
+            dialogueIntervalMin =
+                    Math.clamp(dialogueIntervalMin, 1, 20);
+            dialogueIntervalMax =
+                    Math.clamp(dialogueIntervalMax, 1, 20);
+            if (dialogueIntervalMax < dialogueIntervalMin) {
+                dialogueIntervalMax = dialogueIntervalMin;
+            }
+            dialogueVolume =
+                    Math.clamp(dialogueVolume, 0.0f, 1.0f);
+            dialoguePitchMin =
+                    Math.clamp(dialoguePitchMin, 0.5f, 2.0f);
+            dialoguePitchMax =
+                    Math.clamp(dialoguePitchMax, 0.5f, 2.0f);
+            if (dialoguePitchMax < dialoguePitchMin) {
+                dialoguePitchMax = dialoguePitchMin;
+            }
+            dialogueMaxSoundsPerMessage =
+                    Math.clamp(dialogueMaxSoundsPerMessage, 0, 256);
         }
     }
 }
