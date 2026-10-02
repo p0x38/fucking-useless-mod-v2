@@ -1,66 +1,154 @@
 package me.p0x38.fabric.client;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.logging.LogUtils;
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.sounds.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.PlayerChatMessage;
+import org.slf4j.Logger;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 
 public final class DialogueSoundManager {
-    private static final long UUID_MIX = 0x9E3779B97F4A7C15L;
+    private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Queue<DialogueMessage> QUEUE = new ArrayDeque<>();
-    private static final Map<UUID, Long> MESSAGE_COUNTERS = new HashMap<>();
+    private static final Queue<DialogueMessage> QUEUE =
+            new ArrayDeque<>();
+
+    /*
+     * One player = one voice.
+     *
+     * The selected sound is calculated from the player's UUID
+     * and cached here so every letter/message uses the same sound.
+     */
+    private static final Map<UUID, Integer> PLAYER_VOICES =
+            new HashMap<>();
+
+    /*
+     * The signature uniquely identifies a signed chat message.
+     *
+     * This prevents the same received message from being queued
+     * multiple times while still allowing the same player to send
+     * identical text again as a new message.
+     */
+    private static UUID lastSenderUuid;
+    private static String lastMessage;
+    private static Instant lastReceptionTimestamp;
+    private static MessageSignature lastMessageSignature;
 
     private static DialogueMessage current;
+
+    /*
+     * The currently playing dialogue sound.
+     *
+     * Every new dialogue sound stops this instance first so
+     * dialogue sounds never overlap.
+     */
+    private static SoundInstance currentSound;
+
     private static int interval;
     private static int soundsPlayed;
 
     private DialogueSoundManager() {
     }
 
-    public static void queue(GameProfile sender, String message) {
-        if (sender == null || message == null || message.isBlank()) {
+    public static void queue(
+            GameProfile sender,
+            String message,
+            Instant receptionTimestamp,
+            PlayerChatMessage signedMessage
+    ) {
+        LOGGER.info(
+                "[DialogueDebug] queue() sender={} uuid={} message={} timestamp={} queueSize={}",
+                sender != null ? sender.name() : "<null>",
+                sender != null ? sender.id() : "<null>",
+                message,
+                receptionTimestamp,
+                QUEUE.size()
+        );
+
+        if (sender == null
+                || message == null
+                || message.isBlank()) {
+            LOGGER.info(
+                    "[DialogueDebug] queue() ignored: invalid input"
+            );
             return;
         }
 
         Config.Data config = Config.get();
 
         if (!config.dialogueSoundsEnabled) {
+            LOGGER.info(
+                    "[DialogueDebug] queue() ignored: dialogue sounds disabled"
+            );
             return;
         }
 
-        long messageCounter = MESSAGE_COUNTERS.merge(
-                sender.id(),
-                1L,
-                Long::sum
-        );
+        MessageSignature signature =
+                signedMessage != null
+                    ? signedMessage.signature()
+                        : null;
+
+        if (signature != null) {
+            if (signature.equals(lastMessageSignature)) {
+                return;
+            }
+
+            lastMessageSignature = signature;
+        } else {
+            /*
+             * Unsigned message handling
+             */
+            if (sender.id().equals(lastSenderUuid)
+                && message.equals(lastMessage)
+                && receptionTimestamp != null
+                && receptionTimestamp.equals(lastReceptionTimestamp)) {
+                return;
+            }
+
+            lastSenderUuid = sender.id();
+            lastMessage = message;
+            lastReceptionTimestamp = receptionTimestamp;
+        }
 
         DialogueMessage next = new DialogueMessage(
-                sender.id(),
                 message,
-                messageCounter,
-                config
+                getPlayerVoice(sender.id(), config)
+        );
+
+        LOGGER.info(
+                "[DialogueDebug] created DialogueMessage uuid={} voiceIndex={} textLength={}",
+                sender.id(),
+                next.voiceIndex,
+                message.codePointCount(0, message.length())
         );
 
         if (config.dialogueQueueMessages) {
             QUEUE.add(next);
+
+            LOGGER.info(
+                    "[DialogueDebug] message queued queueSize={}",
+                    QUEUE.size()
+            );
             return;
         }
 
         QUEUE.clear();
+        stopCurrentSound();
         current = next;
         interval = 0;
         soundsPlayed = 0;
+
+        LOGGER.info(
+                "[DialogueDebug] message became current voiceIndex={}",
+                current.voiceIndex
+        );
     }
 
     public static void tick() {
@@ -68,6 +156,7 @@ public final class DialogueSoundManager {
 
         if (!config.dialogueSoundsEnabled) {
             QUEUE.clear();
+            stopCurrentSound();
             current = null;
             return;
         }
@@ -78,6 +167,12 @@ public final class DialogueSoundManager {
             if (current == null) {
                 return;
             }
+
+            LOGGER.info(
+                    "[DialogueDebug] dequeued message voiceIndex={} queueSize={}",
+                    current.voiceIndex,
+                    QUEUE.size()
+            );
 
             interval = 0;
             soundsPlayed = 0;
@@ -95,38 +190,126 @@ public final class DialogueSoundManager {
         }
 
         if (!current.advance(config)) {
+            LOGGER.info(
+                    "[DialogueDebug] message finished soundsPlayed={}",
+                    soundsPlayed
+            );
             current = null;
             return;
         }
+        LOGGER.info(
+                "[DialogueDebug] advance() suceeded index={} soundsPlayed={}",
+                current.index,
+                soundsPlayed
+        );
 
         if (current.shouldPlay(config)) {
             playCurrentSound(config);
             soundsPlayed++;
+
+            LOGGER.info(
+                    "[DialogueDebug] sound played count={} voiceIndex={}",
+                    soundsPlayed,
+                    current.voiceIndex
+            );
+        } else {
+            LOGGER.info(
+                    "[DialogueDebug] sound skipped by chance"
+            );
         }
 
-        interval = chooseInterval(config, current.random);
+        interval = chooseInterval(
+                config,
+                current.random
+        );
     }
 
-    private static void playCurrentSound(Config.Data config) {
-        int soundIndex = current.chooseSound(config);
+    private static void playCurrentSound(
+            Config.Data config
+    ) {
+        /*
+         * IMPORTANT:
+         * current.voiceIndex never changes during this message.
+         */
         float pitch = current.choosePitch(config);
 
-        Minecraft.getInstance()
-                .getSoundManager()
-                .play(
-                        SimpleSoundInstance.forUI(
-                                ModSounds.getDialogueSound(soundIndex),
-                                config.dialogueVolume,
-                                pitch
-                        )
+        LOGGER.info(
+                "[DialogueDebug] playCurrentSound voiceIndex={} pitch={} volume={}",
+                current.voiceIndex,
+                pitch,
+                config.dialogueVolume
+        );
+
+        stopCurrentSound();
+
+        currentSound = SimpleSoundInstance.forUI(
+                ModSounds.getDialogueSound(
+                        current.voiceIndex
+                ),
+                config.dialogueVolume,
+                pitch
+        );
+
+        Minecraft.getInstance().getSoundManager().play(currentSound);
+    }
+
+    private static void stopCurrentSound() {
+        if (currentSound == null) {
+            return;
+        }
+
+        Minecraft.getInstance().getSoundManager().stop(currentSound);
+
+        currentSound = null;
+    }
+
+    private static int getPlayerVoice(
+            UUID uuid,
+            Config.Data config
+    ) {
+        return PLAYER_VOICES.computeIfAbsent(
+                uuid,
+                ignored -> choosePlayerVoice(
+                        uuid,
+                        config.dialogueSoundPool
+                )
+        );
+    }
+
+    private static int choosePlayerVoice(
+            UUID uuid,
+            List<String> configuredPool
+    ) {
+        List<Integer> pool =
+                createSoundPool(configuredPool);
+
+        long seed =
+                uuid.getMostSignificantBits()
+                        ^ Long.rotateLeft(
+                        uuid.getLeastSignificantBits(),
+                        32
                 );
+
+        Random random =
+                new Random(mix64(seed));
+
+        return pool.get(
+                random.nextInt(pool.size())
+        );
+    }
+
+    private static long mix64(long value) {
+        value = (value ^ (value >>> 30)) * 0xBF58476D1CE4E5B9L;
+        value = (value ^ (value >>> 27)) * 0x94D049BB133111EBL;
+        return value ^ (value >>> 31);
     }
 
     private static int chooseInterval(
             Config.Data config,
             Random random
     ) {
-        if (config.dialogueIntervalMin == config.dialogueIntervalMax) {
+        if (config.dialogueIntervalMin
+                == config.dialogueIntervalMax) {
             return config.dialogueIntervalMin;
         }
 
@@ -136,34 +319,82 @@ public final class DialogueSoundManager {
         );
     }
 
+    private static List<Integer> createSoundPool(
+            List<String> configured
+    ) {
+        List<Integer> result =
+                new ArrayList<>();
+
+        if (configured != null) {
+            for (String value : configured) {
+                if (value == null) {
+                    continue;
+                }
+
+                try {
+                    int index =
+                            Integer.parseInt(value.trim());
+
+                    if (index >= 0
+                            && index < ModSounds.DIALOGUE_SOUND_COUNT) {
+                        /*
+                         * Duplicate entries intentionally act
+                         * as weight.
+                         */
+                        result.add(index);
+                    }
+                } catch (NumberFormatException ignored) {
+                    // Ignore invalid indices.
+                }
+            }
+        }
+
+        if (result.isEmpty()) {
+            for (
+                    int index = 0;
+                    index < ModSounds.DIALOGUE_SOUND_COUNT;
+                    index++
+            ) {
+                result.add(index);
+            }
+        }
+
+        return List.copyOf(result);
+    }
+
     private static final class DialogueMessage {
-        private final UUID senderUuid;
         private final String message;
-        private final long messageCounter;
+
+        /*
+         * Fixed for the entire message.
+         */
+        private final int voiceIndex;
+
         private final Random random;
-        private final List<Integer> soundPool;
 
         private int index;
         private boolean insideWord;
         private boolean emittedMessage;
-        private int lastSound = -1;
 
         private DialogueMessage(
-                UUID senderUuid,
                 String message,
-                long messageCounter,
-                Config.Data config
+                int voiceIndex
         ) {
-            this.senderUuid = senderUuid;
             this.message = message;
-            this.messageCounter = messageCounter;
-            this.random = new Random(
-                    createSeed(config.dialogueSeedMode)
-            );
-            this.soundPool = createSoundPool(config.dialogueSoundPool);
+            this.voiceIndex = voiceIndex;
+
+            /*
+             *
+             * The player's UUID is intentionally NOT used here.
+             * UUID -> voiceIndex is handled separately by
+             * getPlayerVoice().
+             */
+            this.random = new Random();
         }
 
-        private boolean advance(Config.Data config) {
+        private boolean advance(
+                Config.Data config
+        ) {
             return switch (config.dialoguePlaybackMode) {
                 case MESSAGE -> advanceMessage();
                 case WORD -> advanceWord(config);
@@ -180,15 +411,21 @@ public final class DialogueSoundManager {
             return true;
         }
 
-        private boolean advanceWord(Config.Data config) {
+        private boolean advanceWord(
+                Config.Data config
+        ) {
             while (index < message.length()) {
-                int codePoint = message.codePointAt(index);
+                int codePoint =
+                        message.codePointAt(index);
+
                 index += Character.charCount(codePoint);
 
                 boolean wordCharacter =
                         Character.isLetterOrDigit(codePoint)
-                                && (!Character.isDigit(codePoint)
-                                || !config.dialogueSkipNumbers);
+                                && (
+                                !Character.isDigit(codePoint)
+                                        || !config.dialogueSkipNumbers
+                        );
 
                 if (wordCharacter) {
                     if (!insideWord) {
@@ -203,12 +440,20 @@ public final class DialogueSoundManager {
             return false;
         }
 
-        private boolean advanceCharacter(Config.Data config) {
+        private boolean advanceCharacter(
+                Config.Data config
+        ) {
             while (index < message.length()) {
-                int codePoint = message.codePointAt(index);
+                int codePoint =
+                        message.codePointAt(index);
+
                 index += Character.charCount(codePoint);
 
                 if (isEligible(codePoint, config)) {
+                    /*
+                     * Exactly ONE successful advance means
+                     * exactly ONE letter/unit can produce ONE sound.
+                     */
                     return true;
                 }
             }
@@ -235,119 +480,50 @@ public final class DialogueSoundManager {
             return Character.isLetter(codePoint);
         }
 
-        private boolean shouldPlay(Config.Data config) {
-            return random.nextFloat() < config.dialogueSoundChance;
-        }
-
-        private int chooseSound(Config.Data config) {
-            if (soundPool.size() == 1
-                    || !config.dialogueAvoidRepeats) {
-                int selected = soundPool.get(
-                        random.nextInt(soundPool.size())
-                );
-                lastSound = selected;
-                return selected;
-            }
-
-            int selected = lastSound;
-            int attempts = 0;
-
-            while (selected == lastSound && attempts++ < 16) {
-                selected = soundPool.get(
-                        random.nextInt(soundPool.size())
-                );
-            }
-
-            lastSound = selected;
-            return selected;
+        private boolean shouldPlay(
+                Config.Data config
+        ) {
+            return random.nextFloat()
+                    < config.dialogueSoundChance;
         }
 
         private float choosePitch(Config.Data config) {
             if (!config.dialogueRandomizePitch
-                    || config.dialoguePitchMin == config.dialoguePitchMax) {
-                return config.dialoguePitchMin;
+                    || config.dialoguePitchVariation <= 0.0f) {
+                return config.dialoguePitch;
             }
 
-            return config.dialoguePitchMin
-                    + random.nextFloat()
-                    * (config.dialoguePitchMax - config.dialoguePitchMin);
+            float variation =
+                    (random.nextFloat() * 2.0f - 1.0f)
+                            * config.dialoguePitchVariation;
+
+            return Math.clamp(
+                    config.dialoguePitch + variation,
+                    0.5f,
+                    2.0f
+            );
         }
 
-        private long createSeed(Config.DialogueSeedMode mode) {
-            long seed =
-                    senderUuid.getMostSignificantBits()
-                            ^ Long.rotateLeft(
-                            senderUuid.getLeastSignificantBits(),
-                            32
-                    );
-
-            return switch (mode) {
-                case UUID -> mix64(seed);
-                case UUID_MESSAGE -> mix64(seed ^ message.hashCode());
-                case UUID_MESSAGE_COUNTER -> mix64(
-                        seed
-                                ^ message.hashCode()
-                                ^ messageCounter * UUID_MIX
-                );
-            };
-        }
-
-        private static List<Integer> createSoundPool(
-                List<String> configured
+        private static boolean isPunctuation(
+                int codePoint
         ) {
-            List<Integer> result = new ArrayList<>();
+            int type =
+                    Character.getType(codePoint);
 
-            if (configured != null) {
-                for (String value : configured) {
-                    if (value == null) {
-                        continue;
-                    }
-
-                    try {
-                        int index = Integer.parseInt(value.trim());
-
-                        if (index >= 0
-                                && index < ModSounds.DIALOGUE_SOUND_COUNT) {
-                            result.add(index);
-                        }
-                    } catch (NumberFormatException ignored) {
-                        // Ignore invalid sound indices.
-                    }
-                }
-            }
-
-            if (result.isEmpty()) {
-                for (
-                        int index = 0;
-                        index < ModSounds.DIALOGUE_SOUND_COUNT;
-                        index++
-                ) {
-                    result.add(index);
-                }
-            }
-
-            return List.copyOf(result);
-        }
-
-        private static boolean isPunctuation(int codePoint) {
-            int type = Character.getType(codePoint);
-
-            return type == Character.CONNECTOR_PUNCTUATION
-                    || type == Character.DASH_PUNCTUATION
-                    || type == Character.START_PUNCTUATION
-                    || type == Character.END_PUNCTUATION
-                    || type == Character.INITIAL_QUOTE_PUNCTUATION
-                    || type == Character.FINAL_QUOTE_PUNCTUATION
-                    || type == Character.OTHER_PUNCTUATION;
-        }
-
-        private static long mix64(long value) {
-            value ^= value >>> 30;
-            value *= 0xBF58476D1CE4E5B9L;
-            value ^= value >>> 27;
-            value *= 0x94D049BB133111EBL;
-            value ^= value >>> 31;
-            return value;
+            return type
+                    == Character.CONNECTOR_PUNCTUATION
+                    || type
+                    == Character.DASH_PUNCTUATION
+                    || type
+                    == Character.START_PUNCTUATION
+                    || type
+                    == Character.END_PUNCTUATION
+                    || type
+                    == Character.INITIAL_QUOTE_PUNCTUATION
+                    || type
+                    == Character.FINAL_QUOTE_PUNCTUATION
+                    || type
+                    == Character.OTHER_PUNCTUATION;
         }
     }
 }

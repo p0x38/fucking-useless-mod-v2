@@ -421,24 +421,24 @@ public final class Config {
         public float dialogueVolume = 0.5f;
 
         @ConfigOption(
-                name = "Minimum Pitch",
+                name = "Pitch",
                 category = "Dialogue",
                 hasMin = true,
                 min = 0.5,
                 hasMax = true,
                 max = 2.0
         )
-        public float dialoguePitchMin = 0.9f;
+        public float dialoguePitch = 1.0f;
 
         @ConfigOption(
-                name = "Maximum Pitch",
+                name = "Pitch Variation",
                 category = "Dialogue",
                 hasMin = true,
-                min = 0.5,
+                min = 0.0,
                 hasMax = true,
-                max = 2.0
+                max = 0.5
         )
-        public float dialoguePitchMax = 1.1f;
+        public float dialoguePitchVariation = 0.2f;
 
         @ConfigOption(name = "Randomize Pitch", category = "Dialogue")
         public boolean dialogueRandomizePitch = true;
@@ -532,13 +532,10 @@ public final class Config {
             }
             dialogueVolume =
                     Math.clamp(dialogueVolume, 0.0f, 1.0f);
-            dialoguePitchMin =
-                    Math.clamp(dialoguePitchMin, 0.5f, 2.0f);
-            dialoguePitchMax =
-                    Math.clamp(dialoguePitchMax, 0.5f, 2.0f);
-            if (dialoguePitchMax < dialoguePitchMin) {
-                dialoguePitchMax = dialoguePitchMin;
-            }
+            dialoguePitch =
+                    Math.clamp(dialoguePitch, 0.5f, 2.0f);
+            dialoguePitchVariation =
+                    Math.clamp(dialoguePitchVariation, 0.0f, 0.5f);
             dialogueMaxSoundsPerMessage =
                     Math.clamp(dialogueMaxSoundsPerMessage, 0, 256);
         }
