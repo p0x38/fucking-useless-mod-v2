@@ -951,7 +951,7 @@ public final class CensorBoxRenderer {
          * This handles partial obstruction much better than a
          * single center-point raycast.
          */
-        for (Vec3 target : new Vec3[] {
+        List<Vec3> targets = List.of(
                 new Vec3(centerX, centerY, centerZ),
 
                 new Vec3(centerX, box.maxY, centerZ),
@@ -967,13 +967,10 @@ public final class CensorBoxRenderer {
                 new Vec3(box.maxX, box.maxY, box.maxZ),
                 new Vec3(box.minX, box.maxY, box.maxZ),
                 new Vec3(box.maxX, box.minY, box.minZ)
-        }) {
-            if (canSee(
-                    level,
-                    cameraPosition,
-                    target,
-                    entity
-            )) {
+        );
+
+        for (Vec3 target : targets) {
+            if (canSee(level, cameraPosition, target, entity)) {
                 return true;
             }
         }
