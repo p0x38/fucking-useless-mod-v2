@@ -517,6 +517,21 @@ public final class Config {
                 CensorBoxEffect.JITTER
         ));
 
+        @ConfigOption(name = "Enable Motion Prediction", category = "Censor Box")
+        public boolean censorBoxPredictionEnabled = true;
+
+        @ConfigOption(name = "Prediction Strength", category = "Censor Box", hasMin = true, min = 0.0, hasMax = true, max = 8.0)
+        public float censorBoxPredictionStrength = 1.0f;
+
+        @ConfigOption(name = "Predict Acceleration", category = "Censor Box")
+        public boolean censorBoxPredictionAcceleration = true;
+
+        @ConfigOption(name = "Dynamic Update Interval", category = "Censor Box")
+        public boolean censorBoxDynamicUpdateInterval = true;
+
+        @ConfigOption(name = "Fast Movement Threshold", category = "Censor Box", hasMin = true, min = 1.0, hasMax = true, max = 64.0)
+        public float censorBoxDynamicUpdateSpeed = 8.0f;
+
         @ConfigOption(name = "Pulse Amount", category = "Censor Box", hasMin = true, min = 0.0, hasMax = true, max = 1.0)
         public float censorBoxPulseAmount = 0.15f;
 
@@ -608,6 +623,10 @@ public final class Config {
             censorBoxRainbowSpeed = Math.clamp(censorBoxRainbowSpeed, 0.0f, 10.0f);
             censorBoxFlashPeriod = Math.clamp(censorBoxFlashPeriod, 1, 40);
             censorBoxDoubleOffset = Math.clamp(censorBoxDoubleOffset, 0, 32);
+            censorBoxPredictionStrength =
+                    Math.clamp(censorBoxPredictionStrength, 0.0f, 8.0f);
+            censorBoxDynamicUpdateSpeed =
+                    Math.clamp(censorBoxDynamicUpdateSpeed, 1.0f, 64.0f);
             if (censorBoxColor == null || censorBoxColor.isBlank()) {
                 censorBoxColor = "#FF000000";
             }
