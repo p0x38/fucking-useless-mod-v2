@@ -41,5 +41,8 @@
     "cloth-config": "*",
     "modmenu": "*",
     "placeholder-api": "*"
-  }
+  },
+  "mixins": [
+    "fuckinguselessmod.mixins.json"
+  ]
 }

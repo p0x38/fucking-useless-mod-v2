@@ -77,10 +77,24 @@ public final class CensorBoxRenderer {
 
     public static void add(UUID uuid) {
         CENSORED_ENTITIES.add(uuid);
+
+        DebugLogger.debug(
+                "[CensorBox] added uuid={}",
+                uuid
+        );
     }
 
     public static boolean remove(UUID uuid) {
-        return CENSORED_ENTITIES.remove(uuid);
+        boolean removed = CENSORED_ENTITIES.remove(uuid);
+
+        if (removed) {
+            DebugLogger.debug(
+                    "[CensorBox] removed uuid={}",
+                    uuid
+            );
+        }
+
+        return removed;
     }
 
     public static Set<UUID> getCensoredEntities() {
@@ -104,105 +118,15 @@ public final class CensorBoxRenderer {
             "unchecked"
     })
     private static final class CensorBoxLayer
-            extends RenderLayer<EntityRenderState, EntityModel<EntityRenderState>> {
+            extends RenderLayer<
+                    EntityRenderState,
+                    EntityModel<EntityRenderState>
+                    > {
 
         private CensorBoxLayer(
                 RenderLayerParent parent
         ) {
             super(parent);
-        }
-
-        /*private static void renderPlane(
-                PoseStack.Pose pose,
-                VertexConsumer consumer
-        ) {
-            float halfWidth = 0.45F;
-            float height = 1.90F;
-
-            consumer.addVertex(
-                    pose,
-                    -halfWidth,
-                    -height / 2.0F,
-                    0.0F
-            ).setColor(
-                    0,
-                    0,
-                    0,
-                    255
-            );
-
-            consumer.addVertex(
-                    pose,
-                    -halfWidth,
-                    height / 2.0F,
-                    0.0F
-            ).setColor(
-                    0,
-                    0,
-                    0,
-                    255
-            );
-
-            consumer.addVertex(
-                    pose,
-                    halfWidth,
-                    height / 2.0F,
-                    0.0F
-            ).setColor(
-                    0,
-                    0,
-                    0,
-                    255
-            );
-
-            consumer.addVertex(
-                    pose,
-                    halfWidth,
-                    -height / 2.0F,
-                    0.0F
-            ).setColor(
-                    0,
-                    0,
-                    0,
-                    255
-            );
-        }*/
-
-        private static void renderPlane(
-                PoseStack.Pose pose,
-                VertexConsumer consumer
-        ) {
-            float halfWidth = 0.75F;
-            float minY = 0.0F;
-            float maxY = 2.5F;
-
-            consumer.addVertex(
-                    pose,
-                    -halfWidth,
-                    minY,
-                    -0.45F
-            ).setColor(0, 0, 0, 255);
-
-            consumer.addVertex(
-                    pose,
-                    -halfWidth,
-                    maxY,
-                    -0.45F
-            ).setColor(0, 0, 0, 255);
-
-            consumer.addVertex(
-                    pose,
-                    halfWidth,
-                    maxY,
-                    -0.45F
-            ).setColor(0, 0, 0, 255);
-
-            consumer.addVertex(
-                    pose,
-                    halfWidth,
-                    minY,
-                    -0.45F
-            ).setColor(0, 0, 0, 255);
         }
 
         @Override
@@ -219,7 +143,11 @@ public final class CensorBoxRenderer {
                             ENTITY_UUID
                     );
 
-            if (uuid == null || !CENSORED_ENTITIES.contains(uuid)) {
+            if (uuid == null) {
+                return;
+            }
+
+            if (!CENSORED_ENTITIES.contains(uuid)) {
                 return;
             }
 
@@ -229,18 +157,71 @@ public final class CensorBoxRenderer {
                     state.entityType
             );
 
-            DebugLogger.debug(
-                    "[CensorBox] submitting plane uuid={}",
-                    uuid
-            );
-
             collector
                     .order(1)
                     .submitCustomGeometry(
                             poseStack,
-                            RenderTypes.debugFilledBox(),
+                            RenderTypes.debugQuads(),
                             CensorBoxLayer::renderPlane
                     );
+        }
+
+        private static void renderPlane(
+                PoseStack.Pose pose,
+                VertexConsumer consumer
+        ) {
+            float halfWidth = 0.75F;
+            float minY = 0.0F;
+            float maxY = 2.5F;
+            float z = -0.45F;
+
+            consumer.addVertex(
+                    pose,
+                    -halfWidth,
+                    minY,
+                    z
+            ).setColor(
+                    0,
+                    0,
+                    0,
+                    255
+            );
+
+            consumer.addVertex(
+                    pose,
+                    -halfWidth,
+                    maxY,
+                    z
+            ).setColor(
+                    0,
+                    0,
+                    0,
+                    255
+            );
+
+            consumer.addVertex(
+                    pose,
+                    halfWidth,
+                    maxY,
+                    z
+            ).setColor(
+                    0,
+                    0,
+                    0,
+                    255
+            );
+
+            consumer.addVertex(
+                    pose,
+                    halfWidth,
+                    minY,
+                    z
+            ).setColor(
+                    0,
+                    0,
+                    0,
+                    255
+            );
         }
     }
 }
