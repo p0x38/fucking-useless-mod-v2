@@ -77,6 +77,15 @@ public final class Config {
         EXCLAMATION
     }
 
+    public enum CensorBoxEffect {
+        STEPPY,
+        JITTER,
+        PULSE,
+        RAINBOW,
+        FLASH,
+        DOUBLE
+    }
+
     private Config() {
     }
 
@@ -475,6 +484,51 @@ public final class Config {
         @ConfigOption(name = "Sound Pool", category = "Dialogue")
         public List<String> dialogueSoundPool = createDialogueSoundPool();
 
+        @ConfigOption(name = "Enable Censor Box", category = "Censor Box")
+        public boolean censorBoxEnabled = true;
+
+        @ConfigOption(name = "Default Censor Selectors", category = "Censor Box")
+        public List<String> censorBoxDefaultSelectors = new ArrayList<>();
+
+        @ConfigOption(name = "Color", category = "Censor Box")
+        public String censorBoxColor = "#FF000000";
+
+        @ConfigOption(name = "Padding", category = "Censor Box", hasMin = true, min = 0, hasMax = true, max = 32)
+        public int censorBoxPadding = 4;
+
+        @ConfigOption(name = "Position Step", category = "Censor Box", hasMin = true, min = 1, hasMax = true, max = 64)
+        public int censorBoxPositionStep = 6;
+
+        @ConfigOption(name = "Size Step", category = "Censor Box", hasMin = true, min = 1, hasMax = true, max = 64)
+        public int censorBoxSizeStep = 4;
+
+        @ConfigOption(name = "Maximum Jitter", category = "Censor Box", hasMin = true, min = 0, hasMax = true, max = 32)
+        public int censorBoxMaxJitter = 1;
+
+        @ConfigOption(name = "Minimum Update Ticks", category = "Censor Box", hasMin = true, min = 1, hasMax = true, max = 40)
+        public int censorBoxMinUpdateTicks = 2;
+
+        @ConfigOption(name = "Maximum Update Ticks", category = "Censor Box", hasMin = true, min = 1, hasMax = true, max = 40)
+        public int censorBoxMaxUpdateTicks = 6;
+
+        @ConfigOption(name = "Effects", category = "Censor Box")
+        public List<CensorBoxEffect> censorBoxEffects = new ArrayList<>(List.of(
+                CensorBoxEffect.STEPPY,
+                CensorBoxEffect.JITTER
+        ));
+
+        @ConfigOption(name = "Pulse Amount", category = "Censor Box", hasMin = true, min = 0.0, hasMax = true, max = 1.0)
+        public float censorBoxPulseAmount = 0.15f;
+
+        @ConfigOption(name = "Rainbow Speed", category = "Censor Box", hasMin = true, min = 0.0, hasMax = true, max = 10.0)
+        public float censorBoxRainbowSpeed = 1.0f;
+
+        @ConfigOption(name = "Flash Period", category = "Censor Box", hasMin = true, min = 1, hasMax = true, max = 40)
+        public int censorBoxFlashPeriod = 2;
+
+        @ConfigOption(name = "Double Offset", category = "Censor Box", hasMin = true, min = 0, hasMax = true, max = 32)
+        public int censorBoxDoubleOffset = 2;
+
         @ConfigOption(name = "Presets", category = "Effects")
         public List<String> presets = new ArrayList<>();
 
@@ -541,6 +595,22 @@ public final class Config {
                     Math.clamp(dialoguePitchVariation, 0.0f, 0.5f);
             dialogueMaxSoundsPerMessage =
                     Math.clamp(dialogueMaxSoundsPerMessage, 0, 256);
+            censorBoxPadding = Math.clamp(censorBoxPadding, 0, 32);
+            censorBoxPositionStep = Math.clamp(censorBoxPositionStep, 1, 64);
+            censorBoxSizeStep = Math.clamp(censorBoxSizeStep, 1, 64);
+            censorBoxMaxJitter = Math.clamp(censorBoxMaxJitter, 0, 32);
+            censorBoxMinUpdateTicks = Math.clamp(censorBoxMinUpdateTicks, 1, 40);
+            censorBoxMaxUpdateTicks = Math.clamp(censorBoxMaxUpdateTicks, 1, 40);
+            if (censorBoxMaxUpdateTicks < censorBoxMinUpdateTicks) {
+                censorBoxMaxUpdateTicks = censorBoxMinUpdateTicks;
+            }
+            censorBoxPulseAmount = Math.clamp(censorBoxPulseAmount, 0.0f, 1.0f);
+            censorBoxRainbowSpeed = Math.clamp(censorBoxRainbowSpeed, 0.0f, 10.0f);
+            censorBoxFlashPeriod = Math.clamp(censorBoxFlashPeriod, 1, 40);
+            censorBoxDoubleOffset = Math.clamp(censorBoxDoubleOffset, 0, 32);
+            if (censorBoxColor == null || censorBoxColor.isBlank()) {
+                censorBoxColor = "#FF000000";
+            }
         }
     }
 }
