@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -376,15 +377,14 @@ public final class CensorBoxCommand {
             ParsedSelector parsed =
                     ParsedSelector.parse(input);
 
-            List<Entity> entities =
+            List<Entity> entities = new ArrayList<>(
                     switch (parsed.selectorType) {
                         case SELF -> List.of(client.player);
-                        case ALL_PLAYERS -> new ArrayList<>(client.level.players());
-                        case NEAREST_PLAYER, RANDOM_PLAYER ->
-                                new ArrayList<>(client.level.players());
-                        case ALL_ENTITIES, NEAREST_ENTITY ->
-                                collectAllEntities(client);
-                    };
+                        case ALL_PLAYERS -> client.level.players();
+                        case NEAREST_PLAYER, RANDOM_PLAYER -> client.level.players();
+                        case ALL_ENTITIES, NEAREST_ENTITY -> collectAllEntities(client);
+                    }
+            );
 
             Vec3 origin =
                     new Vec3(
@@ -515,31 +515,11 @@ public final class CensorBoxCommand {
         }
 
         private static ParsedSelector parse(String input) {
-            if (input.length() < 2 || input.charAt(0) != '@') {
-                throw new IllegalArgumentException("selector must start with '@'");
-            }
-
-            char selector = input.charAt(1);
-
             SelectorType selectorType =
-                    switch (selector) {
-                        case 's' -> SelectorType.SELF;
-                        case 'a' -> SelectorType.ALL_PLAYERS;
-                        case 'p' -> SelectorType.NEAREST_PLAYER;
-                        case 'r' -> SelectorType.RANDOM_PLAYER;
-                        case 'e' -> SelectorType.ALL_ENTITIES;
-                        case 'n' -> SelectorType.NEAREST_ENTITY;
-                        default -> throw new IllegalArgumentException(
-                                "unknown selector '@" + selector + "'"
-                        );
-                    };
+                    parseSelectorType(input);
 
             SelectorSort defaultSort =
-                    switch (selectorType) {
-                        case NEAREST_PLAYER, NEAREST_ENTITY -> SelectorSort.NEAREST;
-                        case RANDOM_PLAYER -> SelectorSort.RANDOM;
-                        default -> SelectorSort.ARBITRARY;
-                    };
+                    defaultSortFor(selectorType);
 
             ParsedSelector result =
                     new ParsedSelector(selectorType, defaultSort);
@@ -548,18 +528,65 @@ public final class CensorBoxCommand {
                 return result;
             }
 
-            if (input.charAt(2) != '[' || input.charAt(input.length() - 1) != ']') {
-                throw new IllegalArgumentException(
-                        "expected selector options like @e[type=minecraft:zombie]"
-                );
-            }
-
-            String options = input.substring(3, input.length() - 1);
+            String options =
+                    extractOptions(input);
 
             if (options.isBlank()) {
                 return result;
             }
 
+            parseOptions(options, result);
+            return result;
+        }
+
+        private static SelectorType parseSelectorType(String input) {
+            if (input.length() < 2 || input.charAt(0) != '@') {
+                throw new IllegalArgumentException(
+                        "selector must start with '@'"
+                );
+            }
+
+            return switch (input.charAt(1)) {
+                case 's' -> SelectorType.SELF;
+                case 'a' -> SelectorType.ALL_PLAYERS;
+                case 'p' -> SelectorType.NEAREST_PLAYER;
+                case 'r' -> SelectorType.RANDOM_PLAYER;
+                case 'e' -> SelectorType.ALL_ENTITIES;
+                case 'n' -> SelectorType.NEAREST_ENTITY;
+                default -> throw new IllegalArgumentException(
+                        "unknown selector '@" + input.charAt(1) + "'"
+                );
+            };
+        }
+
+        private static SelectorSort defaultSortFor(
+                SelectorType selectorType
+        ) {
+            return switch (selectorType) {
+                case NEAREST_PLAYER, NEAREST_ENTITY ->
+                        SelectorSort.NEAREST;
+                case RANDOM_PLAYER ->
+                        SelectorSort.RANDOM;
+                default ->
+                        SelectorSort.ARBITRARY;
+            };
+        }
+
+        private static String extractOptions(String input) {
+            if (input.charAt(2) != '['
+                    || input.charAt(input.length() - 1) != ']') {
+                throw new IllegalArgumentException(
+                        "expected selector options like @e[type=minecraft:zombie]"
+                );
+            }
+
+            return input.substring(3, input.length() - 1);
+        }
+
+        private static void parseOptions(
+                String options,
+                ParsedSelector result
+        ) {
             for (String option : splitOptions(options)) {
                 int equals = option.indexOf('=');
 
@@ -572,59 +599,70 @@ public final class CensorBoxCommand {
                 String key = option.substring(0, equals).trim();
                 String value = option.substring(equals + 1).trim();
 
-                switch (key) {
-                    case "type" -> {
-                        result.typeInverted = value.startsWith("!");
-                        result.type = stripNegation(value);
+                parseOption(result, key, value);
+            }
+        }
 
-                        if (EntityType.byString(result.type).isEmpty()) {
-                            throw new IllegalArgumentException(
-                                    "unknown entity type '" + result.type + "'"
-                            );
-                        }
-                    }
-                    case "name" -> {
-                        result.nameInverted = value.startsWith("!");
-                        result.name = stripNegation(value);
-                    }
-                    case "tag" -> {
-                        result.tagInverted = value.startsWith("!");
-                        result.tag = stripNegation(value);
-                    }
-                    case "distance" -> {
-                        DoubleRange range = DoubleRange.parse(value, "distance");
-                        result.minDistance = range.min;
-                        result.maxDistance = range.max;
-                    }
-                    case "x" -> result.x = parseDouble(value, "x");
-                    case "y" -> result.y = parseDouble(value, "y");
-                    case "z" -> result.z = parseDouble(value, "z");
-                    case "dx" -> result.dx = parseDouble(value, "dx");
-                    case "dy" -> result.dy = parseDouble(value, "dy");
-                    case "dz" -> result.dz = parseDouble(value, "dz");
-                    case "limit" -> {
-                        try {
-                            result.limit = Integer.parseInt(value);
-                        } catch (NumberFormatException exception) {
-                            throw new IllegalArgumentException(
-                                    "invalid limit '" + value + "'"
-                            );
-                        }
+        private static void parseOption(
+                ParsedSelector result,
+                String key,
+                String value
+        ) {
+            switch (key) {
+                case "type" -> {
+                    result.typeInverted = value.startsWith("!");
+                    result.type = stripNegation(value);
 
-                        if (result.limit < 1) {
-                            throw new IllegalArgumentException(
-                                    "limit must be at least 1"
-                            );
-                        }
+                    if (EntityType.byString(result.type).isEmpty()) {
+                        throw new IllegalArgumentException(
+                                "unknown entity type '" + result.type + "'"
+                        );
                     }
-                    case "sort" -> result.sort = SelectorSort.parse(value);
-                    default -> throw new IllegalArgumentException(
-                            "unsupported selector option '" + key + "'"
+                }
+                case "name" -> {
+                    result.nameInverted = value.startsWith("!");
+                    result.name = stripNegation(value);
+                }
+                case "tag" -> {
+                    result.tagInverted = value.startsWith("!");
+                    result.tag = stripNegation(value);
+                }
+                case "distance" -> {
+                    DoubleRange range =
+                            DoubleRange.parse(value, "distance");
+                    result.minDistance = range.min;
+                    result.maxDistance = range.max;
+                }
+                case "x" -> result.x = parseDouble(value, "x");
+                case "y" -> result.y = parseDouble(value, "y");
+                case "z" -> result.z = parseDouble(value, "z");
+                case "dx" -> result.dx = parseDouble(value, "dx");
+                case "dy" -> result.dy = parseDouble(value, "dy");
+                case "dz" -> result.dz = parseDouble(value, "dz");
+                case "limit" -> result.limit = parseLimit(value);
+                case "sort" -> result.sort = SelectorSort.parse(value);
+                default -> throw new IllegalArgumentException(
+                        "unsupported selector option '" + key + "'"
+                );
+            }
+        }
+
+        private static int parseLimit(String value) {
+            try {
+                int limit = Integer.parseInt(value);
+
+                if (limit < 1) {
+                    throw new IllegalArgumentException(
+                            "limit must be at least 1"
                     );
                 }
-            }
 
-            return result;
+                return limit;
+            } catch (NumberFormatException exception) {
+                throw new IllegalArgumentException(
+                        "invalid limit '" + value + "'"
+                );
+            }
         }
 
         private boolean matches(Entity entity, Vec3 origin) {
