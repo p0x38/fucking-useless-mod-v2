@@ -60,8 +60,8 @@ public final class DialogueSoundManager {
             Instant receptionTimestamp,
             PlayerChatMessage signedMessage
     ) {
-        LOGGER.info(
-                "[DialogueDebug] queue() sender={} uuid={} message={} timestamp={} queueSize={}",
+        DebugLogger.debug(
+                "[Dialogue] queue() sender={} uuid={} message={} timestamp={} queueSize={}",
                 sender != null ? sender.name() : "<null>",
                 sender != null ? sender.id() : "<null>",
                 message,
@@ -72,8 +72,8 @@ public final class DialogueSoundManager {
         if (sender == null
                 || message == null
                 || message.isBlank()) {
-            LOGGER.info(
-                    "[DialogueDebug] queue() ignored: invalid input"
+            DebugLogger.debug(
+                    "[Dialogue] queue() ignored: invalid input"
             );
             return;
         }
@@ -81,8 +81,8 @@ public final class DialogueSoundManager {
         Config.Data config = Config.get();
 
         if (!config.dialogueSoundsEnabled) {
-            LOGGER.info(
-                    "[DialogueDebug] queue() ignored: dialogue sounds disabled"
+            DebugLogger.debug(
+                    "[Dialogue] queue() ignored: dialogue sounds disabled"
             );
             return;
         }
@@ -119,8 +119,8 @@ public final class DialogueSoundManager {
                 getPlayerVoice(sender.id(), config)
         );
 
-        LOGGER.info(
-                "[DialogueDebug] created DialogueMessage uuid={} voiceIndex={} textLength={}",
+        DebugLogger.debug(
+                "[Dialogue] created DialogueMessage uuid={} voiceIndex={} textLength={}",
                 sender.id(),
                 next.voiceIndex,
                 message.codePointCount(0, message.length())
@@ -129,8 +129,8 @@ public final class DialogueSoundManager {
         if (config.dialogueQueueMessages) {
             QUEUE.add(next);
 
-            LOGGER.info(
-                    "[DialogueDebug] message queued queueSize={}",
+            DebugLogger.debug(
+                    "[Dialogue] message queued queueSize={}",
                     QUEUE.size()
             );
             return;
@@ -142,8 +142,8 @@ public final class DialogueSoundManager {
         interval = 0;
         soundsPlayed = 0;
 
-        LOGGER.info(
-                "[DialogueDebug] message became current voiceIndex={}",
+        DebugLogger.debug(
+                "[Dialogue] message became current voiceIndex={}",
                 current.voiceIndex
         );
     }
@@ -165,8 +165,8 @@ public final class DialogueSoundManager {
                 return;
             }
 
-            LOGGER.info(
-                    "[DialogueDebug] dequeued message voiceIndex={} queueSize={}",
+            DebugLogger.debug(
+                    "[Dialogue] dequeued message voiceIndex={} queueSize={}",
                     current.voiceIndex,
                     QUEUE.size()
             );
@@ -187,15 +187,15 @@ public final class DialogueSoundManager {
         }
 
         if (!current.advance(config)) {
-            LOGGER.info(
-                    "[DialogueDebug] message finished soundsPlayed={}",
+            DebugLogger.debug(
+                    "[Dialogue] message finished soundsPlayed={}",
                     soundsPlayed
             );
             current = null;
             return;
         }
-        LOGGER.info(
-                "[DialogueDebug] advance() succeeded index={} soundsPlayed={}",
+        DebugLogger.debug(
+                "[Dialogue] advance() succeeded index={} soundsPlayed={}",
                 current.index,
                 soundsPlayed
         );
@@ -204,14 +204,14 @@ public final class DialogueSoundManager {
             playCurrentSound(config);
             soundsPlayed++;
 
-            LOGGER.info(
-                    "[DialogueDebug] sound played count={} voiceIndex={}",
+            DebugLogger.debug(
+                    "[Dialogue] sound played count={} voiceIndex={}",
                     soundsPlayed,
                     current.voiceIndex
             );
         } else {
-            LOGGER.info(
-                    "[DialogueDebug] sound skipped by chance"
+            DebugLogger.debug(
+                    "[Dialogue] sound skipped by chance"
             );
         }
 
@@ -230,8 +230,8 @@ public final class DialogueSoundManager {
          */
         float pitch = current.choosePitch(config);
 
-        LOGGER.info(
-                "[DialogueDebug] playCurrentSound voiceIndex={} pitch={} volume={}",
+        DebugLogger.debug(
+                "[Dialogue] playCurrentSound voiceIndex={} pitch={} volume={}",
                 current.voiceIndex,
                 pitch,
                 config.dialogueVolume

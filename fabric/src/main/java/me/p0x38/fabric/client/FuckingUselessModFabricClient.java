@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 
 public final class FuckingUselessModFabricClient implements ClientModInitializer {
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
     public void onInitializeClient() {
@@ -25,8 +24,8 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
 
         ClientReceiveMessageEvents.CHAT.register(
                 (message, signedMessage, sender, params, receptionTimestamp) -> {
-                    LOGGER.info(
-                            "[DialogueDebug] CHAT callback sender={} uuid={} text={} signed={} timestamp={}",
+                    DebugLogger.debug(
+                            "[Chat] CHAT callback sender={} uuid={} text={} signed={} timestamp={}",
                             sender != null ? sender.name() : "<null>",
                             sender != null ? sender.id() : "<null>",
                             message.getString(),
