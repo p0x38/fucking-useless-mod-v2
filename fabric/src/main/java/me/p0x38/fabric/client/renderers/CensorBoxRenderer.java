@@ -894,21 +894,66 @@ public final class CensorBoxRenderer {
     }
 
     private static int chooseUpdateTicks(
-            Config.Data config
+            Config.Data config,
+            double movementSpeed
     ) {
         if (!hasEffect(config, Config.CensorBoxEffect.STEPPY)) {
             return 1;
         }
 
-        if (config.censorBoxMinUpdateTicks
-                == config.censorBoxMaxUpdateTicks) {
-            return config.censorBoxMinUpdateTicks;
+        int min = config.censorBoxMinUpdateTicks;
+        int max = config.censorBoxMaxUpdateTicks;
+
+        if (!config.censorBoxDynamicUpdateInterval) {
+            return chooseRandomUpdateTicks(min, max);
         }
 
-        return ThreadLocalRandom.current().nextInt(
-                config.censorBoxMinUpdateTicks,
-                config.censorBoxMaxUpdateTicks + 1
+        double normalized =
+                Math.clamp(
+                        movementSpeed / config.censorBoxDynamicUpdateSpeed,
+                        0.0,
+                        1.0
+                );
+
+        int dynamicMax =
+                (int) Math.round(
+                        max - (max - min) * normalized
+                );
+
+        return chooseRandomUpdateTicks(
+                min,
+                Math.max(min, dynamicMax)
         );
+    }
+
+    private static int chooseRandomUpdateTicks(
+            int min,
+            int max
+    ) {
+        if (min >= max) {
+            return min;
+        }
+
+        return ThreadLocalRandom.current().nextInt(min, max + 1);
+    }
+
+    private static float predictionAmount(
+            Config.Data config,
+            double speed
+    ) {
+        if (!config.censorBoxPredictionEnabled) {
+            return 0.0f;
+        }
+
+        double normalized =
+                Math.clamp(
+                        speed / config.censorBoxDynamicUpdateSpeed,
+                        0.0,
+                        1.0
+                );
+
+        return config.censorBoxPredictionStrength
+                * (float) (0.35 + normalized * 0.65);
     }
 
     private static int stepPosition(
