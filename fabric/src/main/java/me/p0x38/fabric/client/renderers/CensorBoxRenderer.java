@@ -601,7 +601,8 @@ public final class CensorBoxRenderer {
                     Math.max(
                             MIN_BOX_WIDTH,
                             stepSize(
-                                    maxX - minX + config.censorBoxPadding * 2
+                                    maxX - minX + config.censorBoxPadding * 2,
+                                    config.censorBoxSizeStep
                             )
                     );
 
@@ -609,7 +610,8 @@ public final class CensorBoxRenderer {
                     Math.max(
                             MIN_BOX_HEIGHT,
                             stepSize(
-                                    maxY - minY + config.censorBoxPadding * 2
+                                    maxY - minY + config.censorBoxPadding * 2,
+                                    config.censorBoxSizeStep
                             )
                     );
 
@@ -965,7 +967,7 @@ public final class CensorBoxRenderer {
                 new Vec3(box.maxX, box.maxY, box.maxZ),
                 new Vec3(box.minX, box.maxY, box.maxZ),
                 new Vec3(box.maxX, box.minY, box.minZ)
-        };) {
+        }) {
             if (canSee(
                     level,
                     cameraPosition,
