@@ -173,7 +173,7 @@
   "text.fuckinguselessmod.config.description.censorBoxPredictionStrength": "検閲ボックスがどれだけ先の位置を予測するかです。範囲: 0.0〜8.0 tick。",
   "text.fuckinguselessmod.config.description.censorBoxPredictionAcceleration": "直近の加速度も使って、曲線的な移動や腕振りを予測します。",
   "text.fuckinguselessmod.config.description.censorBoxDynamicUpdateInterval": "対象が速く動くほど頻繁に、ほぼ静止しているほど低頻度に自動更新します。",
-  "text.fuckinguselessmod.config.description.censorBoxDynamicUpdateSpeed": "動的更新が最速間隔になる移動速度です。範囲: 1.0〜64.0 画面ピクセル/tick。"
+  "text.fuckinguselessmod.config.description.censorBoxDynamicUpdateSpeed": "動的更新が最速間隔になる移動速度です。範囲: 1.0〜64.0 画面ピクセル/tick。",
   "text.fuckinguselessmod.config.option.censorBoxPulseAmount": "パルス強度",
   "text.fuckinguselessmod.config.option.censorBoxRainbowSpeed": "虹色変化速度",
   "text.fuckinguselessmod.config.option.censorBoxFlashPeriod": "フラッシュ周期",

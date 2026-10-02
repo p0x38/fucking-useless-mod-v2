@@ -5,7 +5,6 @@
   "client": [
     "GameRendererMixin",
     "ItemInHandRendererMixin",
-    "AvatarRendererMixin",
-    "LivingEntityRendererMixin"
+    "AvatarRendererMixin"
   ]
 }
