@@ -147,10 +147,6 @@ public final class CensorBoxRenderer {
         }
     }
 
-    public static void setFirstPersonPartialTick(float partialTick) {
-        firstPersonPartialTick = partialTick;
-    }
-
     public static float getFirstPersonPartialTick() {
         return firstPersonPartialTick;
     }
@@ -560,7 +556,7 @@ public final class CensorBoxRenderer {
 
             int maxY =
                     Math.round(
-                            (handState.ndcMinY)
+                            (1.0F - handState.ndcMinY)
                                     * 0.5F
                                     * screenHeight
                     );
