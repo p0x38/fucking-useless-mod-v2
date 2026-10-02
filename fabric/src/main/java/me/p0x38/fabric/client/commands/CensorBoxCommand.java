@@ -2,7 +2,6 @@ package me.p0x38.fabric.client.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.world.entity.EntityType;
 import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -549,7 +548,7 @@ public final class CensorBoxCommand {
                         result.typeInverted = value.startsWith("!");
                         result.type = stripNegation(value);
 
-                        if (EntityType.get(result.type).isEmpty()) {
+                        if (EntityType.byString(result.type).isEmpty()) {
                             throw new IllegalArgumentException(
                                     "unknown entity type '" + result.type + "'"
                             );
@@ -602,7 +601,7 @@ public final class CensorBoxCommand {
         private boolean matches(Entity entity, Vec3 origin) {
             if (type != null) {
                 boolean sameType =
-                        EntityType.get(type)
+                        EntityType.byString(type)
                                 .map(entityType -> entity.getType() == entityType)
                                 .orElse(false);
 
