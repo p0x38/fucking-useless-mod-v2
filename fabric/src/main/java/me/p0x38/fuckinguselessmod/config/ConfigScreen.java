@@ -95,6 +95,11 @@ public final class ConfigScreen {
             return;
         }
 
+        if (type == String.class) {
+            addString(category, entries, config, field, label, tooltip);
+            return;
+        }
+
         if (type.isEnum()) {
             addEnum(category, entries, config, field, label, tooltip);
             return;
@@ -215,6 +220,35 @@ public final class ConfigScreen {
                             .setSaveConsumer(newValue -> {
                                 try {
                                     field.setFloat(config, newValue);
+                                } catch (IllegalAccessException exception) {
+                                    throw new RuntimeException(exception);
+                                }
+                            })
+                            .build()
+            );
+        } catch (IllegalAccessException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    private static void addString(
+            ConfigCategory category,
+            ConfigEntryBuilder entries,
+            Config.Data config,
+            Field field,
+            Component label,
+            Component tooltip
+    ) {
+        try {
+            String value = (String) field.get(config);
+
+            category.addEntry(
+                    entries.startStrField(label, value)
+                            .setTooltip(tooltip)
+                            .setDefaultValue(value)
+                            .setSaveConsumer(newValue -> {
+                                try {
+                                    field.set(config, newValue);
                                 } catch (IllegalAccessException exception) {
                                     throw new RuntimeException(exception);
                                 }
