@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -1158,6 +1159,75 @@ public final class CensorBoxRenderer {
         }
     }
 
+    public static void rememberThirdPersonRenderState(
+            LivingEntity entity,
+            net.minecraft.client.renderer.entity.state.LivingEntityRenderState state
+    ) {
+        if (CENSORED_ENTITIES.contains(entity.getUUID())) {
+            THIRD_PERSON_RENDER_STATES.put(
+                    state,
+                    entity.getUUID()
+            );
+        } else {
+            THIRD_PERSON_RENDER_STATES.remove(state);
+        }
+    }
+
+    public static void captureThirdPersonArms(
+            net.minecraft.client.renderer.entity.state.LivingEntityRenderState state,
+            net.minecraft.client.model.HumanoidModel<?> model,
+            com.mojang.blaze3d.vertex.PoseStack poseStack
+    ) {
+        UUID uuid = THIRD_PERSON_RENDER_STATES.get(state);
+
+        if (uuid == null) {
+            return;
+        }
+
+        ThirdPersonArmBounds bounds =
+                new ThirdPersonArmBounds();
+
+        poseStack.pushPose();
+
+        model.body.translateAndRotate(poseStack);
+
+        captureArmExtents(
+                model.rightArm,
+                poseStack,
+                bounds
+        );
+        captureArmExtents(
+                model.leftArm,
+                poseStack,
+                bounds
+        );
+
+        poseStack.popPose();
+
+        THIRD_PERSON_ARM_BOUNDS.put(uuid, bounds);
+    }
+
+    private static void captureArmExtents(
+            net.minecraft.client.model.geom.ModelPart arm,
+            com.mojang.blaze3d.vertex.PoseStack poseStack,
+            ThirdPersonArmBounds bounds
+    ) {
+        if (!arm.visible || arm.skipDraw) {
+            return;
+        }
+
+        arm.getExtentsForGui(
+                poseStack,
+                position -> bounds.points.add(
+                        new Vec3(
+                                position.x(),
+                                position.y(),
+                                position.z()
+                        )
+                )
+        );
+    }
+
     private static boolean canSee(
             ClientLevel level,
             Vec3 cameraPosition,
@@ -1218,6 +1288,21 @@ public final class CensorBoxRenderer {
         private float velocityX;
         private float velocityY;
         private float speed;
+    }
+
+    private static final Map<
+            net.minecraft.client.renderer.entity.state.LivingEntityRenderState,
+            UUID
+            > THIRD_PERSON_RENDER_STATES =
+            new IdentityHashMap<>();
+
+    private static final Map<UUID, ThirdPersonArmBounds>
+            THIRD_PERSON_ARM_BOUNDS =
+            new HashMap<>();
+
+    private static final class ThirdPersonArmBounds {
+        private final List<Vec3> points =
+                new ArrayList<>();
     }
 
     private static final class CensorMotionState {
