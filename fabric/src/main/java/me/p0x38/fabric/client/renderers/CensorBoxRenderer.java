@@ -1,8 +1,6 @@
 package me.p0x38.fabric.client.renderers;
 
 import me.p0x38.fabric.client.mixins.GameRendererMixin;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelPart;
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
@@ -15,8 +13,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -57,13 +53,6 @@ public final class CensorBoxRenderer {
     private static final Map<UUID, CensorMotionState> MOTION_STATES =
             new HashMap<>();
     private static long firstPersonRenderGeneration;
-
-    private static final Map<LivingEntityRenderState, UUID> THIRD_PERSON_RENDER_STATES =
-            new IdentityHashMap<>();
-    private static final ThreadLocal<ThirdPersonArmCaptureContext> THIRD_PERSON_ARM_CONTEXT =
-            new ThreadLocal<>();
-    private static final Map<UUID, ThirdPersonArmBounds> THIRD_PERSON_ARM_BOUNDS =
-            new HashMap<>();
 
     private CensorBoxRenderer() {
     }
@@ -435,20 +424,6 @@ public final class CensorBoxRenderer {
                             entity
                     );
 
-            if (!visible && armBounds != null) {
-                for (Vec3 armPoint : armBounds.points) {
-                    if (canSee(
-                            level,
-                            cameraPosition,
-                            armPoint,
-                            entity
-                    )) {
-                        visible = true;
-                        break;
-                    }
-                }
-            }
-
             if (!visible) {
                 continue;
             }
@@ -457,9 +432,7 @@ public final class CensorBoxRenderer {
                     entity.getPosition(partialTick);
 
             /*
-             * Put the anchor around the entity's collision body.
-             * Actual rendered humanoid arms are merged into the
-             * projected 2D bounds below.
+             * Put the anchor around the entity's center.
              */
             position = position.add(
                     0.0,
@@ -533,74 +506,8 @@ public final class CensorBoxRenderer {
             double halfEntityHeight =
                     entity.getBbHeight() * 0.5;
 
-            double projectedHalfWidth =
-                    (Math.abs(left.x()) * halfEntityWidth
-                            + Math.abs(left.y()) * halfEntityHeight
-                            + Math.abs(left.z()) * halfEntityWidth)
-                            * focalLength
-                            / depth;
-
-            double projectedHalfHeight =
-                    (Math.abs(up.x()) * halfEntityWidth
-                            + Math.abs(up.y()) * halfEntityHeight
-                            + Math.abs(up.z()) * halfEntityWidth)
-                            * focalLength
-                            / depth;
-
-            double minScreenX =
-                    screenX - projectedHalfWidth;
-            double maxScreenX =
-                    screenX + projectedHalfWidth;
-            double minScreenY =
-                    screenY - projectedHalfHeight;
-            double maxScreenY =
-                    screenY + projectedHalfHeight;
-
-            ThirdPersonArmBounds armBounds =
-                    THIRD_PERSON_ARM_BOUNDS.get(uuid);
-
-            if (armBounds != null) {
-                for (Vec3 armPoint : armBounds.points) {
-                    Vec3 relativeArm =
-                            armPoint.subtract(cameraPosition);
-
-                    double armDepth =
-                            relativeArm.x * forward.x()
-                                    + relativeArm.y * forward.y()
-                                    + relativeArm.z * forward.z();
-
-                    if (armDepth <= 0.01) {
-                        continue;
-                    }
-
-                    double armHorizontal =
-                            relativeArm.x * left.x()
-                                    + relativeArm.y * left.y()
-                                    + relativeArm.z * left.z();
-
-                    double armVertical =
-                            relativeArm.x * up.x()
-                                    + relativeArm.y * up.y()
-                                    + relativeArm.z * up.z();
-
-                    double armScreenX =
-                            screenWidth * 0.5
-                                    - armHorizontal
-                                    * focalLength
-                                    / armDepth;
-
-                    double armScreenY =
-                            screenHeight * 0.5
-                                    - armVertical
-                                    * focalLength
-                                    / armDepth;
-
-                    minScreenX = Math.min(minScreenX, armScreenX);
-                    maxScreenX = Math.max(maxScreenX, armScreenX);
-                    minScreenY = Math.min(minScreenY, armScreenY);
-                    maxScreenY = Math.max(maxScreenY, armScreenY);
-                }
-            }
+            double projectedHalfWidth = (Math.abs(left.x()) * halfEntityWidth + Math.abs(left.y()) * halfEntityHeight + Math.abs(left.z()) * halfEntityWidth) * focalLength / depth;
+            double projectedHalfHeight = (Math.abs(up.x()) * halfEntityWidth + Math.abs(up.y()) * halfEntityHeight + Math.abs(up.z()) * halfEntityWidth) * focalLength / depth;
 
             int boxWidth =
                     Math.max(
@@ -626,20 +533,15 @@ public final class CensorBoxRenderer {
                             )
                     );
 
-            double visualCenterX =
-                    (minScreenX + maxScreenX) * 0.5;
-            double visualCenterY =
-                    (minScreenY + maxScreenY) * 0.5;
-
             int x =
                     (int) Math.round(
-                            visualCenterX
+                            screenX
                                     - boxWidth * 0.5
                     );
 
             int y =
                     (int) Math.round(
-                            visualCenterY
+                            screenY
                                     - boxHeight * 0.5
                     );
 
@@ -1254,95 +1156,6 @@ public final class CensorBoxRenderer {
                     color
             );
         }
-    }
-
-    public static void rememberThirdPersonRenderState(
-            LivingEntity entity,
-            LivingEntityRenderState state
-    ) {
-        UUID uuid = entity.getUUID();
-
-        if (CENSORED_ENTITIES.contains(uuid)) {
-            THIRD_PERSON_RENDER_STATES.put(state, uuid);
-        } else {
-            THIRD_PERSON_RENDER_STATES.remove(state);
-        }
-    }
-
-    public static void beginThirdPersonArmCapture(
-            LivingEntityRenderState state
-    ) {
-        UUID uuid = THIRD_PERSON_RENDER_STATES.get(state);
-
-        if (uuid == null) {
-            THIRD_PERSON_ARM_CONTEXT.remove();
-            return;
-        }
-
-        THIRD_PERSON_ARM_BOUNDS.remove(uuid);
-
-        THIRD_PERSON_ARM_CONTEXT.set(
-                new ThirdPersonArmCaptureContext(
-                        uuid,
-                        getHumanoidArm((LivingEntityRendererAccess) null)
-                )
-        );
-    }
-
-    public static void beginThirdPersonArmCapture(
-            UUID uuid,
-            HumanoidModel<?> model
-    ) {
-        THIRD_PERSON_ARM_BOUNDS.remove(uuid);
-
-        THIRD_PERSON_ARM_CONTEXT.set(
-                new ThirdPersonArmCaptureContext(
-                        uuid,
-                        model.getArm(HumanoidArm.RIGHT),
-                        model.getArm(HumanoidArm.LEFT)
-                )
-        );
-    }
-
-    public static void endThirdPersonArmCapture() {
-        THIRD_PERSON_ARM_CONTEXT.remove();
-    }
-
-    public static void captureThirdPersonArmPart(
-            ModelPart part,
-            com.mojang.blaze3d.vertex.PoseStack poseStack
-    ) {
-        ThirdPersonArmCaptureContext context =
-                THIRD_PERSON_ARM_CONTEXT.get();
-
-        if (context == null
-                || (part != context.rightArm
-                && part != context.leftArm)) {
-            return;
-        }
-
-        ThirdPersonArmBounds bounds =
-                THIRD_PERSON_ARM_BOUNDS.computeIfAbsent(
-                        context.uuid,
-                        key -> new ThirdPersonArmBounds()
-                );
-
-        Vec3 cameraPosition =
-                Minecraft.getInstance()
-                        .gameRenderer
-                        .getMainCamera()
-                        .position();
-
-        part.getExtentsForGui(
-                poseStack,
-                position -> bounds.points.add(
-                        new Vec3(
-                                position.x() + cameraPosition.x,
-                                position.y() + cameraPosition.y,
-                                position.z() + cameraPosition.z
-                        )
-                )
-        );
     }
 
     private static boolean canSee(
