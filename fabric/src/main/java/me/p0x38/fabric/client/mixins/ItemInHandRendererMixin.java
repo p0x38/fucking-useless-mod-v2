@@ -5,7 +5,6 @@ import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,25 +21,6 @@ public abstract class ItemInHandRendererMixin {
             int i,
             CallbackInfo callbackInfo
     ) {
-        CensorBoxRenderer.beginFirstPersonHandTracking();
-    }
-
-    @Inject(
-            method = "renderPlayerArm",
-            at = @At("HEAD")
-    )
-    private void fuckingUselessMod$trackPlayerArm(
-            PoseStack poseStack,
-            SubmitNodeCollector submitNodeCollector,
-            int packedLight,
-            float equipProgress,
-            float swingProgress,
-            HumanoidArm arm,
-            CallbackInfo callbackInfo
-    ) {
-        CensorBoxRenderer.markFirstPersonHand(
-                arm,
-                swingProgress
-        );
+        CensorBoxRenderer.beginFirstPersonHandTracking(f);
     }
 }

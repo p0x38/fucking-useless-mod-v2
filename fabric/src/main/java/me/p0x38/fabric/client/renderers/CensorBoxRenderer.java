@@ -46,21 +46,20 @@ public final class CensorBoxRenderer {
      * First-person hands are not rendered through the normal
      * entity renderer, so they need their own HUD-space boxes.
      */
-    private static final int FIRST_PERSON_BOX_WIDTH = 72;
-    private static final int FIRST_PERSON_BOX_HEIGHT = 64;
     private static final int FIRST_PERSON_POSITION_STEP = 8;
 
     private static final Map<HumanoidArm, FirstPersonHandState> FIRST_PERSON_HAND_STATES =
             new EnumMap<>(HumanoidArm.class);
 
+    private static float firstPersonPartialTick;
+
     private static final int POSITION_STEP = 6;
     private static final int MAX_JITTER = 1;
-
     private static final int MIN_UPDATE_TICKS = 2;
     private static final int MAX_UPDATE_TICKS = 6;
-
     private static final Map<UUID, CensorMotionState> MOTION_STATES =
             new HashMap<>();
+    private static long firstPersonRenderGeneration;
 
     private CensorBoxRenderer() {
     }
@@ -138,12 +137,22 @@ public final class CensorBoxRenderer {
      * We mark every hand as absent first, then renderPlayerArm()
      * marks the ones vanilla actually draws.
      */
-    public static void beginFirstPersonHandTracking() {
+    public static void beginFirstPersonHandTracking(float partialTick) {
+        firstPersonPartialTick = partialTick;
+        firstPersonRenderGeneration++;
+
         for (FirstPersonHandState state :
-            FIRST_PERSON_HAND_STATES.values()) {
+                FIRST_PERSON_HAND_STATES.values()) {
             state.visible = false;
-            state.swingProgress = 0.0f;
         }
+    }
+
+    public static void setFirstPersonPartialTick(float partialTick) {
+        firstPersonPartialTick = partialTick;
+    }
+
+    public static float getFirstPersonPartialTick() {
+        return firstPersonPartialTick;
     }
 
     /*
@@ -152,7 +161,13 @@ public final class CensorBoxRenderer {
      * This means the HUD box follows the actual vanilla arm
      * render path instead of guessing from held-item state.
      */
-    public static void markFirstPersonHand(HumanoidArm arm, float swingProgress) {
+    public static void markFirstPersonHand(
+            HumanoidArm arm,
+            float ndcMinX,
+            float ndcMinY,
+            float ndcMaxX,
+            float ndcMaxY
+    ) {
         FirstPersonHandState state =
                 FIRST_PERSON_HAND_STATES.computeIfAbsent(
                         arm,
@@ -160,7 +175,11 @@ public final class CensorBoxRenderer {
                 );
 
         state.visible = true;
-        state.swingProgress = swingProgress;
+        state.renderGeneration = firstPersonRenderGeneration;
+        state.ndcMinX = ndcMinX;
+        state.ndcMinY = ndcMinY;
+        state.ndcMaxX = ndcMaxX;
+        state.ndcMaxY = ndcMaxY;
     }
 
     private static void render(
@@ -260,8 +279,8 @@ public final class CensorBoxRenderer {
              * is effectively inside the entity.
              */
             if (firstPerson
-            && client.player != null
-            && uuid.equals(client.player.getUUID())) {
+                    && client.player != null
+                    && uuid.equals(client.player.getUUID())) {
                 continue;
             }
 
@@ -486,100 +505,110 @@ public final class CensorBoxRenderer {
         }
 
         for (Map.Entry<HumanoidArm, FirstPersonHandState> entry :
-        FIRST_PERSON_HAND_STATES.entrySet()) {
-            HumanoidArm arm = entry.getKey();
-
+                FIRST_PERSON_HAND_STATES.entrySet()) {
             FirstPersonHandState handState =
                     entry.getValue();
 
-            if (!handState.visible) {
+            /*
+             * Vanilla didn't render this arm during the current
+             * renderHandsWithItems() invocation.
+             *
+             * Do not trust the previous frame's visibility state.
+             */
+            if (!handState.visible
+                    || handState.renderGeneration
+                    != firstPersonRenderGeneration) {
                 continue;
             }
 
-            int handX =
-                    arm == HumanoidArm.RIGHT
-                    ? firstPersonRightX(screenWidth)
-                            : firstPersonLeftX(screenWidth);
-
-            int handY = firstPersonY(screenHeight);
-
             /*
-             * Recreate the characteristic first-person arm
-             * swing motion in screen space.
+             * Keep jitter stable for the whole game tick.
              *
-             * This does not rotate the censor rectangle itself;
-             * only its 2D position moves.
+             * The actual arm position is still updated every
+             * rendered frame from vanilla's PoseStack.
              */
-            float swingProgress =
-                    Math.clamp(
-                            handState.swingProgress,
-                            0.0f,
-                            1.0f
-                    );
-
-            float swingCurve =
-                    (float) Math.sin(
-                            Math.sqrt(swingProgress)
-                            * Math.PI
-                    );
-
-            float swingVertical =
-                    (float) Math.sin(
-                            Math.sqrt(swingProgress)
-                                * Math.PI
-                            * 2.0
-                    );
-
-            int swingX = Math.round(swingCurve * 24.0f);
-            int swingY = Math.round(swingVertical * 12.0f);
-
-            if (arm == HumanoidArm.RIGHT) {
-                handX -= swingX;
-            } else {
-                handX += swingX;
+            if (handState.lastJitterTick != gameTick) {
+                handState.jitterX = randomJitter();
+                handState.jitterY = randomJitter();
+                handState.lastJitterTick = gameTick;
             }
 
-            handY += swingY;
+            /*
+             * Convert the actual transformed arm bounds from NDC
+             * into GUI coordinates.
+             */
+            int minX =
+                    Math.round(
+                            (handState.ndcMinX + 1.0F)
+                                * 0.5f
+                            * screenWidth
+                    );
 
-            handX =
-                    stepFirstPersonPosition(handX) + randomJitter();
+            int minY =
+                    Math.round(
+                            (1.0f - handState.ndcMaxY)
+                                    * 0.5f
+                                    * screenHeight
+                    );
 
-            handY = stepFirstPersonPosition(handY) + randomJitter();
+            int maxX =
+                    Math.round(
+                            (handState.ndcMaxX + 1.0f)
+                                    * 0.5f
+                                    * screenWidth
+                    );
 
-            int boxX = handX - FIRST_PERSON_BOX_WIDTH / 2;
-            int boxY = handY - FIRST_PERSON_BOX_HEIGHT / 2;
+            int maxY =
+                    Math.round(
+                            (handState.ndcMinY)
+                                    * 0.5F
+                                    * screenHeight
+                    );
+
+            /*
+             * The actual projected arm size is used directly.
+             * This means the box follows FOV, bobbing, equipment
+             * motion, and vanilla swing transforms.
+             */
+            int boxWidth =
+                    Math.max(
+                            MIN_BOX_WIDTH,
+                            stepSize(
+                                    maxX - minX + BOX_PADDING * 2
+                            )
+                    );
+
+            int boxHeight =
+                    Math.max(
+                            MIN_BOX_HEIGHT,
+                            stepSize(
+                                    maxY - minY + BOX_PADDING * 2
+                            )
+                    );
+
+            int centerX = (minX + maxX) / 2;
+            int centerY = (minY + maxY) / 2;
+
+            /*
+             * Step the center, not the actual vanilla animation.
+             * The animation therefore remains recognizable while
+             * the censor itself still has the intentionally broken
+             * movement.
+             */
+            centerX = stepFirstPersonPosition(centerX) + handState.jitterX;
+            centerY = stepFirstPersonPosition(centerY) + handState.jitterY;
+
+            int boxX = centerX - boxWidth / 2;
+            int boxY = centerY - boxHeight / 2;
 
             graphics.fill(
                     boxX,
                     boxY,
-                    boxX + FIRST_PERSON_BOX_WIDTH,
-                    boxY + FIRST_PERSON_BOX_HEIGHT,
+                    boxX + boxWidth,
+                    boxY + boxHeight,
                     0xFF000000
             );
         }
-    }
-
-    private static final class FirstPersonHandState {
-        private boolean visible;
-        private float swingProgress;
-    }
-
-    private static int firstPersonLeftX(int screenWidth) {
-        return (int) (
-                screenWidth * 0.08
-                );
-    }
-
-    private static int firstPersonRightX(int screenWidth) {
-        return (int) (
-                screenWidth * 0.72
-                );
-    }
-
-    private static int firstPersonY(int screenHeight) {
-        return (int) (
-                screenHeight * 0.72
-                );
     }
 
     private static int stepFirstPersonPosition(int value) {
@@ -705,6 +734,20 @@ public final class CensorBoxRenderer {
         }
 
         return null;
+    }
+
+    private static final class FirstPersonHandState {
+        private boolean visible;
+        private long renderGeneration = Long.MIN_VALUE;
+
+        private long lastJitterTick = Long.MIN_VALUE;
+        private int jitterX;
+        private int jitterY;
+
+        private float ndcMinX;
+        private float ndcMinY;
+        private float ndcMaxX;
+        private float ndcMaxY;
     }
 
     private static final class CensorMotionState {
