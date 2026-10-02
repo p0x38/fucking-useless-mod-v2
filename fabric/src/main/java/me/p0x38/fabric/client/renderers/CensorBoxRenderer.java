@@ -1,6 +1,8 @@
 package me.p0x38.fabric.client.renderers;
 
 import me.p0x38.fabric.client.mixins.GameRendererMixin;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
@@ -14,6 +16,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -54,6 +57,13 @@ public final class CensorBoxRenderer {
     private static final Map<UUID, CensorMotionState> MOTION_STATES =
             new HashMap<>();
     private static long firstPersonRenderGeneration;
+
+    private static final Map<LivingEntityRenderState, UUID> THIRD_PERSON_RENDER_STATES =
+            new IdentityHashMap<>();
+    private static final ThreadLocal<ThirdPersonArmCaptureContext> THIRD_PERSON_ARM_CONTEXT =
+            new ThreadLocal<>();
+    private static final Map<UUID, ThirdPersonArmBounds> THIRD_PERSON_ARM_BOUNDS =
+            new HashMap<>();
 
     private CensorBoxRenderer() {
     }
@@ -301,9 +311,9 @@ public final class CensorBoxRenderer {
              * the censor box disappears.
              */
             Vec3 interpolatedPosition = entity.getPosition(partialTick);
-            AABB visibilityBox = getThirdPersonVisualBounds(
-                    entity,
-                    interpolatedPosition
+            Vec3 currentPosition = entity.position();
+            AABB visibilityBox = entity.getBoundingBox().move(
+                    interpolatedPosition.subtract(currentPosition)
             );
 
             double visibilityCenterX =
@@ -425,16 +435,37 @@ public final class CensorBoxRenderer {
                             entity
                     );
 
+            if (!visible && armBounds != null) {
+                for (Vec3 armPoint : armBounds.points) {
+                    if (canSee(
+                            level,
+                            cameraPosition,
+                            armPoint,
+                            entity
+                    )) {
+                        visible = true;
+                        break;
+                    }
+                }
+            }
+
             if (!visible) {
                 continue;
             }
 
             Vec3 position =
-                    new Vec3(
-                            (visibilityBox.minX + visibilityBox.maxX) * 0.5,
-                            (visibilityBox.minY + visibilityBox.maxY) * 0.5,
-                            (visibilityBox.minZ + visibilityBox.maxZ) * 0.5
-                    );
+                    entity.getPosition(partialTick);
+
+            /*
+             * Put the anchor around the entity's collision body.
+             * Actual rendered humanoid arms are merged into the
+             * projected 2D bounds below.
+             */
+            position = position.add(
+                    0.0,
+                    entity.getBbHeight() * 0.5,
+                    0.0
+            );
 
             double relativeX =
                     position.x - cameraPosition.x;
@@ -497,13 +528,79 @@ public final class CensorBoxRenderer {
              * No 3D rotation or world-space scaling is used.
              */
             double halfEntityWidth =
-                    (visibilityBox.maxX - visibilityBox.minX) * 0.5;
+                    entity.getBbWidth() * 0.5;
 
             double halfEntityHeight =
-                    (visibilityBox.maxY - visibilityBox.minY) * 0.5;
+                    entity.getBbHeight() * 0.5;
 
-            double projectedHalfWidth = (Math.abs(left.x()) * halfEntityWidth + Math.abs(left.y()) * halfEntityHeight + Math.abs(left.z()) * halfEntityWidth) * focalLength / depth;
-            double projectedHalfHeight = (Math.abs(up.x()) * halfEntityWidth + Math.abs(up.y()) * halfEntityHeight + Math.abs(up.z()) * halfEntityWidth) * focalLength / depth;
+            double projectedHalfWidth =
+                    (Math.abs(left.x()) * halfEntityWidth
+                            + Math.abs(left.y()) * halfEntityHeight
+                            + Math.abs(left.z()) * halfEntityWidth)
+                            * focalLength
+                            / depth;
+
+            double projectedHalfHeight =
+                    (Math.abs(up.x()) * halfEntityWidth
+                            + Math.abs(up.y()) * halfEntityHeight
+                            + Math.abs(up.z()) * halfEntityWidth)
+                            * focalLength
+                            / depth;
+
+            double minScreenX =
+                    screenX - projectedHalfWidth;
+            double maxScreenX =
+                    screenX + projectedHalfWidth;
+            double minScreenY =
+                    screenY - projectedHalfHeight;
+            double maxScreenY =
+                    screenY + projectedHalfHeight;
+
+            ThirdPersonArmBounds armBounds =
+                    THIRD_PERSON_ARM_BOUNDS.get(uuid);
+
+            if (armBounds != null) {
+                for (Vec3 armPoint : armBounds.points) {
+                    Vec3 relativeArm =
+                            armPoint.subtract(cameraPosition);
+
+                    double armDepth =
+                            relativeArm.x * forward.x()
+                                    + relativeArm.y * forward.y()
+                                    + relativeArm.z * forward.z();
+
+                    if (armDepth <= 0.01) {
+                        continue;
+                    }
+
+                    double armHorizontal =
+                            relativeArm.x * left.x()
+                                    + relativeArm.y * left.y()
+                                    + relativeArm.z * left.z();
+
+                    double armVertical =
+                            relativeArm.x * up.x()
+                                    + relativeArm.y * up.y()
+                                    + relativeArm.z * up.z();
+
+                    double armScreenX =
+                            screenWidth * 0.5
+                                    - armHorizontal
+                                    * focalLength
+                                    / armDepth;
+
+                    double armScreenY =
+                            screenHeight * 0.5
+                                    - armVertical
+                                    * focalLength
+                                    / armDepth;
+
+                    minScreenX = Math.min(minScreenX, armScreenX);
+                    maxScreenX = Math.max(maxScreenX, armScreenX);
+                    minScreenY = Math.min(minScreenY, armScreenY);
+                    maxScreenY = Math.max(maxScreenY, armScreenY);
+                }
+            }
 
             int boxWidth =
                     Math.max(
@@ -529,15 +626,20 @@ public final class CensorBoxRenderer {
                             )
                     );
 
+            double visualCenterX =
+                    (minScreenX + maxScreenX) * 0.5;
+            double visualCenterY =
+                    (minScreenY + maxScreenY) * 0.5;
+
             int x =
                     (int) Math.round(
-                            screenX
+                            visualCenterX
                                     - boxWidth * 0.5
                     );
 
             int y =
                     (int) Math.round(
-                            screenY
+                            visualCenterY
                                     - boxHeight * 0.5
                     );
 
@@ -1154,40 +1256,92 @@ public final class CensorBoxRenderer {
         }
     }
 
-    /*
-     * A LivingEntity's vanilla AABB describes its collision body,
-     * not the full visual silhouette. In particular, humanoid arms
-     * can swing outside it, especially during attacks.
-     *
-     * Keep the censor box conservative in third person by adding an
-     * axis-aligned visual envelope around living entities. The extra
-     * reach scales with the entity height, which covers normal player/
-     * humanoid proportions without adding a huge fixed amount to every
-     * entity.
-     */
-    private static AABB getThirdPersonVisualBounds(
-            Entity entity,
-            Vec3 interpolatedPosition
+    public static void rememberThirdPersonRenderState(
+            LivingEntity entity,
+            LivingEntityRenderState state
     ) {
-        AABB bounds = entity.getBoundingBox().move(
-                interpolatedPosition.subtract(entity.position())
-        );
+        UUID uuid = entity.getUUID();
 
-        if (!(entity instanceof LivingEntity livingEntity)) {
-            return bounds;
+        if (CENSORED_ENTITIES.contains(uuid)) {
+            THIRD_PERSON_RENDER_STATES.put(state, uuid);
+        } else {
+            THIRD_PERSON_RENDER_STATES.remove(state);
+        }
+    }
+
+    public static void beginThirdPersonArmCapture(
+            LivingEntityRenderState state
+    ) {
+        UUID uuid = THIRD_PERSON_RENDER_STATES.get(state);
+
+        if (uuid == null) {
+            THIRD_PERSON_ARM_CONTEXT.remove();
+            return;
         }
 
-        double armReach =
-                Math.clamp(
-                        livingEntity.getBbHeight() * 0.25,
-                        0.25,
-                        0.55
+        THIRD_PERSON_ARM_BOUNDS.remove(uuid);
+
+        THIRD_PERSON_ARM_CONTEXT.set(
+                new ThirdPersonArmCaptureContext(
+                        uuid,
+                        getHumanoidArm((LivingEntityRendererAccess) null)
+                )
+        );
+    }
+
+    public static void beginThirdPersonArmCapture(
+            UUID uuid,
+            HumanoidModel<?> model
+    ) {
+        THIRD_PERSON_ARM_BOUNDS.remove(uuid);
+
+        THIRD_PERSON_ARM_CONTEXT.set(
+                new ThirdPersonArmCaptureContext(
+                        uuid,
+                        model.getArm(HumanoidArm.RIGHT),
+                        model.getArm(HumanoidArm.LEFT)
+                )
+        );
+    }
+
+    public static void endThirdPersonArmCapture() {
+        THIRD_PERSON_ARM_CONTEXT.remove();
+    }
+
+    public static void captureThirdPersonArmPart(
+            ModelPart part,
+            com.mojang.blaze3d.vertex.PoseStack poseStack
+    ) {
+        ThirdPersonArmCaptureContext context =
+                THIRD_PERSON_ARM_CONTEXT.get();
+
+        if (context == null
+                || (part != context.rightArm
+                && part != context.leftArm)) {
+            return;
+        }
+
+        ThirdPersonArmBounds bounds =
+                THIRD_PERSON_ARM_BOUNDS.computeIfAbsent(
+                        context.uuid,
+                        key -> new ThirdPersonArmBounds()
                 );
 
-        return bounds.inflate(
-                armReach,
-                0.0,
-                armReach
+        Vec3 cameraPosition =
+                Minecraft.getInstance()
+                        .gameRenderer
+                        .getMainCamera()
+                        .position();
+
+        part.getExtentsForGui(
+                poseStack,
+                position -> bounds.points.add(
+                        new Vec3(
+                                position.x() + cameraPosition.x,
+                                position.y() + cameraPosition.y,
+                                position.z() + cameraPosition.z
+                        )
+                )
         );
     }
 
