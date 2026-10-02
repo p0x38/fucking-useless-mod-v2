@@ -13,6 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -300,9 +301,9 @@ public final class CensorBoxRenderer {
              * the censor box disappears.
              */
             Vec3 interpolatedPosition = entity.getPosition(partialTick);
-            Vec3 currentPosition = entity.position();
-            AABB visibilityBox = entity.getBoundingBox().move(
-                    interpolatedPosition.subtract(currentPosition)
+            AABB visibilityBox = getThirdPersonVisualBounds(
+                    entity,
+                    interpolatedPosition
             );
 
             double visibilityCenterX =
@@ -429,16 +430,11 @@ public final class CensorBoxRenderer {
             }
 
             Vec3 position =
-                    entity.getPosition(partialTick);
-
-            /*
-             * Put the anchor around the entity's center.
-             */
-            position = position.add(
-                    0.0,
-                    entity.getBbHeight() * 0.5,
-                    0.0
-            );
+                    new Vec3(
+                            (visibilityBox.minX + visibilityBox.maxX) * 0.5,
+                            (visibilityBox.minY + visibilityBox.maxY) * 0.5,
+                            (visibilityBox.minZ + visibilityBox.maxZ) * 0.5
+                    );
 
             double relativeX =
                     position.x - cameraPosition.x;
@@ -501,10 +497,10 @@ public final class CensorBoxRenderer {
              * No 3D rotation or world-space scaling is used.
              */
             double halfEntityWidth =
-                    entity.getBbWidth() * 0.5;
+                    (visibilityBox.maxX - visibilityBox.minX) * 0.5;
 
             double halfEntityHeight =
-                    entity.getBbHeight() * 0.5;
+                    (visibilityBox.maxY - visibilityBox.minY) * 0.5;
 
             double projectedHalfWidth = (Math.abs(left.x()) * halfEntityWidth + Math.abs(left.y()) * halfEntityHeight + Math.abs(left.z()) * halfEntityWidth) * focalLength / depth;
             double projectedHalfHeight = (Math.abs(up.x()) * halfEntityWidth + Math.abs(up.y()) * halfEntityHeight + Math.abs(up.z()) * halfEntityWidth) * focalLength / depth;
@@ -1156,6 +1152,43 @@ public final class CensorBoxRenderer {
                     color
             );
         }
+    }
+
+    /*
+     * A LivingEntity's vanilla AABB describes its collision body,
+     * not the full visual silhouette. In particular, humanoid arms
+     * can swing outside it, especially during attacks.
+     *
+     * Keep the censor box conservative in third person by adding an
+     * axis-aligned visual envelope around living entities. The extra
+     * reach scales with the entity height, which covers normal player/
+     * humanoid proportions without adding a huge fixed amount to every
+     * entity.
+     */
+    private static AABB getThirdPersonVisualBounds(
+            Entity entity,
+            Vec3 interpolatedPosition
+    ) {
+        AABB bounds = entity.getBoundingBox().move(
+                interpolatedPosition.subtract(entity.position())
+        );
+
+        if (!(entity instanceof LivingEntity livingEntity)) {
+            return bounds;
+        }
+
+        double armReach =
+                Math.clamp(
+                        livingEntity.getBbHeight() * 0.25,
+                        0.25,
+                        0.55
+                );
+
+        return bounds.inflate(
+                armReach,
+                0.0,
+                armReach
+        );
     }
 
     private static boolean canSee(
