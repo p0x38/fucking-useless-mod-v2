@@ -489,6 +489,9 @@ public final class Config {
                         SentenceEndEffect.EXCLAMATION
                 ));
 
+        @ConfigOption(name = "Enable Debug Logging", category = "Misc")
+        public boolean debugLoggingEnabled = false;
+
         private static List<String> createDialogueSoundPool() {
             List<String> pool = new ArrayList<>();
             for (int index = 0; index < 69; index++) {
