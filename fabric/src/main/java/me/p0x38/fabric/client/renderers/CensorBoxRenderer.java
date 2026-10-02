@@ -1,6 +1,7 @@
 package me.p0x38.fabric.client.renderers;
 
 import me.p0x38.fabric.client.mixins.GameRendererMixin;
+import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -32,7 +33,6 @@ public final class CensorBoxRenderer {
     private static final Set<UUID> CENSORED_ENTITIES =
             new HashSet<>();
 
-    private static final int BOX_PADDING = 4;
     private static final int MIN_BOX_WIDTH = 4;
     private static final int MIN_BOX_HEIGHT = 4;
 
@@ -40,7 +40,6 @@ public final class CensorBoxRenderer {
      * Box size is quantized separately from its position so
      * perspective changes also appear steppy instead of smooth.
      */
-    private static final int SIZE_STEP = 4;
 
     /*
      * First-person hands are not rendered through the normal
@@ -51,10 +50,6 @@ public final class CensorBoxRenderer {
 
     private static float firstPersonPartialTick;
 
-    private static final int POSITION_STEP = 6;
-    private static final int MAX_JITTER = 1;
-    private static final int MIN_UPDATE_TICKS = 2;
-    private static final int MAX_UPDATE_TICKS = 6;
     private static final Map<UUID, CensorMotionState> MOTION_STATES =
             new HashMap<>();
     private static long firstPersonRenderGeneration;
@@ -184,6 +179,12 @@ public final class CensorBoxRenderer {
             return;
         }
 
+        Config.Data config = Config.get();
+
+        if (!config.censorBoxEnabled) {
+            return;
+        }
+
         Minecraft client =
                 Minecraft.getInstance();
 
@@ -235,7 +236,8 @@ public final class CensorBoxRenderer {
                     screenWidth,
                     screenHeight,
                     gameTick,
-                    client.player.getUUID()
+                    partialTick,
+                    config
             );
         }
 
@@ -477,12 +479,20 @@ public final class CensorBoxRenderer {
                 );
             }
 
-            graphics.fill(
+            if (hasEffect(config, Config.CensorBoxEffect.FLASH)
+                    && ((gameTick / config.censorBoxFlashPeriod) & 1L) != 0L) {
+                continue;
+            }
+
+            float pulse = pulseScale(config, gameTick, partialTick);
+            drawCensorBox(
+                    graphics,
                     state.x,
                     state.y,
-                    state.x + state.width,
-                    state.y + state.height,
-                    0xFF000000
+                    Math.round(state.width * pulse),
+                    Math.round(state.height * pulse),
+                    censorColor(config, gameTick, partialTick),
+                    config
             );
         }
     }
@@ -492,7 +502,8 @@ public final class CensorBoxRenderer {
             int screenWidth,
             int screenHeight,
             long gameTick,
-            UUID uuid
+            float partialTick,
+            Config.Data config
     ) {
         if (FIRST_PERSON_HAND_STATES.isEmpty()) {
             return;
@@ -610,33 +621,171 @@ public final class CensorBoxRenderer {
             int boxX = handState.x - handState.width / 2;
             int boxY = handState.y - handState.height / 2;
 
-            graphics.fill(
-                    boxX,
-                    boxY,
-                    boxX + handState.width,
-                    boxY + handState.height,
-                    0xFF000000
+            if (hasEffect(config, Config.CensorBoxEffect.FLASH)
+                    && ((gameTick / config.censorBoxFlashPeriod) & 1L) != 0L) {
+                continue;
+            }
+
+            float pulse = pulseScale(config, gameTick, partialTick);
+            drawCensorBox(
+                    graphics,
+                    handState.x,
+                    handState.y,
+                    Math.round(handState.width * pulse),
+                    Math.round(handState.height * pulse),
+                    censorColor(config, gameTick, partialTick),
+                    config
             );
         }
     }
 
-    private static int stepPosition(int value) {
-        return Math.round(
-                (float) value / POSITION_STEP
-        ) * POSITION_STEP;
+    private static int stepPosition(int value, int step) {
+        int safeStep = Math.max(1, step);
+        return Math.round((float) value / safeStep) * safeStep;
     }
 
-    private static int stepSize(int value) {
+    private static int stepSize(int value, int step) {
+        int safeStep = Math.max(1, step);
         return Math.max(
                 MIN_BOX_WIDTH,
-                Math.round(
-                        (float) value / SIZE_STEP
-                ) * SIZE_STEP
+                Math.round((float) value / safeStep) * safeStep
         );
     }
 
-    private static int randomJitter() {
-        return ThreadLocalRandom.current().nextInt(-MAX_JITTER, MAX_JITTER + 1);
+    private static int randomJitter(int maxJitter) {
+        int safeMax = Math.max(0, maxJitter);
+        return ThreadLocalRandom.current().nextInt(
+                -safeMax,
+                safeMax + 1
+        );
+    }
+
+    private static boolean hasEffect(
+            Config.Data config,
+            Config.CensorBoxEffect effect
+    ) {
+        return config.censorBoxEffects != null
+                && config.censorBoxEffects.contains(effect);
+    }
+
+    private static int parseColor(String value) {
+        if (value == null) {
+            return 0xFF000000;
+        }
+
+        String hex = value.trim();
+
+        if (hex.startsWith("#")) {
+            hex = hex.substring(1);
+        } else if (hex.startsWith("0x") || hex.startsWith("0X")) {
+            hex = hex.substring(2);
+        }
+
+        try {
+            long parsed = Long.parseLong(hex, 16);
+
+            if (hex.length() == 6) {
+                return 0xFF000000 | (int) parsed;
+            }
+
+            if (hex.length() == 8) {
+                return (int) parsed;
+            }
+        } catch (NumberFormatException ignored) {
+            // Fall back to opaque black.
+        }
+
+        return 0xFF000000;
+    }
+
+    private static int hsvToRgb(float hue) {
+        float scaled = hue * 6.0F;
+        int sector = ((int) Math.floor(scaled)) % 6;
+        float fraction = scaled - (float) Math.floor(scaled);
+        float q = 1.0F - fraction;
+        float t = fraction;
+
+        return switch (sector) {
+            case 0 -> 0x00FF0000 | (Math.round(t * 255.0F) << 8);
+            case 1 -> (Math.round(q * 255.0F) << 16) | 0x0000FF00;
+            case 2 -> (Math.round(t * 255.0F) << 8) | 0x000000FF;
+            case 3 -> (Math.round(q * 255.0F) << 8) | 0x000000FF;
+            case 4 -> (Math.round(t * 255.0F) << 16) | 0x000000FF;
+            default -> 0x00FF0000 | Math.round(q * 255.0F);
+        };
+    }
+
+    private static int censorColor(
+            Config.Data config,
+            long gameTick,
+            float partialTick
+    ) {
+        int base = parseColor(config.censorBoxColor);
+
+        if (!hasEffect(config, Config.CensorBoxEffect.RAINBOW)) {
+            return base;
+        }
+
+        float hue =
+                (gameTick + partialTick)
+                        * config.censorBoxRainbowSpeed
+                        * 0.01F;
+        hue -= (float) Math.floor(hue);
+
+        return (base & 0xFF000000) | hsvToRgb(hue);
+    }
+
+    private static float pulseScale(
+            Config.Data config,
+            long gameTick,
+            float partialTick
+    ) {
+        if (!hasEffect(config, Config.CensorBoxEffect.PULSE)
+                || config.censorBoxPulseAmount <= 0.0F) {
+            return 1.0F;
+        }
+
+        return 1.0F
+                + (float) Math.sin((gameTick + partialTick) * 0.25F)
+                * config.censorBoxPulseAmount;
+    }
+
+    private static void drawCensorBox(
+            GuiGraphics graphics,
+            int centerX,
+            int centerY,
+            int width,
+            int height,
+            int color,
+            Config.Data config
+    ) {
+        int drawWidth = Math.max(MIN_BOX_WIDTH, width);
+        int drawHeight = Math.max(MIN_BOX_HEIGHT, height);
+        int x = centerX - drawWidth / 2;
+        int y = centerY - drawHeight / 2;
+
+        graphics.fill(x, y, x + drawWidth, y + drawHeight, color);
+
+        if (hasEffect(config, Config.CensorBoxEffect.DOUBLE)
+                && config.censorBoxDoubleOffset > 0) {
+            int offset = config.censorBoxDoubleOffset;
+
+            graphics.fill(
+                    x - offset,
+                    y + offset,
+                    x - offset + drawWidth,
+                    y + offset + drawHeight,
+                    color
+            );
+
+            graphics.fill(
+                    x + offset,
+                    y - offset,
+                    x + offset + drawWidth,
+                    y - offset + drawHeight,
+                    color
+            );
+        }
     }
 
     private static boolean isVisible(
@@ -768,6 +917,7 @@ public final class CensorBoxRenderer {
         private int height;
 
         private long nextUpdateTick;
+        private boolean hasMotionState;
 
         private CensorMotionState(
                 int initialX,
@@ -781,6 +931,7 @@ public final class CensorBoxRenderer {
             this.width = width;
             this.height = height;
             this.nextUpdateTick = nextUpdateTick;
+            this.hasMotionState = true;
         }
     }
 }
