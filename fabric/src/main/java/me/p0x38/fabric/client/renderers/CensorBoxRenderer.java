@@ -46,8 +46,6 @@ public final class CensorBoxRenderer {
      * First-person hands are not rendered through the normal
      * entity renderer, so they need their own HUD-space boxes.
      */
-    private static final int FIRST_PERSON_POSITION_STEP = 8;
-
     private static final Map<HumanoidArm, FirstPersonHandState> FIRST_PERSON_HAND_STATES =
             new EnumMap<>(HumanoidArm.class);
 
@@ -518,20 +516,10 @@ public final class CensorBoxRenderer {
             }
 
             /*
-             * Keep jitter stable for the whole game tick.
-             *
-             * The actual arm position is still updated every
-             * rendered frame from vanilla's PoseStack.
-             */
-            if (handState.lastJitterTick != gameTick) {
-                handState.jitterX = randomJitter();
-                handState.jitterY = randomJitter();
-                handState.lastJitterTick = gameTick;
-            }
-
-            /*
              * Convert the actual transformed arm bounds from NDC
-             * into GUI coordinates.
+             * into GUI coordinates. These are the live vanilla arm
+             * bounds, but they are only sampled into the censor's
+             * motion state every few game ticks.
              */
             int minX =
                     Math.round(
@@ -561,12 +549,7 @@ public final class CensorBoxRenderer {
                                     * screenHeight
                     );
 
-            /*
-             * The actual projected arm size is used directly.
-             * This means the box follows FOV, bobbing, equipment
-             * motion, and vanilla swing transforms.
-             */
-            int boxWidth =
+            int liveBoxWidth =
                     Math.max(
                             MIN_BOX_WIDTH,
                             stepSize(
@@ -574,7 +557,7 @@ public final class CensorBoxRenderer {
                             )
                     );
 
-            int boxHeight =
+            int liveBoxHeight =
                     Math.max(
                             MIN_BOX_HEIGHT,
                             stepSize(
@@ -582,35 +565,59 @@ public final class CensorBoxRenderer {
                             )
                     );
 
-            int centerX = (minX + maxX) / 2;
-            int centerY = (minY + maxY) / 2;
+            int liveCenterX = (minX + maxX) / 2;
+            int liveCenterY = (minY + maxY) / 2;
 
             /*
-             * Step the center, not the actual vanilla animation.
-             * The animation therefore remains recognizable while
-             * the censor itself still has the intentionally broken
-             * movement.
+             * Match the world/entity censor behavior:
+             *
+             * - position is quantized
+             * - size is quantized
+             * - a small random offset is added
+             * - the cached box remains frozen for 2-6 ticks
+             * - the box suddenly snaps to the next sample
+             *
+             * The real arm animation keeps moving underneath it.
              */
-            centerX = stepFirstPersonPosition(centerX) + handState.jitterX;
-            centerY = stepFirstPersonPosition(centerY) + handState.jitterY;
+            if (!handState.hasMotionState
+                    || gameTick >= handState.nextUpdateTick) {
+                handState.x =
+                        stepPosition(liveCenterX)
+                                + randomJitter();
+                handState.y =
+                        stepPosition(liveCenterY)
+                                + randomJitter();
+                handState.width = liveBoxWidth;
+                handState.height = liveBoxHeight;
+                handState.nextUpdateTick =
+                        gameTick
+                                + ThreadLocalRandom.current().nextLong(
+                                MIN_UPDATE_TICKS,
+                                MAX_UPDATE_TICKS + 1L
+                        );
+                handState.hasMotionState = true;
 
-            int boxX = centerX - boxWidth / 2;
-            int boxY = centerY - boxHeight / 2;
+                DebugLogger.debug(
+                        "[CensorBox] updated first-person arm={} screen=({}, {}) size=({}, {})",
+                        entry.getKey(),
+                        handState.x,
+                        handState.y,
+                        handState.width,
+                        handState.height
+                );
+            }
+
+            int boxX = handState.x - handState.width / 2;
+            int boxY = handState.y - handState.height / 2;
 
             graphics.fill(
                     boxX,
                     boxY,
-                    boxX + boxWidth,
-                    boxY + boxHeight,
+                    boxX + handState.width,
+                    boxY + handState.height,
                     0xFF000000
             );
         }
-    }
-
-    private static int stepFirstPersonPosition(int value) {
-        return Math.round(
-                (float) value / FIRST_PERSON_POSITION_STEP
-        ) * FIRST_PERSON_POSITION_STEP;
     }
 
     private static int stepPosition(int value) {
@@ -736,14 +743,22 @@ public final class CensorBoxRenderer {
         private boolean visible;
         private long renderGeneration = Long.MIN_VALUE;
 
-        private long lastJitterTick = Long.MIN_VALUE;
-        private int jitterX;
-        private int jitterY;
-
         private float ndcMinX;
         private float ndcMinY;
         private float ndcMaxX;
         private float ndcMaxY;
+
+        /*
+         * The captured arm bounds update every rendered frame,
+         * but the censor box intentionally does not. This mirrors
+         * the deliberately broken motion used by world entities.
+         */
+        private int x;
+        private int y;
+        private int width;
+        private int height;
+        private long nextUpdateTick = Long.MIN_VALUE;
+        private boolean hasMotionState;
     }
 
     private static final class CensorMotionState {
