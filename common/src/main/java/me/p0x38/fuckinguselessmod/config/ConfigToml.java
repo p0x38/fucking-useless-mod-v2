@@ -147,9 +147,22 @@ public final class ConfigToml {
                 output.append("# Valid values: TILDE, ELLIPSIS, EXCLAMATION\n");
             }
             case "dialogueSoundPool" -> {
-                output.append("# Sound indices refer to dialogtxt/t_<index>.ogg.\n");
-                output.append("# Duplicate indices increase that sound's selection weight.\n");
-                output.append("# Invalid indices are ignored; an empty valid pool uses all 69 sounds.\n");
+                output.append("# Entries can be legacy numeric indices (0-68) or SoundEvent IDs.\n");
+                output.append("# Examples: 0, dialogtxt/t_69, minecraft:block.note_block.hat\n");
+                output.append("# Duplicate entries increase that sound's selection weight.\n");
+                output.append("# SoundEvent IDs must have a corresponding sound definition in a resource pack/mod.\n");
+            }
+            case "censorBoxDefaultSelectors" -> {
+                output.append("# Entity selectors applied automatically once when entering a world.\n");
+                output.append("# Examples: @e[type=minecraft:zombie], @e[type=!minecraft:player,distance=..16]\n");
+                output.append("# Leave empty to disable automatic censoring.\n");
+            }
+            case "censorBoxColor" -> {
+                output.append("# ARGB color in #AARRGGBB form. #RRGGBB is also accepted with full opacity.\n");
+            }
+            case "censorBoxEffects" -> {
+                output.append("# Effects: STEPPY, JITTER, PULSE, RAINBOW, FLASH, DOUBLE.\n");
+                output.append("# STEPPY and JITTER reproduce the default broken tracking behavior.\n");
             }
             default -> {
             }
