@@ -644,8 +644,8 @@ public final class CensorBoxRenderer {
             float pulse = pulseScale(config, gameTick, partialTick);
             drawCensorBox(
                     graphics,
-                    state.x,
-                    state.y,
+                    state.x + state.width / 2,
+                    state.y + state.height / 2,
                     Math.round(state.width * pulse),
                     Math.round(state.height * pulse),
                     censorColor(config, gameTick, partialTick),
