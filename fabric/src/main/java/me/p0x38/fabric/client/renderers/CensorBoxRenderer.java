@@ -1057,5 +1057,5 @@ public final class CensorBoxRenderer {
             this.height = height;
             this.nextUpdateTick = nextUpdateTick;
         }
-    }}
+    }
 }
