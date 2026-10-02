@@ -3,6 +3,7 @@ package me.p0x38.fabric.client.mixins;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
 import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
@@ -74,6 +75,22 @@ public abstract class AvatarRendererMixin {
         Matrix4f projectionMatrix =
                 client.gameRenderer.getProjectionMatrix(fov);
 
+        /*
+         * Vanilla's hand pass renders with:
+         *
+         *   projection * modelView * poseStack * vertex
+         *
+         * and poseStack starts with modelView^-1. Reuse the live
+         * model-view matrix from the hand pass so the captured
+         * bounds exactly follow the same transform as the arm.
+         */
+        Matrix4f modelViewMatrix =
+                new Matrix4f(RenderSystem.getModelViewMatrix());
+
+        Matrix4f handMvp =
+                new Matrix4f(projectionMatrix)
+                        .mul(modelViewMatrix);
+
         float minX = Float.POSITIVE_INFINITY;
         float minY = Float.POSITIVE_INFINITY;
         float maxX = Float.NEGATIVE_INFINITY;
@@ -90,7 +107,7 @@ public abstract class AvatarRendererMixin {
                 poseStack,
                 position -> {
                     Vector3f projected =
-                            new Matrix4f(projectionMatrix)
+                            new Matrix4f(handMvp)
                                     .transformProject(
                                             new Vector3f(position)
                                     );
