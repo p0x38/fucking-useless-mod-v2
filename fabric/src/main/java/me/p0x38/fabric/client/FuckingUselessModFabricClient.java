@@ -58,7 +58,10 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(
-                client -> DialogueSoundManager.tick()
+                client -> {
+                    CensorBoxCommand.applyConfiguredDefaults(client);
+                    DialogueSoundManager.tick();
+                }
         );
     }
 }
