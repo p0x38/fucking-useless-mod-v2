@@ -157,7 +157,7 @@ public final class CensorBoxCommand {
                 Minecraft.getInstance();
 
         List<Entity> targets =
-                resolve(client, selector);
+                resolve(context, selector);
 
         if (targets.isEmpty()) {
             context.getSource().sendError(
@@ -199,7 +199,7 @@ public final class CensorBoxCommand {
                 Minecraft.getInstance();
 
         List<Entity> targets =
-                resolve(client, selector);
+                resolve(context, selector);
 
         if (targets.isEmpty()) {
             context.getSource().sendError(
