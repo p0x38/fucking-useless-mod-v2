@@ -23,8 +23,10 @@ public final class DialogueSoundManager {
      * The selected sound is calculated from the player's UUID
      * and cached here so every letter/message uses the same sound.
      */
-    private static final Map<UUID, Integer> PLAYER_VOICES =
+    private static final Map<UUID, String> PLAYER_VOICES =
             new HashMap<>();
+
+    private static String playerVoicePoolKey;
 
     /*
      * The signature uniquely identifies a signed chat message.
@@ -120,9 +122,9 @@ public final class DialogueSoundManager {
         );
 
         DebugLogger.debug(
-                "[Dialogue] created DialogueMessage uuid={} voiceIndex={} textLength={}",
+                "[Dialogue] created DialogueMessage uuid={} voiceId={} textLength={}",
                 sender.id(),
-                next.voiceIndex,
+                next.voiceId,
                 message.codePointCount(0, message.length())
         );
 
@@ -143,8 +145,8 @@ public final class DialogueSoundManager {
         soundsPlayed = 0;
 
         DebugLogger.debug(
-                "[Dialogue] message became current voiceIndex={}",
-                current.voiceIndex
+                "[Dialogue] message became current voiceId={}",
+                current.voiceId
         );
     }
 
@@ -166,8 +168,8 @@ public final class DialogueSoundManager {
             }
 
             DebugLogger.debug(
-                    "[Dialogue] dequeued message voiceIndex={} queueSize={}",
-                    current.voiceIndex,
+                    "[Dialogue] dequeued message voiceId={} queueSize={}",
+                    current.voiceId,
                     QUEUE.size()
             );
 
@@ -205,9 +207,9 @@ public final class DialogueSoundManager {
             soundsPlayed++;
 
             DebugLogger.debug(
-                    "[Dialogue] sound played count={} voiceIndex={}",
+                    "[Dialogue] sound played count={} voiceId={}",
                     soundsPlayed,
-                    current.voiceIndex
+                    current.voiceId
             );
         } else {
             DebugLogger.debug(
@@ -226,13 +228,13 @@ public final class DialogueSoundManager {
     ) {
         /*
          * IMPORTANT:
-         * current.voiceIndex never changes during this message.
+         * current.voiceId never changes during this message.
          */
         float pitch = current.choosePitch(config);
 
         DebugLogger.debug(
-                "[Dialogue] playCurrentSound voiceIndex={} pitch={} volume={}",
-                current.voiceIndex,
+                "[Dialogue] playCurrentSound voiceId={} pitch={} volume={}",
+                current.voiceId,
                 pitch,
                 config.dialogueVolume
         );
@@ -241,7 +243,7 @@ public final class DialogueSoundManager {
 
         currentSound = SimpleSoundInstance.forUI(
                 ModSounds.getDialogueSound(
-                        current.voiceIndex
+                        current.voiceId
                 ),
                 pitch,
                 config.dialogueVolume
@@ -260,25 +262,29 @@ public final class DialogueSoundManager {
         currentSound = null;
     }
 
-    private static int getPlayerVoice(
+    private static String getPlayerVoice(
             UUID uuid,
             Config.Data config
     ) {
+        List<String> pool = createSoundPool(config.dialogueSoundPool);
+        String poolKey = String.join("\u0000", pool);
+
+        if (!poolKey.equals(playerVoicePoolKey)) {
+            PLAYER_VOICES.clear();
+            playerVoicePoolKey = poolKey;
+        }
+
         return PLAYER_VOICES.computeIfAbsent(
                 uuid,
-                ignored -> choosePlayerVoice(
-                        uuid,
-                        config.dialogueSoundPool
-                )
+                ignored -> choosePlayerVoice(uuid, pool)
         );
     }
 
-    private static int choosePlayerVoice(
+    private static String choosePlayerVoice(
             UUID uuid,
             List<String> configuredPool
     ) {
-        List<Integer> pool =
-                createSoundPool(configuredPool);
+        List<String> pool = configuredPool;
 
         long seed =
                 uuid.getMostSignificantBits()
@@ -316,43 +322,31 @@ public final class DialogueSoundManager {
         );
     }
 
-    private static List<Integer> createSoundPool(
+    private static List<String> createSoundPool(
             List<String> configured
     ) {
-        List<Integer> result =
-                new ArrayList<>();
+        List<String> result = new ArrayList<>();
 
         if (configured != null) {
             for (String value : configured) {
-                if (value == null) {
-                    continue;
-                }
+                var identifier = ModSounds.normalizeDialogueSoundId(value);
 
-                try {
-                    int index =
-                            Integer.parseInt(value.trim());
-
-                    if (index >= 0
-                            && index < ModSounds.DIALOGUE_SOUND_COUNT) {
-                        /*
-                         * Duplicate entries intentionally act
-                         * as weight.
-                         */
-                        result.add(index);
-                    }
-                } catch (NumberFormatException ignored) {
-                    // Ignore invalid indices.
+                if (identifier != null) {
+                    /*
+                     * Duplicate entries intentionally act as weight.
+                     */
+                    result.add(identifier.toString());
                 }
             }
         }
 
         if (result.isEmpty()) {
-            for (
-                    int index = 0;
-                    index < ModSounds.DIALOGUE_SOUND_COUNT;
-                    index++
-            ) {
-                result.add(index);
+            for (int index = 0; index < ModSounds.DIALOGUE_SOUND_COUNT; index++) {
+                result.add(
+                        ModSounds.normalizeDialogueSoundId(
+                                String.valueOf(index)
+                        ).toString()
+                );
             }
         }
 
@@ -365,7 +359,7 @@ public final class DialogueSoundManager {
         /*
          * Fixed for the entire message.
          */
-        private final int voiceIndex;
+        private final String voiceId;
 
         private final Random random;
 
@@ -375,15 +369,15 @@ public final class DialogueSoundManager {
 
         private DialogueMessage(
                 String message,
-                int voiceIndex
+                String voiceId
         ) {
             this.message = message;
-            this.voiceIndex = voiceIndex;
+            this.voiceId = voiceId;
 
             /*
              *
              * The player's UUID is intentionally NOT used here.
-             * UUID -> voiceIndex is handled separately by
+             * UUID -> voiceId is handled separately by
              * getPlayerVoice().
              */
             this.random = new Random();
