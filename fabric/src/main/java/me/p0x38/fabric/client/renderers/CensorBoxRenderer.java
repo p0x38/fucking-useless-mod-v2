@@ -951,42 +951,17 @@ public final class CensorBoxRenderer {
          * This handles partial obstruction much better than a
          * single center-point raycast.
          */
-        if (isAnyVisibilitySampleClear(
-                level,
-                cameraPosition,
-                entity,
-                new Vec3(centerX, centerY, centerZ),
-                new Vec3(centerX, box.maxY, centerZ),
-                new Vec3(centerX, box.minY, centerZ),
-                new Vec3(box.minX, centerY, centerZ),
-                new Vec3(box.maxX, centerY, centerZ),
-                new Vec3(centerX, centerY, box.minZ),
-                new Vec3(centerX, centerY, box.maxZ),
-                new Vec3(box.minX, box.minY, box.minZ),
-                new Vec3(box.maxX, box.maxY, box.maxZ),
-                new Vec3(box.minX, box.maxY, box.maxZ),
-                new Vec3(box.maxX, box.minY, box.minZ)
-        )) {
-            return true;
-        }
-
-        return false;
-    }
-
-
-    private static boolean isAnyVisibilitySampleClear(
-            ClientLevel level,
-            Vec3 cameraPosition,
-            Entity entity,
-            Vec3... targets
-    ) {
-        for (Vec3 target : targets) {
-            if (canSee(level, cameraPosition, target, entity)) {
-                return true;
-            }
-        }
-
-        return false;
+        return canSee(level, cameraPosition, new Vec3(centerX, centerY, centerZ), entity)
+                || canSee(level, cameraPosition, new Vec3(centerX, box.maxY, centerZ), entity)
+                || canSee(level, cameraPosition, new Vec3(centerX, box.minY, centerZ), entity)
+                || canSee(level, cameraPosition, new Vec3(box.minX, centerY, centerZ), entity)
+                || canSee(level, cameraPosition, new Vec3(box.maxX, centerY, centerZ), entity)
+                || canSee(level, cameraPosition, new Vec3(centerX, centerY, box.minZ), entity)
+                || canSee(level, cameraPosition, new Vec3(centerX, centerY, box.maxZ), entity)
+                || canSee(level, cameraPosition, new Vec3(box.minX, box.minY, box.minZ), entity)
+                || canSee(level, cameraPosition, new Vec3(box.maxX, box.maxY, box.maxZ), entity)
+                || canSee(level, cameraPosition, new Vec3(box.minX, box.maxY, box.maxZ), entity)
+                || canSee(level, cameraPosition, new Vec3(box.maxX, box.minY, box.minZ), entity);
     }
 
     private static boolean canSee(
