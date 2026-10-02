@@ -585,12 +585,48 @@ public final class CensorBoxRenderer {
                             )
                     );
 
+            double deltaSeconds = 1.0;
+            if (state.initialized && gameTick > state.lastSampleTick) {
+                deltaSeconds = gameTick - state.lastSampleTick;
+            }
+
+            double velocityX = state.initialized
+                    ? (x - state.lastRawX) / deltaSeconds
+                    : 0.0;
+            double velocityY = state.initialized
+                    ? (y - state.lastRawY) / deltaSeconds
+                    : 0.0;
+
+            double accelerationX = state.initialized
+                    ? velocityX - state.velocityX
+                    : 0.0;
+            double accelerationY = state.initialized
+                    ? velocityY - state.velocityY
+                    : 0.0;
+
+            double speed = Math.hypot(velocityX, velocityY);
+            float prediction = predictionAmount(config, speed);
+
+            state.lastRawX = x;
+            state.lastRawY = y;
+            state.velocityX = velocityX;
+            state.velocityY = velocityY;
+            state.lastSampleTick = gameTick;
+
             if (!state.initialized
                     || !hasEffect(config, Config.CensorBoxEffect.STEPPY)
                     || gameTick >= state.nextUpdateTick) {
+                double predictedX = x + velocityX * prediction;
+                double predictedY = y + velocityY * prediction;
+
+                if (config.censorBoxPredictionAcceleration) {
+                    predictedX += accelerationX * prediction * prediction * 0.5;
+                    predictedY += accelerationY * prediction * prediction * 0.5;
+                }
+
                 state.x =
                         stepPosition(
-                                x,
+                                (int) Math.round(predictedX),
                                 config.censorBoxPositionStep
                         ) + (
                                 hasEffect(
@@ -605,7 +641,7 @@ public final class CensorBoxRenderer {
 
                 state.y =
                         stepPosition(
-                                y,
+                                (int) Math.round(predictedY),
                                 config.censorBoxPositionStep
                         ) + (
                                 hasEffect(
@@ -622,17 +658,21 @@ public final class CensorBoxRenderer {
                 state.height = boxHeight;
                 state.nextUpdateTick =
                         gameTick
-                                + chooseUpdateTicks(config);
+                                + chooseUpdateTicks(
+                                        config,
+                                        speed
+                                );
                 state.initialized = true;
 
                 DebugLogger.debug(
-                        "[CensorBox] updated uuid={} screen=({}, {}) size=({}, {}) depth={}",
+                        "[CensorBox] updated uuid={} screen=({}, {}) size=({}, {}) speed={} prediction={}",
                         uuid,
                         state.x,
                         state.y,
                         state.width,
                         state.height,
-                        depth
+                        speed,
+                        prediction
                 );
             }
 
@@ -738,6 +778,25 @@ public final class CensorBoxRenderer {
             int liveCenterX = (minX + maxX) / 2;
             int liveCenterY = (minY + maxY) / 2;
 
+            float frameVelocityX =
+                    handState.hasMotionState
+                            ? liveCenterX - handState.previousCenterX
+                            : 0.0f;
+            float frameVelocityY =
+                    handState.hasMotionState
+                            ? liveCenterY - handState.previousCenterY
+                            : 0.0f;
+
+            handState.velocityX = frameVelocityX;
+            handState.velocityY = frameVelocityY;
+            handState.speed =
+                    (float) Math.hypot(
+                            frameVelocityX,
+                            frameVelocityY
+                    );
+            handState.previousCenterX = liveCenterX;
+            handState.previousCenterY = liveCenterY;
+
             /*
              * Match the world/entity censor behavior:
              *
@@ -754,7 +813,14 @@ public final class CensorBoxRenderer {
                     || gameTick >= handState.nextUpdateTick) {
                 handState.x =
                         stepPosition(
-                                liveCenterX,
+                                (int) Math.round(
+                                        liveCenterX
+                                                + handState.velocityX
+                                                * predictionAmount(
+                                                        config,
+                                                        handState.speed
+                                                )
+                                ),
                                 config.censorBoxPositionStep
                         ) + (
                                 hasEffect(
@@ -769,7 +835,14 @@ public final class CensorBoxRenderer {
 
                 handState.y =
                         stepPosition(
-                                liveCenterY,
+                                (int) Math.round(
+                                        liveCenterY
+                                                + handState.velocityY
+                                                * predictionAmount(
+                                                        config,
+                                                        handState.speed
+                                                )
+                                ),
                                 config.censorBoxPositionStep
                         ) + (
                                 hasEffect(
@@ -786,7 +859,10 @@ public final class CensorBoxRenderer {
                 handState.height = liveBoxHeight;
                 handState.nextUpdateTick =
                         gameTick
-                                + chooseUpdateTicks(config);
+                                + chooseUpdateTicks(
+                                        config,
+                                        handState.speed
+                                );
                 handState.hasMotionState = true;
 
                 DebugLogger.debug(
@@ -1091,6 +1167,12 @@ public final class CensorBoxRenderer {
         private int height;
         private long nextUpdateTick = Long.MIN_VALUE;
         private boolean hasMotionState;
+
+        private float previousCenterX;
+        private float previousCenterY;
+        private float velocityX;
+        private float velocityY;
+        private float speed;
     }
 
     private static final class CensorMotionState {
@@ -1101,6 +1183,12 @@ public final class CensorBoxRenderer {
 
         private long nextUpdateTick;
         private boolean initialized;
+
+        private double lastRawX;
+        private double lastRawY;
+        private double velocityX;
+        private double velocityY;
+        private long lastSampleTick = Long.MIN_VALUE;
 
         private CensorMotionState(
                 int initialX,
