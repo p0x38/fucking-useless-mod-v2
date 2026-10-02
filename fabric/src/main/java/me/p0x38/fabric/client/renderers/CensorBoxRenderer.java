@@ -13,6 +13,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -46,8 +50,8 @@ public final class CensorBoxRenderer {
     private static final int FIRST_PERSON_BOX_HEIGHT = 64;
     private static final int FIRST_PERSON_POSITION_STEP = 8;
 
-    private static final EnumSet<HumanoidArm> VISIBLE_FIRST_PERSON_HANDS =
-            EnumSet.noneOf(HumanoidArm.class);
+    private static final Map<HumanoidArm, FirstPersonHandState> FIRST_PERSON_HAND_STATES =
+            new EnumMap<>(HumanoidArm.class);
 
     private static final int POSITION_STEP = 6;
     private static final int MAX_JITTER = 1;
@@ -127,12 +131,36 @@ public final class CensorBoxRenderer {
         return Set.copyOf(CENSORED_ENTITIES);
     }
 
+    /*
+     * Called immediately before vanilla starts rendering the
+     * first-person hands for the current frame.
+     *
+     * We mark every hand as absent first, then renderPlayerArm()
+     * marks the ones vanilla actually draws.
+     */
     public static void beginFirstPersonHandTracking() {
-        VISIBLE_FIRST_PERSON_HANDS.clear();
+        for (FirstPersonHandState state :
+            FIRST_PERSON_HAND_STATES.values()) {
+            state.visible = false;
+            state.swingProgress = 0.0f;
+        }
     }
 
-    public static void markFirstPersonHand(HumanoidArm arm) {
-        VISIBLE_FIRST_PERSON_HANDS.add(arm);
+    /*
+     * Called from ItemInHandRenderer.renderPlayerArm().
+     *
+     * This means the HUD box follows the actual vanilla arm
+     * render path instead of guessing from held-item state.
+     */
+    public static void markFirstPersonHand(HumanoidArm arm, float swingProgress) {
+        FirstPersonHandState state =
+                FIRST_PERSON_HAND_STATES.computeIfAbsent(
+                        arm,
+                        key -> new FirstPersonHandState()
+                );
+
+        state.visible = true;
+        state.swingProgress = swingProgress;
     }
 
     private static void render(
@@ -244,6 +272,24 @@ public final class CensorBoxRenderer {
                     );
 
             if (entity == null) {
+                continue;
+            }
+
+            /*
+             * The HUD is rendered after the world, so depth testing
+             * cannot tell us whether the entity is actually visible.
+             *
+             * Perform several camera-to-entity raycasts instead.
+             * The box is shown when at least one sampled point can
+             * be seen. If every sampled point is behind a block,
+             * the censor box disappears.
+             */
+            if (!isVisible(
+                    level,
+                    cameraPosition,
+                    entity,
+                    partialTick
+            )) {
                 continue;
             }
 
@@ -435,76 +481,87 @@ public final class CensorBoxRenderer {
             long gameTick,
             UUID uuid
     ) {
-        if (VISIBLE_FIRST_PERSON_HANDS.isEmpty()) {
+        if (FIRST_PERSON_HAND_STATES.isEmpty()) {
             return;
         }
 
-        CensorMotionState state =
-                MOTION_STATES.computeIfAbsent(
-                        uuid,
-                        key -> {
-                            int leftX = firstPersonLeftX(screenWidth);
+        for (Map.Entry<HumanoidArm, FirstPersonHandState> entry :
+        FIRST_PERSON_HAND_STATES.entrySet()) {
+            HumanoidArm arm = entry.getKey();
 
-                            int y = firstPersonY(screenHeight);
+            FirstPersonHandState handState =
+                    entry.getValue();
 
-                            return new CensorMotionState(
-                                    leftX,
-                                    y,
-                                    FIRST_PERSON_BOX_WIDTH,
-                                    FIRST_PERSON_BOX_HEIGHT,
-                                    gameTick
-                            );
-                        }
-                );
+            if (!handState.visible) {
+                continue;
+            }
 
-        if (gameTick >= state.nextUpdateTick) {
-            state.x = stepFirstPersonPosition(
-                    firstPersonLeftX(screenWidth)
-            ) + randomJitter();
-            state.y = stepFirstPersonPosition(
-                    firstPersonY(screenHeight)
-            ) + randomJitter();
-
-            state.width = FIRST_PERSON_BOX_WIDTH;
-            state.height = FIRST_PERSON_BOX_HEIGHT;
-
-            state.nextUpdateTick =
-                    gameTick + ThreadLocalRandom.current().nextLong(
-                            MIN_UPDATE_TICKS,
-                            MAX_UPDATE_TICKS + 1L
-                    );
-
-            DebugLogger.debug(
-                    "[CensorBox] updated first-person uuid={} hands={} size=({}, {})",
-                    uuid,
-                    visibleFirstPersonHands(),
-                    state.width,
-                    state.height
-            );
-        }
-
-        for (HumanoidArm arm : VISIBLE_FIRST_PERSON_HANDS) {
             int handX =
                     arm == HumanoidArm.RIGHT
-                        ? firstPersonRightX(screenWidth)
+                    ? firstPersonRightX(screenWidth)
                             : firstPersonLeftX(screenWidth);
 
+            int handY = firstPersonY(screenHeight);
+
+            /*
+             * Recreate the characteristic first-person arm
+             * swing motion in screen space.
+             *
+             * This does not rotate the censor rectangle itself;
+             * only its 2D position moves.
+             */
+            float swingProgress =
+                    Math.clamp(
+                            handState.swingProgress,
+                            0.0f,
+                            1.0f
+                    );
+
+            float swingCurve =
+                    (float) Math.sin(
+                            Math.sqrt(swingProgress)
+                            * Math.PI
+                    );
+
+            float swingVertical =
+                    (float) Math.sin(
+                            Math.sqrt(swingProgress)
+                                * Math.PI
+                            * 2.0
+                    );
+
+            int swingX = Math.round(swingCurve * 24.0f);
+            int swingY = Math.round(swingVertical * 12.0f);
+
+            if (arm == HumanoidArm.RIGHT) {
+                handX -= swingX;
+            } else {
+                handX += swingX;
+            }
+
+            handY += swingY;
+
             handX =
-                    stepFirstPersonPosition(handX)
-                            + (state.x - firstPersonLeftX(screenWidth));
+                    stepFirstPersonPosition(handX) + randomJitter();
+
+            handY = stepFirstPersonPosition(handY) + randomJitter();
+
+            int boxX = handX - FIRST_PERSON_BOX_WIDTH / 2;
+            int boxY = handY - FIRST_PERSON_BOX_HEIGHT / 2;
 
             graphics.fill(
-                    handX,
-                    state.y,
-                    handX + state.width,
-                    state.y + state.height,
+                    boxX,
+                    boxY,
+                    boxX + FIRST_PERSON_BOX_WIDTH,
+                    boxY + FIRST_PERSON_BOX_HEIGHT,
                     0xFF000000
             );
         }
     }
 
-    private static String visibleFirstPersonHands() {
-        return VISIBLE_FIRST_PERSON_HANDS.toString();
+    private static final class FirstPersonHandState {
+        private boolean visible;
+        private float swingProgress;
     }
 
     private static int firstPersonLeftX(int screenWidth) {
@@ -548,6 +605,92 @@ public final class CensorBoxRenderer {
 
     private static int randomJitter() {
         return ThreadLocalRandom.current().nextInt(-MAX_JITTER, MAX_JITTER + 1);
+    }
+
+    private static boolean isVisible(
+            ClientLevel level,
+            Vec3 cameraPosition,
+            Entity entity,
+            float partialTick
+    ) {
+        /*
+         * Shift the bounding box to the interpolated position so
+         * the visibility test uses the same frame position as the
+         * HUD projection.
+         */
+        Vec3 interpolatedPosition =
+                entity.getPosition(partialTick);
+
+        Vec3 currentPosition =
+                entity.position();
+
+        AABB box =
+                entity.getBoundingBox().move(
+                        interpolatedPosition.subtract(
+                                currentPosition
+                        )
+                );
+
+        double centerX = (box.minX + box.maxX) * .5;
+        double centerY = (box.minY + box.maxY) * .5;
+        double centerZ = (box.minZ + box.maxZ) * .5;
+
+        /*
+         * Center + top/bottom + four side points + four corners.
+         *
+         * This handles partial obstruction much better than a
+         * single center-point raycast.
+         */
+        Vec3[] samples = {
+                new Vec3(centerX, centerY, centerZ),
+
+                new Vec3(centerX, box.maxY, centerZ),
+                new Vec3(centerX, box.minY, centerZ),
+
+                new Vec3(box.minX, centerY, centerZ),
+                new Vec3(box.maxX, centerY, centerZ),
+
+                new Vec3(centerX, centerY, box.minZ),
+                new Vec3(centerX, centerY, box.maxZ),
+
+                new Vec3(box.minX, box.minY, box.minZ),
+                new Vec3(box.maxX, box.maxY, box.maxZ),
+                new Vec3(box.minX, box.maxY, box.maxZ),
+                new Vec3(box.maxX, box.minY, box.minZ)
+        };
+
+        for (Vec3 target : samples) {
+            if (canSee(
+                    level,
+                    cameraPosition,
+                    target,
+                    entity
+            )) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean canSee(
+            ClientLevel level,
+            Vec3 cameraPosition,
+            Vec3 target,
+            Entity entity
+    ) {
+        BlockHitResult hit =
+                level.clip(
+                        new ClipContext(
+                                cameraPosition,
+                                target,
+                                ClipContext.Block.OUTLINE,
+                                ClipContext.Fluid.NONE,
+                                entity
+                        )
+                );
+
+        return hit.getType() == HitResult.Type.MISS;
     }
 
     private static Entity findEntity(
