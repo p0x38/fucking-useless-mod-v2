@@ -299,12 +299,132 @@ public final class CensorBoxRenderer {
              * be seen. If every sampled point is behind a block,
              * the censor box disappears.
              */
-            if (!isVisible(
-                    level,
-                    cameraPosition,
-                    entity,
-                    partialTick
-            )) {
+            Vec3 interpolatedPosition = entity.getPosition(partialTick);
+            Vec3 currentPosition = entity.position();
+            AABB visibilityBox = entity.getBoundingBox().move(
+                    interpolatedPosition.subtract(currentPosition)
+            );
+
+            double visibilityCenterX =
+                    (visibilityBox.minX + visibilityBox.maxX) * 0.5;
+            double visibilityCenterY =
+                    (visibilityBox.minY + visibilityBox.maxY) * 0.5;
+            double visibilityCenterZ =
+                    (visibilityBox.minZ + visibilityBox.maxZ) * 0.5;
+
+            boolean visible =
+                    canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityCenterX,
+                                    visibilityCenterY,
+                                    visibilityCenterZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityCenterX,
+                                    visibilityBox.maxY,
+                                    visibilityCenterZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityCenterX,
+                                    visibilityBox.minY,
+                                    visibilityCenterZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityBox.minX,
+                                    visibilityCenterY,
+                                    visibilityCenterZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityBox.maxX,
+                                    visibilityCenterY,
+                                    visibilityCenterZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityCenterX,
+                                    visibilityCenterY,
+                                    visibilityBox.minZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityCenterX,
+                                    visibilityCenterY,
+                                    visibilityBox.maxZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityBox.minX,
+                                    visibilityBox.minY,
+                                    visibilityBox.minZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityBox.maxX,
+                                    visibilityBox.maxY,
+                                    visibilityBox.maxZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityBox.minX,
+                                    visibilityBox.maxY,
+                                    visibilityBox.maxZ
+                            ),
+                            entity
+                    )
+                            || canSee(
+                            level,
+                            cameraPosition,
+                            new Vec3(
+                                    visibilityBox.maxX,
+                                    visibilityBox.minY,
+                                    visibilityBox.minZ
+                            ),
+                            entity
+                    );
+
+            if (!visible) {
                 continue;
             }
 
@@ -915,53 +1035,6 @@ public final class CensorBoxRenderer {
                     color
             );
         }
-    }
-
-    private static boolean isVisible(
-            ClientLevel level,
-            Vec3 cameraPosition,
-            Entity entity,
-            float partialTick
-    ) {
-        /*
-         * Shift the bounding box to the interpolated position so
-         * the visibility test uses the same frame position as the
-         * HUD projection.
-         */
-        Vec3 interpolatedPosition =
-                entity.getPosition(partialTick);
-
-        Vec3 currentPosition =
-                entity.position();
-
-        AABB box =
-                entity.getBoundingBox().move(
-                        interpolatedPosition.subtract(
-                                currentPosition
-                        )
-                );
-
-        double centerX = (box.minX + box.maxX) * .5;
-        double centerY = (box.minY + box.maxY) * .5;
-        double centerZ = (box.minZ + box.maxZ) * .5;
-
-        /*
-         * Center + top/bottom + four side points + four corners.
-         *
-         * This handles partial obstruction much better than a
-         * single center-point raycast.
-         */
-        return canSee(level, cameraPosition, new Vec3(centerX, centerY, centerZ), entity)
-                || canSee(level, cameraPosition, new Vec3(centerX, box.maxY, centerZ), entity)
-                || canSee(level, cameraPosition, new Vec3(centerX, box.minY, centerZ), entity)
-                || canSee(level, cameraPosition, new Vec3(box.minX, centerY, centerZ), entity)
-                || canSee(level, cameraPosition, new Vec3(box.maxX, centerY, centerZ), entity)
-                || canSee(level, cameraPosition, new Vec3(centerX, centerY, box.minZ), entity)
-                || canSee(level, cameraPosition, new Vec3(centerX, centerY, box.maxZ), entity)
-                || canSee(level, cameraPosition, new Vec3(box.minX, box.minY, box.minZ), entity)
-                || canSee(level, cameraPosition, new Vec3(box.maxX, box.maxY, box.maxZ), entity)
-                || canSee(level, cameraPosition, new Vec3(box.minX, box.maxY, box.maxZ), entity)
-                || canSee(level, cameraPosition, new Vec3(box.maxX, box.minY, box.minZ), entity);
     }
 
     private static boolean canSee(
