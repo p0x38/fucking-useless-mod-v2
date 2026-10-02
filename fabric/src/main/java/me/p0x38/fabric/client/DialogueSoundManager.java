@@ -1,21 +1,18 @@
 package me.p0x38.fabric.client;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.logging.LogUtils;
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.sounds.ModSounds;
+import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
-import org.slf4j.Logger;
-
 import java.time.Instant;
 import java.util.*;
 
 public final class DialogueSoundManager {
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Queue<DialogueMessage> QUEUE =
             new ArrayDeque<>();
@@ -198,7 +195,7 @@ public final class DialogueSoundManager {
             return;
         }
         LOGGER.info(
-                "[DialogueDebug] advance() suceeded index={} soundsPlayed={}",
+                "[DialogueDebug] advance() succeeded index={} soundsPlayed={}",
                 current.index,
                 soundsPlayed
         );
