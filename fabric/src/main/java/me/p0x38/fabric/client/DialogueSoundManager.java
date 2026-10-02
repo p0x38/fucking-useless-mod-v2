@@ -243,8 +243,8 @@ public final class DialogueSoundManager {
                 ModSounds.getDialogueSound(
                         current.voiceIndex
                 ),
-                config.dialogueVolume,
-                pitch
+                pitch,
+                config.dialogueVolume
         );
 
         Minecraft.getInstance().getSoundManager().play(currentSound);

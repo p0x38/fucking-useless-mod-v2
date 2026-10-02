@@ -398,7 +398,7 @@ public final class Config {
                 hasMax = true,
                 max = 20
         )
-        public int dialogueIntervalMin = 2;
+        public int dialogueIntervalMin = 1;
 
         @ConfigOption(
                 name = "Maximum Interval",
@@ -408,7 +408,7 @@ public final class Config {
                 hasMax = true,
                 max = 20
         )
-        public int dialogueIntervalMax = 2;
+        public int dialogueIntervalMax = 1;
 
         @ConfigOption(
                 name = "Volume",
