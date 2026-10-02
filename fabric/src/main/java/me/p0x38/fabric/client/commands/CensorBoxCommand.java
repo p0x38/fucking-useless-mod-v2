@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.world.entity.EntityType;
 import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
+import me.p0x38.fuckinguselessmod.Config;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -18,6 +19,8 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class CensorBoxCommand {
+    private static Object lastDefaultLevel;
+
     private CensorBoxCommand() {
     }
 
@@ -305,6 +308,30 @@ public final class CensorBoxCommand {
         return count;
     }
 
+    public static void applyConfiguredDefaults(Minecraft client) {
+        if (client.level == null) {
+            lastDefaultLevel = null;
+            return;
+        }
+
+        if (lastDefaultLevel == client.level) {
+            return;
+        }
+
+        lastDefaultLevel = client.level;
+        Config.Data config = Config.get();
+
+        if (config.censorBoxDefaultSelectors == null) {
+            return;
+        }
+
+        for (String selector : config.censorBoxDefaultSelectors) {
+            for (Entity entity : resolve(null, selector)) {
+                CensorBoxRenderer.add(entity.getUUID());
+            }
+        }
+    }
+
     private static List<Entity> resolve(
             CommandContext<FabricClientCommandSource> context,
             String selector
@@ -416,11 +443,13 @@ public final class CensorBoxCommand {
 
             return entities;
         } catch (IllegalArgumentException exception) {
-            context.getSource().sendError(
-                    Component.literal(
-                            "Invalid entity selector: " + exception.getMessage()
-                    )
-            );
+            if (context != null) {
+                context.getSource().sendError(
+                        Component.literal(
+                                "Invalid entity selector: " + exception.getMessage()
+                        )
+                );
+            }
             return List.of();
         }
     }
