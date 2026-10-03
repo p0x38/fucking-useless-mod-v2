@@ -185,7 +185,12 @@ public final class SentientSign {
             return;
         }
 
-        if (trust >= 0.78f && curiosity >= 0.5f) {\n            mood = Mood.PLAYFUL;\n            return;\n        }\n\n        if (curiosity >= 0.45f || awareness >= 30) {
+        if (trust >= 0.78f && curiosity >= 0.5f) {
+            mood = Mood.PLAYFUL;
+            return;
+        }
+
+        if (curiosity >= 0.45f || awareness >= 30) {
             mood = Mood.CURIOUS;
             return;
         }
