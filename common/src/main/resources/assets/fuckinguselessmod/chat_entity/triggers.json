@@ -95,6 +95,16 @@
       "[?？]",
       "^\\s*(?:why|how|what|where|when|who)\\b",
       "^\\s*(?:can|could|would|will|do|did|are|is)\\s+(?:you|u|it|there)\\b"
+    ],
+    "sleep": [
+      "\\b(?:i\\s+was|i['’]?ve\\s+been|i\\s+fell)\\s+(?:sleeping|asleep)\\b",
+      "\\bfell\\s+asleep\\b",
+      "\\bwas\\s+asleep\\b",
+      "\\bslept\\b",
+      "寝てた",
+      "寝ていた",
+      "寝ちゃってた",
+      "寝てたよ"
     ]
   }
 }
