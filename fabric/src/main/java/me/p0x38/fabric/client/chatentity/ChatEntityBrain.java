@@ -10,6 +10,9 @@ import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class ChatEntityBrain {
+    private static final String TEXT_PREFIX =
+            "text.fuckinguselessmod.chat.entity.";
+
     private enum InteractionKind {
         CONTROL,
         UNSETTLING,
@@ -27,24 +30,16 @@ public final class ChatEntityBrain {
             ClientLevel level
     ) {
         long gameTick = level.getGameTime();
-
-        var memories = entity.memories();
-
-        if (memories.isEmpty()) {
-            return;
-        }
-
         Memory latest = entity.latestMemory();
 
         if (latest == null
-        || latest == entity.lastProcessedMemory()) {
+                || latest == entity.lastProcessedMemory()) {
             return;
         }
 
         /*
-         * Direct player messages are scheduled immediately, but the actual
-         * chat delivery happens after a thinking phase and a typing/composition
-         * phase. Ambient reactions still respect the normal speech cooldown.
+         * Direct player messages bypass the ambient action cooldown because
+         * they are conversational events. Everything else respects it.
          */
         if (latest.type() != Memory.Type.PLAYER_INTERACTED
                 && !entity.canAct(gameTick)) {
@@ -61,17 +56,23 @@ public final class ChatEntityBrain {
         );
 
         switch (latest.type()) {
-            case CHAT_ENTITY_SPOKE -> handleEntitySpoke(entity, latest, gameTick);
-            case WORLD_CHANGED -> handleWorldChanged(entity, latest, gameTick);
-            case PLAYER_IDLE -> handlePlayerIdle(entity, latest, gameTick);
-            case PLAYER_LOCATION_UPDATED -> handleLocationUpdate(entity, latest);
-            case PLAYER_INTERACTED -> handleInteraction(entity, latest, gameTick);
-            case PLAYER_SEEN -> handlePlayerSeen(entity, latest, gameTick);
-            case PLAYER_RETURNED -> handlePlayerReturned(entity, latest, gameTick);
-            case PLAYER_LOOKED_AWAY -> handlePlayerLookedAway(entity, latest, gameTick);
-            default -> {
-                // No response currently associated with this memory.
-            }
+            case CHAT_ENTITY_SPOKE ->
+                    handleEntitySpoke(entity, latest, gameTick);
+            case WORLD_CHANGED ->
+                    handleWorldChanged(entity, latest, gameTick);
+            case PLAYER_IDLE ->
+                    handlePlayerIdle(entity, latest, gameTick);
+            case PLAYER_LOCATION_UPDATED ->
+                    handleLocationUpdate(entity, latest);
+            case PLAYER_INTERACTED ->
+                    handleInteraction(entity, latest, gameTick);
+            case PLAYER_SEEN ->
+                    handlePlayerSeen(entity, latest, gameTick);
+            case PLAYER_RETURNED ->
+                    handlePlayerReturned(entity, latest, gameTick);
+            case PLAYER_LOOKED_AWAY ->
+                    handlePlayerLookedAway(entity, latest, gameTick);
+            default -> entity.markMemoryProcessed(latest);
         }
     }
 
@@ -80,8 +81,12 @@ public final class ChatEntityBrain {
             Memory memory,
             long gameTick
     ) {
-        if ((entity.lastReactionKind() == ChatEntity.ReactionKind.UNSETTLING
-        || entity.lastReactionKind() == ChatEntity.ReactionKind.OUT_OF_PLACE) && randomChance(0.35)) {
+        ChatEntity.ReactionKind reaction =
+                entity.lastReactionKind();
+
+        if ((reaction == ChatEntity.ReactionKind.UNSETTLING
+                || reaction == ChatEntity.ReactionKind.OUT_OF_PLACE)
+                && randomChance(0.35)) {
             say(
                     entity,
                     chooseText("self_aware", 8),
@@ -124,7 +129,7 @@ public final class ChatEntityBrain {
                 chooseText("idle." + stage, 4),
                 gameTick,
                 stage >= 5
-                ? ChatEntity.ReactionKind.META
+                        ? ChatEntity.ReactionKind.META
                         : ChatEntity.ReactionKind.NORMAL
         );
 
@@ -132,10 +137,16 @@ public final class ChatEntityBrain {
     }
 
     private static int parseIdleStage(Memory memory) {
+        String value = memory.context("stage");
+
+        if (value == null) {
+            return 1;
+        }
+
         try {
             return Math.max(
                     1,
-                    Integer.parseInt(memory.context("stage"))
+                    Integer.parseInt(value)
             );
         } catch (NumberFormatException exception) {
             return 1;
@@ -195,18 +206,15 @@ public final class ChatEntityBrain {
             Memory memory,
             long gameTick
     ) {
-        if (randomChance(0.5)) {
+        if (randomChance(0.50)) {
             String username = memory.context("username");
 
             say(
                     entity,
-                    choose(
-                            text("returned.1", username),
-                            text("returned.2", username),
-                            text("returned.3", username),
-                            text("returned.4", username),
-                            text("returned.5"),
-                            text("returned.6")
+                    chooseText(
+                            "returned",
+                            6,
+                            username
                     ),
                     gameTick,
                     ChatEntity.ReactionKind.NORMAL
@@ -224,7 +232,10 @@ public final class ChatEntityBrain {
             Memory memory,
             long gameTick
     ) {
-        if (entity.mood() == ChatEntity.Mood.CURIOUS && randomChance(0.25)) {
+        ChatEntity.Mood mood = entity.mood();
+
+        if (mood == ChatEntity.Mood.CURIOUS
+                && randomChance(0.25)) {
             say(
                     entity,
                     chooseText("curious", 8),
@@ -235,7 +246,8 @@ public final class ChatEntityBrain {
             return;
         }
 
-        if (entity.mood() == ChatEntity.Mood.ANNOYED && randomChance(0.3)) {
+        if (mood == ChatEntity.Mood.ANNOYED
+                && randomChance(0.30)) {
             say(
                     entity,
                     chooseText("annoyed", 8),
@@ -266,166 +278,158 @@ public final class ChatEntityBrain {
         String normalized = normalize(message);
         int interactionCount = entity.interactionCount();
         int annoyanceCount = entity.annoyanceCount();
+        ChatEntity.Mood mood = entity.mood();
+        boolean sillyMode = Config.get().chatEntitySillyMode;
 
-        InteractionKind kind = classifyInteraction(normalized);
+        InteractionKind kind =
+                classifyInteraction(normalized);
 
-        if (kind == InteractionKind.CONTROL) {
-            return chooseText("control", 6);
-        }
+        return switch (kind) {
+            case CONTROL -> chooseText("control", 6);
+            case UNSETTLING -> chooseText("unsettling", 8);
+            case GREETING ->
+                    chooseGreetingResponse(
+                            interactionCount,
+                            username
+                    );
+            case IDENTITY ->
+                    interactionCount >= 5
+                            ? chooseText("identity.again", 4)
+                            : chooseText("identity", 8);
+            case QUESTION -> chooseText("question", 6);
+            case NORMAL -> chooseNormalResponse(
+                    interactionCount,
+                    annoyanceCount,
+                    mood,
+                    sillyMode
+            );
+        };
+    }
 
-        if (kind == InteractionKind.UNSETTLING) {
-            return chooseText("unsettling", 8);
-        }
-
+    private static String chooseNormalResponse(
+            int interactionCount,
+            int annoyanceCount,
+            ChatEntity.Mood mood,
+            boolean sillyMode
+    ) {
         /*
-         * The entity occasionally answers with something only loosely
-         * connected to the conversation. This becomes more common
-         * as it grows familiar with the player.
+         * Silly responses are only possible for otherwise ordinary messages.
+         * Classification already ruled out greetings and questions.
          */
-        if (Config.get().chatEntitySillyMode
-                && !isQuestion(normalized)
-                && !isGreeting(normalized)
-                && randomChance(entity.interactionCount() >= 10 ? 0.18 : 0.08)) {
+        if (sillyMode
+                && randomChance(
+                        interactionCount >= 10
+                                ? 0.18
+                                : 0.08
+                )) {
             return chooseText("out_of_place", 8);
         }
 
-        if (kind == InteractionKind.GREETING) {
-            if (interactionCount == 1) {
-                return choose(
-                        text("greeting.first.1", username),
-                        text("greeting.first.2", username),
-                        text("greeting.first.3", username),
-                        text("greeting.first.4", username)
-                );
-            }
-
-            if (interactionCount <= 3) {
-                return choose(
-                        text("greeting.again.1", username),
-                        text("greeting.again.2", username),
-                        text("greeting.again.3"),
-                        text("greeting.again.4")
-                );
-            }
-
-            return choose(
-                    text("greeting.familiar.1", username),
-                    text("greeting.familiar.2"),
-                    text("greeting.familiar.3"),
-                    text("greeting.familiar.4")
-            );
-        }
-
-        if (kind == InteractionKind.IDENTITY) {
-            if (interactionCount >= 5) {
-                return choose(
-                        text("identity.again.1"),
-                        text("identity.again.2"),
-                        text("identity.again.3"),
-                        text("identity.again.4")
-                );
-            }
-
-            return choose(
-                    text("identity.1"),
-                    text("identity.2"),
-                    text("identity.3"),
-                    text("identity.4"),
-                    text("identity.5"),
-                    text("identity.6"),
-                    text("identity.7"),
-                    text("identity.8")
-            );
-        }
-
-        if (kind == InteractionKind.QUESTION) {
-            return chooseText("question", 6);
-        }
-
         if (annoyanceCount >= 6) {
-            return choose(
-                    text("annoyed.interaction.late.1"),
-                    text("annoyed.interaction.late.2"),
-                    text("annoyed.interaction.late.3"),
-                    text("annoyed.interaction.late.4"),
-                    text("annoyed.interaction.late.5")
+            return chooseText(
+                    "annoyed.interaction.late",
+                    5
             );
         }
 
         if (annoyanceCount >= 3) {
-            return choose(
-                    text("annoyed.interaction.mid.1"),
-                    text("annoyed.interaction.mid.2"),
-                    text("annoyed.interaction.mid.3"),
-                    text("annoyed.interaction.mid.4"),
-                    text("annoyed.interaction.mid.5")
+            return chooseText(
+                    "annoyed.interaction.mid",
+                    5
             );
         }
 
-        if (Config.get().chatEntitySillyMode && entity.mood() == ChatEntity.Mood.PLAYFUL) {
-            return choose(
-                    text("playful.1"),
-                    text("playful.2"),
-                    text("playful.3"),
-                    text("playful.4"),
-                    text("playful.5"),
-                    text("playful.6")
+        if (sillyMode
+                && mood == ChatEntity.Mood.PLAYFUL) {
+            return chooseText("playful", 6);
+        }
+
+        if (mood == ChatEntity.Mood.ANNOYED) {
+            return chooseText(
+                    "annoyed.interaction",
+                    6
             );
         }
 
-        if (entity.mood() == ChatEntity.Mood.ANNOYED) {
-            return choose(
-                    text("annoyed.interaction.1"),
-                    text("annoyed.interaction.2"),
-                    text("annoyed.interaction.3"),
-                    text("annoyed.interaction.4"),
-                    text("annoyed.interaction.5"),
-                    text("annoyed.interaction.6")
-            );
-        }
-
-        if (entity.mood() == ChatEntity.Mood.CURIOUS) {
-            return choose(
-                    text("interacted.curious.1"),
-                    text("interacted.curious.2"),
-                    text("interacted.curious.3"),
-                    text("interacted.curious.4"),
-                    text("interacted.curious.5"),
-                    text("interacted.curious.6"),
-                    text("interacted.curious.7")
+        if (mood == ChatEntity.Mood.CURIOUS) {
+            return chooseText(
+                    "interacted.curious",
+                    7
             );
         }
 
         if (interactionCount >= 10) {
-            return choose(
-                    text("interacted.familiar.1"),
-                    text("interacted.familiar.2"),
-                    text("interacted.familiar.3"),
-                    text("interacted.familiar.4"),
-                    text("interacted.familiar.5")
+            return chooseText(
+                    "interacted.familiar",
+                    5
             );
         }
 
-        return choose(
-                text("interacted.default.1"),
-                text("interacted.default.2"),
-                text("interacted.default.3"),
-                text("interacted.default.4"),
-                text("interacted.default.5"),
-                text("interacted.default.6"),
-                text("interacted.default.7"),
-                text("interacted.default.8")
+        return chooseText(
+                "interacted.default",
+                8
         );
+    }
+
+    private static String chooseGreetingResponse(
+            int interactionCount,
+            String username
+    ) {
+        if (interactionCount == 1) {
+            return chooseText(
+                    "greeting.first",
+                    4,
+                    username
+            );
+        }
+
+        if (interactionCount <= 3) {
+            int index = randomIndex(4);
+
+            return index <= 2
+                    ? text(
+                            "greeting.again." + index,
+                            username
+                    )
+                    : text(
+                            "greeting.again." + index
+                    );
+        }
+
+        int index = randomIndex(4);
+
+        return index == 1
+                ? text(
+                        "greeting.familiar.1",
+                        username
+                )
+                : text(
+                        "greeting.familiar." + index
+                );
     }
 
     private static InteractionKind classifyInteraction(
             String normalized
     ) {
-        if (isControlQuestion(normalized)) return InteractionKind.CONTROL;
-        if (isUnsettlingQuestion(normalized)) return InteractionKind.UNSETTLING;
-        if (isGreeting(normalized)) return InteractionKind.GREETING;
-        if (isIdentityQuestion(normalized)) return InteractionKind.IDENTITY;
-        if (isQuestion(normalized)) return InteractionKind.QUESTION;
+        if (isControlQuestion(normalized)) {
+            return InteractionKind.CONTROL;
+        }
+
+        if (isUnsettlingQuestion(normalized)) {
+            return InteractionKind.UNSETTLING;
+        }
+
+        if (isGreeting(normalized)) {
+            return InteractionKind.GREETING;
+        }
+
+        if (isIdentityQuestion(normalized)) {
+            return InteractionKind.IDENTITY;
+        }
+
+        if (isQuestion(normalized)) {
+            return InteractionKind.QUESTION;
+        }
 
         return InteractionKind.NORMAL;
     }
@@ -463,9 +467,64 @@ public final class ChatEntityBrain {
     }
 
     private static boolean isGreeting(String message) {
-        return message.matches(
-                "^(hi+|hello+|hey+|hiya|yo+|sup|howdy)[!.,? ]*$"
-        );
+        int end = message.length();
+
+        while (end > 0) {
+            char character =
+                    message.charAt(end - 1);
+
+            if (character == '!'
+                    || character == '.'
+                    || character == ','
+                    || character == '?') {
+                end--;
+                continue;
+            }
+
+            break;
+        }
+
+        String greeting =
+                message.substring(0, end);
+
+        return isRepeatedGreeting(
+                greeting,
+                "h",
+                'i'
+        ) || isRepeatedGreeting(
+                greeting,
+                "hell",
+                'o'
+        ) || isRepeatedGreeting(
+                greeting,
+                "he",
+                'y'
+        ) || isRepeatedGreeting(
+                greeting,
+                "y",
+                'o'
+        ) || greeting.equals("hiya")
+                || greeting.equals("sup")
+                || greeting.equals("howdy");
+    }
+
+    private static boolean isRepeatedGreeting(
+            String value,
+            String prefix,
+            char repeatedCharacter
+    ) {
+        if (!value.startsWith(prefix)
+                || value.length() <= prefix.length()) {
+            return false;
+        }
+
+        for (int i = prefix.length(); i < value.length(); i++) {
+            if (value.charAt(i) != repeatedCharacter) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static boolean isIdentityQuestion(String message) {
@@ -493,9 +552,9 @@ public final class ChatEntityBrain {
     }
 
     private static String normalize(String message) {
-        return message
-                .trim()
-                .toLowerCase(Locale.ROOT);
+        return message == null
+                ? ""
+                : message.trim().toLowerCase(Locale.ROOT);
     }
 
     private static void say(
@@ -545,18 +604,24 @@ public final class ChatEntityBrain {
 
     private static String text(String key) {
         return Component.translatable(
-                "text.fuckinguselessmod.chat.entity." + key
+                TEXT_PREFIX + key
         ).getString();
     }
 
-    private static String text(String key, String username) {
+    private static String text(
+            String key,
+            String username
+    ) {
         String resolvedUsername =
                 username == null || username.isBlank()
                         ? "you"
                         : username;
 
         return text(key)
-                .replace("${username}", resolvedUsername);
+                .replace(
+                        "${username}",
+                        resolvedUsername
+                );
     }
 
     private static String chooseText(
@@ -564,29 +629,35 @@ public final class ChatEntityBrain {
             int count
     ) {
         return text(
-                prefix
-                + "."
-                + (ThreadLocalRandom.current().nextInt(0, count + 1))
+                prefix + "." + randomIndex(count)
         );
     }
 
-    private static boolean isPerceptionMemory(
-            Memory memory
+    private static String chooseText(
+            String prefix,
+            int count,
+            String username
     ) {
-        return memory.type() == Memory.Type.PLAYER_RETURNED
-                || memory.type() == Memory.Type.PLAYER_LOOKED_AWAY;
+        return text(
+                prefix + "." + randomIndex(count),
+                username
+        );
+    }
+
+    private static int randomIndex(int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException(
+                    "Response pool must contain at least one entry"
+            );
+        }
+
+        return ThreadLocalRandom.current()
+                .nextInt(count) + 1;
     }
 
     private static boolean randomChance(double chance) {
         return ThreadLocalRandom.current()
                 .nextDouble()
                 < chance;
-    }
-
-    private static String choose(String... options) {
-        return options[
-                ThreadLocalRandom.current()
-                        .nextInt(options.length)
-                ];
     }
 }
