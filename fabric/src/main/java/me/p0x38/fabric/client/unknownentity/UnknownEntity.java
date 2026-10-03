@@ -96,12 +96,14 @@ public final class UnknownEntity {
         this.origin = origin;
     }
 
+    /** @return the block position associated with this entity. */
     public BlockPos origin() { return origin; }
 
     public String id() {
         return "chat-" + Long.toUnsignedString(origin.asLong(), 36);
     }
 
+    /** @return the entity's current mood. */
     public Mood mood() {
         return mood;
     }
@@ -154,18 +156,22 @@ public final class UnknownEntity {
     public ReactionKind lastReactionKind() { return lastReactionKind; }
     /** @return the current chat connection mode. */
     public ChatConnectionMode connectionMode() { return connectionMode; }
+    /** @return the most recently processed memory, or {@code null}. */
     public Memory lastProcessedMemory() { return lastProcessedMemory; }
 
+    /** @return an immutable view of the entity's memories. */
     public List<Memory> memories() {
         return List.copyOf(memories);
     }
 
+    /** @return the latest memory, or {@code null} when none exists. */
     public Memory latestMemory() {
         return memories.isEmpty()
                 ? null
                 : memories.getLast();
     }
 
+    /** @param type memory type to search for @return whether a matching memory exists */
     public boolean hasMemory(Memory.Type type) {
         return memories.stream()
                 .anyMatch(memory ->
@@ -173,6 +179,7 @@ public final class UnknownEntity {
                 );
     }
 
+    /** @param type memory type to count @return number of matching memories */
     public long countMemories(Memory.Type type) {
         return memories.stream()
                 .filter(memory ->
@@ -181,6 +188,7 @@ public final class UnknownEntity {
                 .count();
     }
 
+    /** @param type memory type to search for @return latest matching memory, or {@code null} */
     public Memory latestMemory(Memory.Type type) {
         for (int i = memories.size() - 1; i >= 0; i--) {
             Memory memory = memories.get(i);
