@@ -54,6 +54,7 @@ public final class SentientSign {
 
     private long lastSeenTick = Long.MIN_VALUE;
     private long lastActionTick = Long.MIN_VALUE;
+    private Memory lastProcessedMemory;
 
     private String currentMessage = "...";
 
@@ -89,6 +90,7 @@ public final class SentientSign {
     public float selfControl() { return selfControl; }
     public ReactionKind lastReactionKind() { return lastReactionKind; }
     public SignConnectionMode connectionMode() { return connectionMode; }
+    public Memory lastProcessedMemory() { return lastProcessedMemory; }
 
     public List<Memory> memories() {
         return List.copyOf(memories);
@@ -294,6 +296,10 @@ public final class SentientSign {
 
     public void markAction(long gameTick) {
         lastActionTick = gameTick;
+    }
+
+    public void markMemoryProcessed(Memory memory) {
+        lastProcessedMemory = memory;
     }
 
     private void updateMood() {
