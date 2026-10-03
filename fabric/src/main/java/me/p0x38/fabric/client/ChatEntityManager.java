@@ -5,6 +5,7 @@ import me.p0x38.fabric.client.chatentity.ChatEntity;
 import me.p0x38.fabric.client.chatentity.ChatEntityBrain;
 import me.p0x38.fabric.client.chatentity.Memory;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -248,12 +249,11 @@ public final class ChatEntityManager {
     }
 
     private static void showChatEntityMessage(String message) {
-        String name = Component.translatable(
-                "text.fuckinguselessmod.chat.entity.name"
-        ).getString();
 
         Minecraft.getInstance().gui.getChat().addMessage(
-                Component.literal("<" + name + "> " + message)
+                Component.literal(message).withStyle(
+                        ChatFormatting.DARK_AQUA
+                )
         );
     }
 
