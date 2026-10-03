@@ -14,14 +14,12 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.world.InteractionResult;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
 
 public final class FuckingUselessModFabricClient implements ClientModInitializer {
@@ -35,33 +33,6 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         CensorBoxRenderer.initialize();
         CensorBoxCommand.initialize();
         SentientSignCommand.initialize();
-
-        UseBlockCallback.EVENT.register(
-                (player, level, hand, hitResult) -> {
-                    if (!(level instanceof net.minecraft.client.multiplayer.ClientLevel)) {
-                        return InteractionResult.PASS;
-                    }
-
-                    var sign =
-                            BlindSpotSigns.getSignAt(
-                                    hitResult.getBlockPos()
-                            );
-
-                    if (sign == null) {
-                        return InteractionResult.PASS;
-                    }
-
-                    Minecraft.getInstance().setScreen(
-                            new SignEditScreen(
-                                    sign,
-                                    false,
-                                    true
-                            )
-                    );
-
-                    return InteractionResult.FAIL;
-                }
-        );
 
         ClientSendMessageEvents.MODIFY_CHAT.register(
                 ChatTransformer::transform
