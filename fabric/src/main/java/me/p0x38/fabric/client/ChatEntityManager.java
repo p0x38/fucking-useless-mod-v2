@@ -3,6 +3,7 @@ package me.p0x38.fabric.client;
 import me.p0x38.fabric.client.chatentity.ChatConnectionMode;
 import me.p0x38.fabric.client.chatentity.ChatEntity;
 import me.p0x38.fabric.client.chatentity.ChatEntityBrain;
+import me.p0x38.fabric.client.chatentity.ChatEntityPersistence;
 import me.p0x38.fabric.client.chatentity.Memory;
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
@@ -43,6 +44,7 @@ public final class ChatEntityManager {
     private static BlockPos observedOrigin;
     private static long hiddenSince = Long.MIN_VALUE;
     private static boolean entityActivatedWhileHidden;
+    private static boolean hasSpokenInCurrentWorld;
 
     private static long playerIdleSince = Long.MIN_VALUE;
     private static int lastIdleChatlineStage;
@@ -159,6 +161,13 @@ public final class ChatEntityManager {
         entityActivatedWhileHidden = true;
         entity.activate();
 
+        if (!ChatEntityPersistence.hasEverInteracted()) {
+            ChatEntityBrain.initialGreeting(
+                    entity,
+                    gameTick
+            );
+        }
+
         entity.remember(
                 new Memory(
                         Memory.Type.WORLD_CHANGED,
@@ -209,12 +218,25 @@ public final class ChatEntityManager {
                 Component.literal("<" + username + "> " + trimmed)
         );
 
+        boolean firstChatInWorld =
+                !hasSpokenInCurrentWorld;
+
+        if (firstChatInWorld) {
+            ChatEntityBrain.firstChatAmbient(
+                    entity,
+                    gameTick
+            );
+        }
+
         entity.interact(
                 trimmed,
-                client.level.getGameTime(),
+                gameTick,
                 ChatConnectionMode.detect(client),
                 username
         );
+
+        hasSpokenInCurrentWorld = true;
+        ChatEntityPersistence.markEverInteracted();
 
         think(entity, client.level);
         return true;
@@ -501,6 +523,7 @@ public final class ChatEntityManager {
         playerIdleSince = Long.MIN_VALUE;
         lastIdleChatlineStage = 0;
         activityStateInitialized = false;
+        hasSpokenInCurrentWorld = false;
         lastActivityX = 0.0;
         lastActivityY = 0.0;
         lastActivityZ = 0.0;
