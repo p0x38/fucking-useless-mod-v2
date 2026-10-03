@@ -192,8 +192,7 @@ public final class ChatEntityBrain {
          * after a fresh observation.
          */
         if (entity.mood() == ChatEntity.Mood.CURIOUS
-                && (latest.type() == Memory.Type.PLAYER_RETURNED
-                || latest.type() == Memory.Type.PLAYER_LOOKED_AWAY)
+                && (isPerceptionMemory(latest))
                 && randomChance(0.25)) {
             say(
                     entity,
@@ -220,8 +219,7 @@ public final class ChatEntityBrain {
          * another moment where the player looks away.
          */
         if (entity.mood() == ChatEntity.Mood.ANNOYED
-                && (latest.type() == Memory.Type.PLAYER_RETURNED
-                || latest.type() == Memory.Type.PLAYER_LOOKED_AWAY)
+                && (isPerceptionMemory(latest))
                 && randomChance(0.30)) {
             say(
                     entity,
