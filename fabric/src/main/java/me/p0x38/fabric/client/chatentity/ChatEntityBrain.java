@@ -296,7 +296,7 @@ public final class ChatEntityBrain {
             case UNSETTLING -> chooseText("unsettling", 16);
             case ACTIVITY -> chooseText("activity", 10);
             case WELLBEING -> chooseText("wellbeing", 10);
-            case NULL -> chooseText("null", 16);
+            case NULL -> chooseNullResponse(entity);
             case CONFUSED -> chooseText("confused", 14);
             case INSULT -> chooseText("insult", 14);
             case THANKS -> chooseText("thanks", 14);
@@ -318,6 +318,25 @@ public final class ChatEntityBrain {
                     sillyMode
             );
         };
+    }
+
+    private static String chooseNullResponse(
+            ChatEntity entity
+    ) {
+        int interactionCount = entity.interactionCount();
+
+        double formalChance =
+                interactionCount >= 8
+                        ? 0.85
+                        : interactionCount >= 4
+                                ? 0.70
+                                : 0.55;
+
+        if (randomChance(formalChance)) {
+            return chooseText("null.formal", 8);
+        }
+
+        return chooseText("null", 16);
     }
 
     private static String chooseNormalResponse(
