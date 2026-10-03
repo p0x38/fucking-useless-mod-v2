@@ -78,11 +78,7 @@ public final class ChatEntityBrain {
                 20
                         + ThreadLocalRandom.current().nextLong(20, 60);
 
-        long baseTick =
-                entity.getNextAvailableResponseTick(
-                        gameTick,
-                        delayTicks
-                );
+        long baseTick = gameTick + delayTicks;
 
         entity.queueResponse(
                 message,
