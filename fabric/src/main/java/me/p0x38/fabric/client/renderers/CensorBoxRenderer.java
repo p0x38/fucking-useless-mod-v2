@@ -1305,7 +1305,8 @@ public final class CensorBoxRenderer {
                         );
 
         Matrix4f projectionMatrix =
-                minecraft.gameRenderer.getProjectionMatrix(fov);
+                ((GameRendererMixin) minecraft.gameRenderer)
+                        .fuckingUselessMod$getProjectionMatrix(fov);
 
         Matrix4f mvpMatrix =
                 new Matrix4f(projectionMatrix)
