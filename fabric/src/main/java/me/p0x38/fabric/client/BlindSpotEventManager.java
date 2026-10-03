@@ -56,8 +56,8 @@ public final class BlindSpotEventManager {
         if (observedLevel != null && observedLevel != level) {
             DebugLogger.debug(
                     "[BlindSpot] client world changed; clearing previous state oldLevel={} newLevel={}",
-                    observedLevel.dimension().location(),
-                    level.dimension().location()
+                    observedLevel.dimension(),
+                    level.dimension()
             );
 
             BlindSpotSigns.clear(observedLevel);
@@ -353,7 +353,8 @@ public final class BlindSpotEventManager {
         sign.interact(
                 message,
                 gameTick,
-                SignConnectionMode.detect(client)
+                SignConnectionMode.detect(client),
+                client.player.getGameProfile().name()
         );
 
         SentientSignBrain.think(
