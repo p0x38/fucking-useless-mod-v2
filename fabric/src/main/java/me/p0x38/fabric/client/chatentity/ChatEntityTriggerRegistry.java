@@ -5,10 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 import java.io.BufferedReader;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class ChatEntityTriggerRegistry
-        implements ResourceManagerReloadListener {
+        implements IdentifiableResourceReloadListener {
     private static final Identifier RESOURCE_ID =
             Identifier.fromNamespaceAndPath(
                     "fuckinguselessmod",
@@ -47,6 +47,11 @@ public final class ChatEntityTriggerRegistry
 
         return pattern != null
                 && pattern.matcher(message).find();
+    }
+
+    @Override
+    public Identifier getFabricId() {
+        return RESOURCE_ID;
     }
 
     @Override
