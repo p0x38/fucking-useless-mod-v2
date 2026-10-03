@@ -50,11 +50,17 @@ public final class SentientSign {
 
     public boolean hasMemory(Memory.Type type) {
         return memories.stream()
-                .anyMatch(memory -> memory.type() == type);
+                .anyMatch(memory ->
+                        memory.type() == type
+                );
     }
 
     public long countMemories(Memory.Type type) {
-        return memories.stream().filter(memory -> memory.type() == type).count();
+        return memories.stream()
+                .filter(memory ->
+                        memory.type() == type
+                )
+                .count();
     }
 
     public Memory latestMemory(Memory.Type type) {
@@ -78,21 +84,26 @@ public final class SentientSign {
         playerLooking = looking;
         playerLookingAway = !looking;
 
+        /*
+         * The player has just started looking at the sign.
+         */
         if (!wasLooking && looking) {
             hasBeenSeen = true;
             lastSeenTick = gameTick;
 
             Memory.Type memoryType =
-                    memories.stream().anyMatch(memory -> memory.type() == Memory.Type.PLAYER_LOOKED_AWAY)
-                        ? Memory.Type.PLAYER_RETURNED
+                    hasMemory(Memory.Type.PLAYER_LOOKED_AWAY)
+                            ? Memory.Type.PLAYER_RETURNED
                             : Memory.Type.PLAYER_SEEN;
 
             remember(
-                    new Memory(memoryType,
+                    new Memory(
+                            memoryType,
                             gameTick,
                             1.0f,
                             position,
-                            Map.of())
+                            Map.of()
+                    )
             );
 
             awareness = Math.min(
@@ -102,7 +113,7 @@ public final class SentientSign {
         }
 
         /*
-         * Player stopped looking at the sign.
+         * The player has just stopped looking at the sign.
          */
         if (wasLooking && !looking) {
             remember(

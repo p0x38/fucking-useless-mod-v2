@@ -1,5 +1,8 @@
 package me.p0x38.fabric.client;
 
+import me.p0x38.fabric.client.blindspot.Memory;
+import me.p0x38.fabric.client.blindspot.SentientSign;
+import me.p0x38.fabric.client.blindspot.SentientSignBrain;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -9,8 +12,9 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3fc;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class BlindSpotEventManager {
@@ -20,11 +24,21 @@ public final class BlindSpotEventManager {
     private static final double LOOK_DOT_THRESHOLD = 0.75;
     private static final double LOOK_DISTANCE = 6.0;
 
+    private static final Map<BlockPos, SentientSign> SIGNS =
+            new HashMap<>();
+
+    /*
+     * This is the block currently being treated as the persistent
+     * sign target. Looking at another block makes this target hidden
+     * instead of replacing it.
+     */
     private static BlockPos observedBlock;
+
     private static long hiddenSince = Long.MIN_VALUE;
     private static boolean changedWhileHidden;
 
-    private BlindSpotEventManager() {}
+    private BlindSpotEventManager() {
+    }
 
     public static void tick() {
         Minecraft client = Minecraft.getInstance();
@@ -36,68 +50,91 @@ public final class BlindSpotEventManager {
             return;
         }
 
-        Camera camera = client.gameRenderer.getMainCamera();
+        Camera camera =
+                client.gameRenderer.getMainCamera();
 
-        BlockPos target = getLookedAtBlock(level, player, camera);
+        BlockPos lookedAtBlock =
+                getLookedAtBlock(
+                        level,
+                        player,
+                        camera
+                );
 
         /*
-         * The player is currently looking at a different block.
-         *
-         * Keep the currently observed target only when there is
-         * actually a target.
+         * Start observing the first block the player looks at.
+         * The selected target remains fixed until the client world
+         * is reset.
          */
-        if (target != null) {
-            boolean returnedToObservedBlock =
-                    observedBlock != null
-                        && observedBlock.equals(target);
+        if (observedBlock == null) {
+            if (lookedAtBlock == null) {
+                return;
+            }
 
-            observedBlock = target;
+            observedBlock = lookedAtBlock;
+            hiddenSince = Long.MIN_VALUE;
+            changedWhileHidden = false;
+        }
+
+        SentientSign sign =
+                SIGNS.computeIfAbsent(
+                        observedBlock,
+                        SentientSign::new
+                );
+
+        boolean lookingAtObservedBlock =
+                observedBlock.equals(lookedAtBlock);
+
+        long gameTick =
+                level.getGameTime();
+
+        sign.observe(
+                lookingAtObservedBlock,
+                gameTick
+        );
+
+        /*
+         * Give the sign's brain the latest perception event.
+         */
+        SentientSignBrain.think(
+                sign,
+                level
+        );
+
+        if (lookingAtObservedBlock) {
             hiddenSince = Long.MIN_VALUE;
 
-            /*
-             * We have looked back at it.
-             *
-             * The world/effect was changed while the player was
-             * looking away, so this is the reveal moment.
-             */
-            if (changedWhileHidden && returnedToObservedBlock) {
+            if (changedWhileHidden) {
                 changedWhileHidden = false;
 
-                onReveal(level, target);
+                onReveal(
+                        sign,
+                        level
+                );
             }
 
             return;
         }
 
         /*
-         * No block is currently being looked at.
-         *
-         * This means the player has looked away from the previously
-         * observed location.
+         * The player is no longer looking at the observed sign.
          */
-        if (observedBlock == null) {
-            return;
-        }
-
         if (hiddenSince == Long.MIN_VALUE) {
-            hiddenSince = level.getGameTime();
+            hiddenSince = gameTick;
             return;
         }
 
         long hiddenTicks =
-                level.getGameTime() - hiddenSince;
+                gameTick - hiddenSince;
 
         if (hiddenTicks < MIN_HIDDEN_TICKS
-        || hiddenTicks > MAX_HIDDEN_TICKS
-        || changedWhileHidden) {
+                || hiddenTicks > MAX_HIDDEN_TICKS
+                || changedWhileHidden) {
             return;
         }
 
         /*
-         * Small random change each tick.
-         *
-         * This makes the effect unpredictable instead of happening
-         * at exactly the same delay every time.
+         * Small random change each tick prevents the event from
+         * feeling synchronized to a predictable fixed delay.
          */
         if (ThreadLocalRandom.current().nextDouble() >= 0.03) {
             return;
@@ -105,7 +142,10 @@ public final class BlindSpotEventManager {
 
         changedWhileHidden = true;
 
-        onHiddenChange(level, observedBlock);
+        onHiddenChange(
+                sign,
+                level
+        );
     }
 
     private static BlockPos getLookedAtBlock(
@@ -113,9 +153,11 @@ public final class BlindSpotEventManager {
             Player player,
             Camera camera
     ) {
-        Vec3 cameraPosition = camera.position();
+        Vec3 cameraPosition =
+                camera.position();
 
-        var cameraForward = camera.forwardVector();
+        var cameraForward =
+                camera.forwardVector();
 
         Vec3 forward =
                 new Vec3(
@@ -124,9 +166,6 @@ public final class BlindSpotEventManager {
                         cameraForward.z()
                 );
 
-        /*
-         * Check a point several blocks in front of the camera.
-         */
         Vec3 targetPosition =
                 cameraPosition.add(
                         forward.scale(LOOK_DISTANCE)
@@ -147,10 +186,16 @@ public final class BlindSpotEventManager {
             return null;
         }
 
-        BlockPos blockPos = hit.getBlockPos();
+        BlockPos blockPos =
+                hit.getBlockPos();
 
-        Vec3 blockCenter = Vec3.atCenterOf(blockPos);
-        Vec3 toBlock = blockCenter.subtract(cameraPosition);
+        Vec3 blockCenter =
+                Vec3.atCenterOf(blockPos);
+
+        Vec3 toBlock =
+                blockCenter.subtract(
+                        cameraPosition
+                );
 
         if (toBlock.lengthSqr() <= 0.0001) {
             return null;
@@ -158,10 +203,6 @@ public final class BlindSpotEventManager {
 
         toBlock = toBlock.normalize();
 
-        /*
-         * Dot product tells us how directly the camera is facing
-         * the block.
-         */
         double dot =
                 forward.dot(toBlock);
 
@@ -173,31 +214,47 @@ public final class BlindSpotEventManager {
     }
 
     private static void onHiddenChange(
-            ClientLevel level,
-            BlockPos blockPos
+            SentientSign sign,
+            ClientLevel level
     ) {
-        /*
-         * THIS is the point where the spooky change happens.
-         *
-         * Example:
-         *
-         * replaceWithSign(level, blockPos);
-         */
+        sign.remember(
+                new Memory(
+                        Memory.Type.WORLD_CHANGED,
+                        level.getGameTime(),
+                        0.85f,
+                        sign.position(),
+                        Map.of(
+                                "phase",
+                                "hidden",
+                                "block",
+                                level.getBlockState(
+                                        sign.position()
+                                ).toString()
+                        )
+                )
+        );
     }
 
     private static void onReveal(
-            ClientLevel level,
-            BlockPos blockPos
+            SentientSign sign,
+            ClientLevel level
     ) {
-        /*
-         * Optional reveal effect.
-         *
-         * You could play a sound, spawn particles, log debug info,
-         * etc.
-         */
+        sign.remember(
+                new Memory(
+                        Memory.Type.WORLD_CHANGED,
+                        level.getGameTime(),
+                        0.95f,
+                        sign.position(),
+                        Map.of(
+                                "phase",
+                                "revealed"
+                        )
+                )
+        );
     }
 
     private static void reset() {
+        SIGNS.clear();
         observedBlock = null;
         hiddenSince = Long.MIN_VALUE;
         changedWhileHidden = false;

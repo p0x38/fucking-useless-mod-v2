@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class SentientSignBrain {
-    private SentientSignBrain() {}
+    private SentientSignBrain() {
+    }
 
     public static void think(
             SentientSign sign,
@@ -14,40 +15,94 @@ public final class SentientSignBrain {
     ) {
         long gameTick = level.getGameTime();
 
-        if (!sign.canAct(gameTick)) return;
+        if (!sign.canAct(gameTick)) {
+            return;
+        }
+
+        var memories = sign.memories();
+
+        if (memories.isEmpty()) {
+            return;
+        }
+
+        Memory latest = memories.getLast();
 
         /*
-         * A sign which has never been noticed behaves quietly.
+         * React to the moment the player first notices the sign.
          */
-        if (!sign.hasMemory(Memory.Type.PLAYER_SEEN) && randomChance(0.01)) {
-            say(sign, "...", gameTick);
+        if (latest.type() == Memory.Type.PLAYER_SEEN
+                && randomChance(0.10)) {
+            say(
+                    sign,
+                    "...",
+                    gameTick
+            );
 
             sign.markAction(gameTick);
             return;
         }
 
         /*
-         * Once the player knows the sign exists,
-         * it becomes increasingly interested in them.
+         * Returning is much more interesting to the sign than
+         * simply continuing to stare at it.
          */
-        if (sign.mood() == SentientSign.Mood.CURIOUS && randomChance(0.02)) {
-            say(sign, choose("hello", "you're back", "i saw that", "why did you leave?" ), gameTick);
+        if (latest.type() == Memory.Type.PLAYER_RETURNED
+                && randomChance(0.35)) {
+            say(
+                    sign,
+                    choose(
+                            "you're back",
+                            "i knew you'd return",
+                            "you came back",
+                            "i remember you"
+                    ),
+                    gameTick
+            );
 
             sign.markAction(gameTick);
             return;
         }
 
         /*
-         * An annoyed sign can become deliberately deceptive.
+         * A curious sign can comment on the player's behavior
+         * after a fresh observation.
          */
-        if (sign.mood() == SentientSign.Mood.ANNOYED && randomChance(0.03)) {
-            say(sign, choose(
-                    "i wasn't here before",
-                    "you remember incorrectly",
-                    "there has always been a sign here"
-            ), gameTick);
+        if (sign.mood() == SentientSign.Mood.CURIOUS
+                && (latest.type() == Memory.Type.PLAYER_RETURNED
+                || latest.type() == Memory.Type.PLAYER_LOOKED_AWAY)
+                && randomChance(0.20)) {
+            say(
+                    sign,
+                    choose(
+                            "why did you leave?",
+                            "i saw that",
+                            "you keep looking away",
+                            "are you watching me?"
+                    ),
+                    gameTick
+            );
 
             sign.markAction(gameTick);
+            return;
+        }
+
+        /*
+         * An annoyed sign can respond after a fresh return or
+         * another moment where the player looks away.
+         */
+        if (sign.mood() == SentientSign.Mood.ANNOYED
+                && (latest.type() == Memory.Type.PLAYER_RETURNED
+                || latest.type() == Memory.Type.PLAYER_LOOKED_AWAY)
+                && randomChance(0.30)) {
+            say(
+                    sign,
+                    choose(
+                            "i wasn't here before",
+                            "you remember incorrectly",
+                            "there has always been a sign here"
+                    ),
+                    gameTick
+            );
         }
     }
 
@@ -71,10 +126,15 @@ public final class SentientSignBrain {
     }
 
     private static boolean randomChance(double chance) {
-        return ThreadLocalRandom.current().nextDouble() < chance;
+        return ThreadLocalRandom.current()
+                .nextDouble()
+                < chance;
     }
 
     private static String choose(String... options) {
-        return options[ThreadLocalRandom.current().nextInt(options.length)];
+        return options[
+                ThreadLocalRandom.current()
+                        .nextInt(options.length)
+        ];
     }
 }

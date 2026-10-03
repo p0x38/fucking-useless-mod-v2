@@ -32,9 +32,13 @@ public final class Memory {
     ) {
         this.type = type;
         this.gameTick = gameTick;
-        this.confidence = Math.clamp(confidence, 0.0f, 1.0f);
+        this.confidence = Math.clamp(
+                confidence,
+                0.0f,
+                1.0f
+        );
         this.position = blockPos;
-        this.context = context;
+        this.context = Map.copyOf(context);
     }
 
     public Type type() {
