@@ -128,7 +128,8 @@ public final class BlindSpotEventManager {
         sign.observe(
                 lookingAtObservedBlock,
                 gameTick,
-                SignConnectionMode.detect(client)
+                SignConnectionMode.detect(client),
+                player.getGameProfile().name()
         );
 
         /*
@@ -261,7 +262,8 @@ public final class BlindSpotEventManager {
         sign.interact(
                 message,
                 gameTick,
-                connectionMode
+                connectionMode,
+                client.player.getGameProfile().name()
         );
 
         SentientSignBrain.think(
