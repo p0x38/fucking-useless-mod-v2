@@ -1,4 +1,4 @@
-package me.p0x38.fabric.client.chatentity;
+package me.p0x38.fabric.client.unknownentity;
 
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
@@ -11,7 +11,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
-public final class ChatEntity {
+public final class UnknownEntity {
     public enum Mood {
         CALM,
         CURIOUS,
@@ -78,7 +78,7 @@ public final class ChatEntity {
     private final List<Memory> memories =
             new ArrayList<>();
 
-    public ChatEntity(BlockPos origin) {
+    public UnknownEntity(BlockPos origin) {
         this.origin = origin;
     }
 

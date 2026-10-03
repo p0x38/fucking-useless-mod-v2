@@ -3,7 +3,7 @@ package me.p0x38.neoforge;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.config.ConfigScreen;
 import me.p0x38.fuckinguselessmod.entity.ModEntities;
-import me.p0x38.fuckinguselessmod.entity.UselessEntity;
+import me.p0x38.fuckinguselessmod.entity.ChatEntity;
 import me.p0x38.fuckinguselessmod.transformers.ChatTransformer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -57,7 +57,7 @@ public final class FuckingUselessModNeoForge {
     ) {
         event.put(
                 ModEntities.USELESS_ENTITY,
-                UselessEntity.createAttributes().build()
+                ChatEntity.createAttributes().build()
         );
     }
 
@@ -71,7 +71,7 @@ public final class FuckingUselessModNeoForge {
     }
 
     private static final class UselessEntityRenderer extends HumanoidMobRenderer<
-            UselessEntity,
+            ChatEntity,
             HumanoidRenderState,
             HumanoidModel<HumanoidRenderState>
             > {

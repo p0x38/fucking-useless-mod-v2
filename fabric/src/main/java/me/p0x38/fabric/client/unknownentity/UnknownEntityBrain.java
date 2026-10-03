@@ -1,4 +1,4 @@
-package me.p0x38.fabric.client.chatentity;
+package me.p0x38.fabric.client.unknownentity;
 
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class ChatEntityBrain {
+public final class UnknownEntityBrain {
     private static final String TEXT_PREFIX =
             "text.fuckinguselessmod.chat.entity.";
 
@@ -19,7 +19,7 @@ public final class ChatEntityBrain {
 
     private record InteractionResponse(
             String message,
-            ChatEntity.ReactionKind reactionKind
+            UnknownEntity.ReactionKind reactionKind
     ) {
     }
 
@@ -41,24 +41,24 @@ public final class ChatEntityBrain {
         SLEEP
     }
 
-    private ChatEntityBrain() {
+    private UnknownEntityBrain() {
     }
 
     public static void initialGreeting(
-            ChatEntity entity,
+            UnknownEntity entity,
             long gameTick
     ) {
         say(
                 entity,
                 chooseText("first.greeting", 6),
                 gameTick,
-                ChatEntity.ReactionKind.GREETING
+                UnknownEntity.ReactionKind.GREETING
         );
         entity.markAction(gameTick);
     }
 
     public static void firstChatAmbient(
-            ChatEntity entity,
+            UnknownEntity entity,
             long gameTick
     ) {
         if (!randomChance(0.05)) {
@@ -68,11 +68,11 @@ public final class ChatEntityBrain {
         String message =
                 chooseText("first.ambient", 12);
 
-        ChatEntityResponseTiming.Timing timing =
-                ChatEntityResponseTiming.calculate(
+        UnknownEntityResponseTiming.Timing timing =
+                UnknownEntityResponseTiming.calculate(
                         entity,
                         message,
-                        ChatEntity.ReactionKind.META
+                        UnknownEntity.ReactionKind.META
                 );
 
         long delayTicks =
@@ -83,7 +83,7 @@ public final class ChatEntityBrain {
 
         entity.queueResponse(
                 message,
-                ChatEntity.ReactionKind.META,
+                UnknownEntity.ReactionKind.META,
                 baseTick,
                 timing.thinkingTicks(),
                 timing.typingTicks()
@@ -92,7 +92,7 @@ public final class ChatEntityBrain {
     }
 
     public static void think(
-            ChatEntity entity,
+            UnknownEntity entity,
             ClientLevel level
     ) {
         long gameTick = level.getGameTime();
@@ -147,21 +147,21 @@ public final class ChatEntityBrain {
     }
 
     private static void handleEntitySpoke(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
-        ChatEntity.ReactionKind reaction =
+        UnknownEntity.ReactionKind reaction =
                 entity.lastReactionKind();
 
-        if ((reaction == ChatEntity.ReactionKind.UNSETTLING
-                || reaction == ChatEntity.ReactionKind.OUT_OF_PLACE)
+        if ((reaction == UnknownEntity.ReactionKind.UNSETTLING
+                || reaction == UnknownEntity.ReactionKind.OUT_OF_PLACE)
                 && randomChance(0.35)) {
             say(
                     entity,
                     chooseText("self_aware", 8),
                     gameTick,
-                    ChatEntity.ReactionKind.META
+                    UnknownEntity.ReactionKind.META
             );
 
             entity.markAction(gameTick);
@@ -171,7 +171,7 @@ public final class ChatEntityBrain {
     }
 
     private static void handleWorldChanged(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -186,14 +186,14 @@ public final class ChatEntityBrain {
                         entity,
                         chooseText("quiet", 3),
                         gameTick,
-                        ChatEntity.ReactionKind.META
+                        UnknownEntity.ReactionKind.META
                 );
             } else {
                 say(
                         entity,
                         chooseText("world_changed", 8),
                         gameTick,
-                        ChatEntity.ReactionKind.META
+                        UnknownEntity.ReactionKind.META
                 );
             }
         }
@@ -202,7 +202,7 @@ public final class ChatEntityBrain {
     }
 
     private static void handlePlayerIdle(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -213,7 +213,7 @@ public final class ChatEntityBrain {
                     entity,
                     chooseText("quiet", 3),
                     gameTick,
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
         } else {
             say(
@@ -221,8 +221,8 @@ public final class ChatEntityBrain {
                     chooseText("idle." + stage, 4),
                     gameTick,
                     stage >= 5
-                            ? ChatEntity.ReactionKind.META
-                            : ChatEntity.ReactionKind.NORMAL
+                            ? UnknownEntity.ReactionKind.META
+                            : UnknownEntity.ReactionKind.NORMAL
             );
         }
 
@@ -247,14 +247,14 @@ public final class ChatEntityBrain {
     }
 
     private static void handleLocationUpdate(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory
     ) {
         entity.markMemoryProcessed(memory);
     }
 
     private static void handlePlayerDamaged(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -262,14 +262,14 @@ public final class ChatEntityBrain {
                 entity,
                 chooseText("event.damage", 5),
                 gameTick,
-                ChatEntity.ReactionKind.NORMAL
+                UnknownEntity.ReactionKind.NORMAL
         );
 
         markProcessed(entity, memory, gameTick);
     }
 
     private static void handlePlayerDied(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -278,7 +278,7 @@ public final class ChatEntityBrain {
                     entity,
                     chooseText("event.creeper_death", 4),
                     gameTick,
-                    ChatEntity.ReactionKind.META
+                    UnknownEntity.ReactionKind.META
             );
         }
 
@@ -286,7 +286,7 @@ public final class ChatEntityBrain {
     }
 
     private static void handleInteraction(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -319,7 +319,7 @@ public final class ChatEntityBrain {
     }
 
     private static void handlePlayerSeen(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -328,7 +328,7 @@ public final class ChatEntityBrain {
                     entity,
                     chooseText("seen", 6),
                     gameTick,
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
 
             markProcessed(entity, memory, gameTick);
@@ -339,7 +339,7 @@ public final class ChatEntityBrain {
     }
 
     private static void handlePlayerReturned(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -354,7 +354,7 @@ public final class ChatEntityBrain {
                             username
                     ),
                     gameTick,
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
 
             markProcessed(entity, memory, gameTick);
@@ -365,13 +365,13 @@ public final class ChatEntityBrain {
     }
 
     private static void handlePlayerLookedAway(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
-        ChatEntity.Mood mood = entity.mood();
+        UnknownEntity.Mood mood = entity.mood();
 
-        if (mood == ChatEntity.Mood.CURIOUS
+        if (mood == UnknownEntity.Mood.CURIOUS
                 && randomChance(0.25)) {
             say(
                     entity,
@@ -383,7 +383,7 @@ public final class ChatEntityBrain {
             return;
         }
 
-        if (mood == ChatEntity.Mood.ANNOYED
+        if (mood == UnknownEntity.Mood.ANNOYED
                 && randomChance(0.30)) {
             say(
                     entity,
@@ -399,7 +399,7 @@ public final class ChatEntityBrain {
     }
 
     private static void markProcessed(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory,
             long gameTick
     ) {
@@ -410,13 +410,13 @@ public final class ChatEntityBrain {
     private static InteractionResponse chooseInteractionResponse(
             String message,
             String username,
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory
     ) {
         String normalized = normalize(message);
         int interactionCount = entity.interactionCount();
         int annoyanceCount = entity.annoyanceCount();
-        ChatEntity.Mood mood = entity.mood();
+        UnknownEntity.Mood mood = entity.mood();
         boolean sillyMode = Config.get().chatEntitySillyMode;
 
         InteractionKind kind =
@@ -425,64 +425,64 @@ public final class ChatEntityBrain {
         return switch (kind) {
             case CONTROL -> response(
                     chooseText("control", 6),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
             case UNSETTLING -> response(
                     chooseText("unsettling", 9),
-                    ChatEntity.ReactionKind.UNSETTLING
+                    UnknownEntity.ReactionKind.UNSETTLING
             );
             case GREETING -> response(
                     chooseGreetingResponse(
                             interactionCount,
                             username
                     ),
-                    ChatEntity.ReactionKind.GREETING
+                    UnknownEntity.ReactionKind.GREETING
             );
             case IDENTITY -> response(
                     interactionCount >= 5
                             ? chooseText("identity.again", 4)
                             : chooseText("identity", 8),
-                    ChatEntity.ReactionKind.IDENTITY
+                    UnknownEntity.ReactionKind.IDENTITY
             );
             case ACTIVITY -> response(
                     chooseText("activity", 6),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
             case WELLBEING -> response(
                     chooseText("wellbeing", 6),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
             case LOCATION -> response(
                     chooseText("location", 6),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
             case NULL -> response(
                     chooseNullResponse(entity),
-                    ChatEntity.ReactionKind.NULL
+                    UnknownEntity.ReactionKind.NULL
             );
             case CONFUSED -> response(
                     chooseText("confused", 6),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
             case INSULT -> response(
                     chooseText("insult", 6),
-                    ChatEntity.ReactionKind.ANNOYED
+                    UnknownEntity.ReactionKind.ANNOYED
             );
             case THANKS -> response(
                     chooseText("thanks", 6),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
             case APOLOGY -> response(
                     chooseText("apology", 6),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
             case SLEEP -> response(
                     chooseSleepResponse(entity, memory),
-                    ChatEntity.ReactionKind.SLEEP
+                    UnknownEntity.ReactionKind.SLEEP
             );
             case QUESTION -> response(
                     chooseText("question", 6),
-                    ChatEntity.ReactionKind.QUESTION
+                    UnknownEntity.ReactionKind.QUESTION
             );
             case NORMAL -> response(
                     chooseNormalResponse(
@@ -491,7 +491,7 @@ public final class ChatEntityBrain {
                             mood,
                             sillyMode
                     ),
-                    ChatEntity.ReactionKind.NORMAL
+                    UnknownEntity.ReactionKind.NORMAL
             );
         };
     }
@@ -534,7 +534,7 @@ public final class ChatEntityBrain {
 
     private static InteractionResponse chooseInteractionFollowUp(
             InteractionKind kind,
-            ChatEntity.ReactionKind reactionKind
+            UnknownEntity.ReactionKind reactionKind
     ) {
         String prefix = switch (kind) {
             case CONTROL -> "control.followup";
@@ -574,15 +574,15 @@ public final class ChatEntityBrain {
     }
 
     private static void saySequence(
-            ChatEntity entity,
+            UnknownEntity entity,
             List<InteractionResponse> responses,
             long gameTick
     ) {
         long nextStartTick = gameTick;
 
         for (InteractionResponse response : responses) {
-            ChatEntityResponseTiming.Timing timing =
-                    ChatEntityResponseTiming.calculate(
+            UnknownEntityResponseTiming.Timing timing =
+                    UnknownEntityResponseTiming.calculate(
                             entity,
                             response.message(),
                             response.reactionKind()
@@ -614,7 +614,7 @@ public final class ChatEntityBrain {
     }
 
     private static String chooseSleepResponse(
-            ChatEntity entity,
+            UnknownEntity entity,
             Memory memory
     ) {
         long idleTicks =
@@ -649,7 +649,7 @@ public final class ChatEntityBrain {
     }
 
     private static String chooseNullResponse(
-            ChatEntity entity
+            UnknownEntity entity
     ) {
         int interactionCount = entity.interactionCount();
 
@@ -674,7 +674,7 @@ public final class ChatEntityBrain {
     private static String chooseNormalResponse(
             int interactionCount,
             int annoyanceCount,
-            ChatEntity.Mood mood,
+            UnknownEntity.Mood mood,
             boolean sillyMode
     ) {
         /*
@@ -718,18 +718,18 @@ public final class ChatEntityBrain {
         }
 
         if (sillyMode
-                && mood == ChatEntity.Mood.PLAYFUL) {
+                && mood == UnknownEntity.Mood.PLAYFUL) {
             return chooseText("playful", 6);
         }
 
-        if (mood == ChatEntity.Mood.ANNOYED) {
+        if (mood == UnknownEntity.Mood.ANNOYED) {
             return chooseText(
                     "annoyed.interaction",
                     6
             );
         }
 
-        if (mood == ChatEntity.Mood.CURIOUS) {
+        if (mood == UnknownEntity.Mood.CURIOUS) {
             return chooseText(
                     "interacted.curious",
                     7
@@ -789,59 +789,59 @@ public final class ChatEntityBrain {
     private static InteractionKind classifyInteraction(
             String normalized
     ) {
-        if (ChatEntityTriggerRegistry.matches("control", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("control", normalized)) {
             return InteractionKind.CONTROL;
         }
 
-        if (ChatEntityTriggerRegistry.matches("unsettling", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("unsettling", normalized)) {
             return InteractionKind.UNSETTLING;
         }
 
-        if (ChatEntityTriggerRegistry.matches("greeting", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("greeting", normalized)) {
             return InteractionKind.GREETING;
         }
 
-        if (ChatEntityTriggerRegistry.matches("identity", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("identity", normalized)) {
             return InteractionKind.IDENTITY;
         }
 
-        if (ChatEntityTriggerRegistry.matches("activity", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("activity", normalized)) {
             return InteractionKind.ACTIVITY;
         }
 
-        if (ChatEntityTriggerRegistry.matches("wellbeing", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("wellbeing", normalized)) {
             return InteractionKind.WELLBEING;
         }
 
-        if (ChatEntityTriggerRegistry.matches("sleep", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("sleep", normalized)) {
             return InteractionKind.SLEEP;
         }
 
-        if (ChatEntityTriggerRegistry.matches("location", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("location", normalized)) {
             return InteractionKind.LOCATION;
         }
 
-        if (ChatEntityTriggerRegistry.matches("null", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("null", normalized)) {
             return InteractionKind.NULL;
         }
 
-        if (ChatEntityTriggerRegistry.matches("insult", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("insult", normalized)) {
             return InteractionKind.INSULT;
         }
 
-        if (ChatEntityTriggerRegistry.matches("thanks", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("thanks", normalized)) {
             return InteractionKind.THANKS;
         }
 
-        if (ChatEntityTriggerRegistry.matches("apology", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("apology", normalized)) {
             return InteractionKind.APOLOGY;
         }
 
-        if (ChatEntityTriggerRegistry.matches("confused", normalized)) {
+        if (UnknownEntityTriggerRegistry.matches("confused", normalized)) {
             return InteractionKind.CONFUSED;
         }
 
-        return ChatEntityTriggerRegistry.matches("question", normalized)
+        return UnknownEntityTriggerRegistry.matches("question", normalized)
                 ? InteractionKind.QUESTION
                 : InteractionKind.NORMAL;
     }
@@ -853,7 +853,7 @@ public final class ChatEntityBrain {
     }
 
     private static void say(
-            ChatEntity entity,
+            UnknownEntity entity,
             String message,
             long gameTick
     ) {
@@ -861,18 +861,18 @@ public final class ChatEntityBrain {
                 entity,
                 message,
                 gameTick,
-                ChatEntity.ReactionKind.NORMAL
+                UnknownEntity.ReactionKind.NORMAL
         );
     }
 
     private static void say(
-            ChatEntity entity,
+            UnknownEntity entity,
             String message,
             long gameTick,
-            ChatEntity.ReactionKind reactionKind
+            UnknownEntity.ReactionKind reactionKind
     ) {
-        ChatEntityResponseTiming.Timing timing =
-                ChatEntityResponseTiming.calculate(
+        UnknownEntityResponseTiming.Timing timing =
+                UnknownEntityResponseTiming.calculate(
                         entity,
                         message,
                         reactionKind
@@ -952,7 +952,7 @@ public final class ChatEntityBrain {
 
     private static InteractionResponse response(
             String message,
-            ChatEntity.ReactionKind reactionKind
+            UnknownEntity.ReactionKind reactionKind
     ) {
         return new InteractionResponse(
                 message,

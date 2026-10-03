@@ -1,4 +1,4 @@
-package me.p0x38.fabric.client.chatentity;
+package me.p0x38.fabric.client.unknownentity;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class ChatEntityPersistence {
+public final class UnknownEntityPersistence {
     private static final Gson GSON =
             new GsonBuilder().setPrettyPrinting().create();
 
@@ -19,7 +19,7 @@ public final class ChatEntityPersistence {
     private static boolean loaded;
     private static boolean everInteracted;
 
-    private ChatEntityPersistence() {
+    private UnknownEntityPersistence() {
     }
 
     public static void load() {

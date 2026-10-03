@@ -1,9 +1,9 @@
-package me.p0x38.fabric.client.chatentity;
+package me.p0x38.fabric.client.unknownentity;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class ChatEntityResponseTiming {
-    private ChatEntityResponseTiming() {}
+public final class UnknownEntityResponseTiming {
+    private UnknownEntityResponseTiming() {}
 
     public record Timing(
             long thinkingTicks,
@@ -11,9 +11,9 @@ public final class ChatEntityResponseTiming {
     ) {}
 
     public static Timing calculate(
-            ChatEntity entity,
+            UnknownEntity entity,
             String message,
-            ChatEntity.ReactionKind reactionKind
+            UnknownEntity.ReactionKind reactionKind
     ) {
         if (message == null || message.isBlank()) {
             return new Timing(1, 1);
@@ -93,8 +93,8 @@ public final class ChatEntityResponseTiming {
                                 * typingVariation
                 );
 
-        if (reactionKind == ChatEntity.ReactionKind.UNSETTLING
-                || reactionKind == ChatEntity.ReactionKind.META) {
+        if (reactionKind == UnknownEntity.ReactionKind.UNSETTLING
+                || reactionKind == UnknownEntity.ReactionKind.META) {
             typingSeconds +=
                     ThreadLocalRandom.current().nextDouble(
                             0.0,
@@ -120,7 +120,7 @@ public final class ChatEntityResponseTiming {
         );
     }
 
-    private static double getTypingSeconds(ChatEntity entity, String message) {
+    private static double getTypingSeconds(UnknownEntity entity, String message) {
         long characterCount =
                 message.codePointCount(
                         0,

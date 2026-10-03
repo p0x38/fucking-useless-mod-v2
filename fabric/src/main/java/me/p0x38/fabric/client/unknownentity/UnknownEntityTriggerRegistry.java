@@ -1,4 +1,4 @@
-package me.p0x38.fabric.client.chatentity;
+package me.p0x38.fabric.client.unknownentity;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public final class ChatEntityTriggerRegistry
+public final class UnknownEntityTriggerRegistry
         implements ResourceManagerReloadListener {
     public static final Identifier RESOURCE_ID =
             Identifier.fromNamespaceAndPath(
@@ -26,13 +26,13 @@ public final class ChatEntityTriggerRegistry
                     "chat_entity/triggers.json"
             );
 
-    public static final ChatEntityTriggerRegistry INSTANCE =
-            new ChatEntityTriggerRegistry();
+    public static final UnknownEntityTriggerRegistry INSTANCE =
+            new UnknownEntityTriggerRegistry();
 
     private volatile Map<String, Pattern> patterns =
             Collections.emptyMap();
 
-    private ChatEntityTriggerRegistry() {
+    private UnknownEntityTriggerRegistry() {
     }
 
     public static boolean matches(

@@ -14,7 +14,7 @@ public final class FuckingUselessMod {
         PresetRegistry.loadExternal();
         ConfigManager.load();
 
-        ModEntities.USELESS_ENTITY.toString();
+        ModEntities.initialize();
         ModSounds.initialize();
     }
 }

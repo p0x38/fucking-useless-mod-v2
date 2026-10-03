@@ -1,7 +1,8 @@
 package me.p0x38.fabric.client;
 
 import me.p0x38.fabric.client.commands.CensorBoxCommand;
-import me.p0x38.fabric.client.chatentity.ChatEntityTriggerRegistry;
+import me.p0x38.fabric.client.renderers.UnknownEntityRenderer;
+import me.p0x38.fabric.client.unknownentity.UnknownEntityTriggerRegistry;
 import me.p0x38.fabric.client.commands.ChatEntityCommand;
 import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
@@ -25,11 +26,11 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         ResourceLoader.get(
                 PackType.CLIENT_RESOURCES
         ).registerReloader(
-                ChatEntityTriggerRegistry.RESOURCE_ID,
-                ChatEntityTriggerRegistry.INSTANCE
+                UnknownEntityTriggerRegistry.RESOURCE_ID,
+                UnknownEntityTriggerRegistry.INSTANCE
         );
 
-        EntityRenderers.register(ModEntities.USELESS_ENTITY, UselessEntityRenderer::new);
+        EntityRenderers.register(ModEntities.CHAT_ENTITY, UnknownEntityRenderer::new);
 
         CensorBoxRenderer.initialize();
         CensorBoxCommand.initialize();
@@ -42,7 +43,7 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         ClientSendMessageEvents.ALLOW_CHAT.register(
                 message -> {
                     boolean handled =
-                            ChatEntityManager.talkToChatEntity(
+                            UnknownEntityManager.talkToChatEntity(
                                     message
                             );
 
@@ -86,7 +87,7 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(
-                client -> ChatEntityManager.tick()
+                client -> UnknownEntityManager.tick()
         );
     }
 }

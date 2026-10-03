@@ -1,10 +1,10 @@
 package me.p0x38.fabric.client;
 
-import me.p0x38.fabric.client.chatentity.ChatConnectionMode;
-import me.p0x38.fabric.client.chatentity.ChatEntity;
-import me.p0x38.fabric.client.chatentity.ChatEntityBrain;
-import me.p0x38.fabric.client.chatentity.ChatEntityPersistence;
-import me.p0x38.fabric.client.chatentity.Memory;
+import me.p0x38.fabric.client.unknownentity.ChatConnectionMode;
+import me.p0x38.fabric.client.unknownentity.UnknownEntity;
+import me.p0x38.fabric.client.unknownentity.UnknownEntityBrain;
+import me.p0x38.fabric.client.unknownentity.UnknownEntityPersistence;
+import me.p0x38.fabric.client.unknownentity.Memory;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class ChatEntityManager {
+public final class UnknownEntityManager {
     private static final int MIN_HIDDEN_TICKS = 10;
     private static final int MAX_HIDDEN_TICKS = 60;
     private static final double LOOK_DOT_THRESHOLD = 0.75;
@@ -39,7 +39,7 @@ public final class ChatEntityManager {
     private static final double IDLE_MOVEMENT_THRESHOLD_SQR = 0.0025;
     private static final float IDLE_ROTATION_THRESHOLD = 1.0F;
 
-    private static final Map<BlockPos, ChatEntity> ENTITIES = new HashMap<>();
+    private static final Map<BlockPos, UnknownEntity> ENTITIES = new HashMap<>();
 
     private static ClientLevel observedLevel;
     private static BlockPos observedOrigin;
@@ -58,7 +58,7 @@ public final class ChatEntityManager {
     private static float lastActivityYaw;
     private static float lastActivityPitch;
 
-    private ChatEntityManager() {}
+    private UnknownEntityManager() {}
 
     public static void tick() {
         Minecraft client = Minecraft.getInstance();
@@ -98,9 +98,9 @@ public final class ChatEntityManager {
             );
         }
 
-        ChatEntity entity = ENTITIES.computeIfAbsent(
+        UnknownEntity entity = ENTITIES.computeIfAbsent(
                 observedOrigin,
-                ChatEntity::new
+                UnknownEntity::new
         );
 
         long gameTick = level.getGameTime();
@@ -175,10 +175,10 @@ public final class ChatEntityManager {
         entity.activate();
 
         boolean firstEncounter =
-                !ChatEntityPersistence.hasEverInteracted();
+                !UnknownEntityPersistence.hasEverInteracted();
 
         if (firstEncounter) {
-            ChatEntityBrain.initialGreeting(
+            UnknownEntityBrain.initialGreeting(
                     entity,
                     gameTick
             );
@@ -220,7 +220,7 @@ public final class ChatEntityManager {
             return false;
         }
 
-        ChatEntity entity = ENTITIES.get(observedOrigin);
+        UnknownEntity entity = ENTITIES.get(observedOrigin);
 
         if (entity == null || !entity.isActive()) {
             return false;
@@ -256,12 +256,12 @@ public final class ChatEntityManager {
         );
 
         hasSpokenInCurrentWorld = true;
-        ChatEntityPersistence.markEverInteracted();
+        UnknownEntityPersistence.markEverInteracted();
 
         think(entity, client.level);
 
         if (firstChatInWorld) {
-            ChatEntityBrain.firstChatAmbient(
+            UnknownEntityBrain.firstChatAmbient(
                     entity,
                     gameTick
             );
@@ -271,12 +271,12 @@ public final class ChatEntityManager {
     }
 
     public static String getObservedChatEntityId() {
-        ChatEntity entity = getObservedChatEntity();
+        UnknownEntity entity = getObservedChatEntity();
         return entity == null ? null : entity.id();
     }
 
     public static String getObservedChatEntityInfo() {
-        ChatEntity entity = getObservedChatEntity();
+        UnknownEntity entity = getObservedChatEntity();
 
         if (entity == null) {
             return null;
@@ -295,7 +295,7 @@ public final class ChatEntityManager {
                 + " | memories: " + entity.memories().size();
     }
 
-    private static ChatEntity getObservedChatEntity() {
+    private static UnknownEntity getObservedChatEntity() {
         if (observedLevel == null || observedOrigin == null) {
             return null;
         }
@@ -304,17 +304,17 @@ public final class ChatEntityManager {
     }
 
     private static void think(
-            ChatEntity entity,
+            UnknownEntity entity,
             ClientLevel level
     ) {
-        ChatEntityBrain.think(
+        UnknownEntityBrain.think(
                 entity,
                 level
         );
     }
 
     private static void processIdleChatline(
-            ChatEntity entity,
+            UnknownEntity entity,
             ClientLevel level,
             long gameTick
     ) {
@@ -471,7 +471,7 @@ public final class ChatEntityManager {
     }
 
     private static void observePlayerCondition(
-            ChatEntity entity,
+            UnknownEntity entity,
             Player player,
             long gameTick
     ) {
@@ -538,11 +538,11 @@ public final class ChatEntityManager {
     }
 
     private static void processPendingResponses(
-            ChatEntity entity,
+            UnknownEntity entity,
             ClientLevel level,
             long gameTick
     ) {
-        ChatEntity.PendingResponse response =
+        UnknownEntity.PendingResponse response =
                 entity.pollDueResponse(gameTick);
 
         if (response == null) {

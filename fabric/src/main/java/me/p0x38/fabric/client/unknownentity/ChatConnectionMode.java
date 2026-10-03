@@ -1,4 +1,4 @@
-package me.p0x38.fabric.client.chatentity;
+package me.p0x38.fabric.client.unknownentity;
 
 import net.minecraft.client.Minecraft;
 
