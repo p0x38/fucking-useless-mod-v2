@@ -32,6 +32,36 @@ public final class ChatEntityBrain {
     private ChatEntityBrain() {
     }
 
+    public static void initialGreeting(
+            ChatEntity entity,
+            long gameTick
+    ) {
+        say(
+                entity,
+                chooseText("first.greeting", 6),
+                gameTick,
+                ChatEntity.ReactionKind.GREETING
+        );
+        entity.markAction(gameTick);
+    }
+
+    public static void firstChatAmbient(
+            ChatEntity entity,
+            long gameTick
+    ) {
+        if (!randomChance(0.08)) {
+            return;
+        }
+
+        say(
+                entity,
+                chooseText("first.ambient", 8),
+                gameTick,
+                ChatEntity.ReactionKind.META
+        );
+        entity.markAction(gameTick);
+    }
+
     public static void think(
             ChatEntity entity,
             ClientLevel level
