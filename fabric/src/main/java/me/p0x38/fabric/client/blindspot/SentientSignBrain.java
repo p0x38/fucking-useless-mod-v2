@@ -19,10 +19,6 @@ public final class SentientSignBrain {
     ) {
         long gameTick = level.getGameTime();
 
-        if (!sign.canAct(gameTick)) {
-            return;
-        }
-
         var memories = sign.memories();
 
         if (memories.isEmpty()) {
@@ -30,6 +26,19 @@ public final class SentientSignBrain {
         }
 
         Memory latest = memories.getLast();
+
+        if (latest == sign.lastProcessedMemory()) {
+            return;
+        }
+
+        /*
+         * Direct player messages are immediate. Ambient reactions still
+         * respect the normal speech cooldown.
+         */
+        if (latest.type() != Memory.Type.PLAYER_INTERACTED
+                && !sign.canAct(gameTick)) {
+            return;
+        }
 
         DebugLogger.debug(
                 "[SentientSignBrain] think id={} tick={} mood={} latestMemory={} message={}",
@@ -88,6 +97,7 @@ public final class SentientSignBrain {
                     gameTick
             );
 
+            sign.markMemoryProcessed(latest);
             sign.markAction(gameTick);
             return;
         }
@@ -111,6 +121,7 @@ public final class SentientSignBrain {
                     SentientSign.ReactionKind.NORMAL
             );
 
+            sign.markMemoryProcessed(latest);
             sign.markAction(gameTick);
             return;
         }
@@ -137,6 +148,7 @@ public final class SentientSignBrain {
                     SentientSign.ReactionKind.NORMAL
             );
 
+            sign.markMemoryProcessed(latest);
             sign.markAction(gameTick);
             return;
         }
@@ -164,6 +176,7 @@ public final class SentientSignBrain {
                     gameTick
             );
 
+            sign.markMemoryProcessed(latest);
             sign.markAction(gameTick);
             return;
         }
@@ -191,6 +204,7 @@ public final class SentientSignBrain {
                     gameTick
             );
 
+            sign.markMemoryProcessed(latest);
             sign.markAction(gameTick);
         }
     }
