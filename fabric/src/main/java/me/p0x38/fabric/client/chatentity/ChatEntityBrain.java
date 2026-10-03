@@ -541,7 +541,7 @@ public final class ChatEntityBrain {
                         Memory.Type.CHAT_ENTITY_SPOKE,
                         gameTick,
                         1.0f,
-                        entity.position(),
+                        entity.origin(),
                         Map.of(
                                 "message",
                                 message
