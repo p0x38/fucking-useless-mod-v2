@@ -13,7 +13,7 @@ public final class UnknownEntityResponseTiming {
     public static Timing calculate(
             UnknownEntity entity,
             String message,
-            UnknownEntity.ReactionKind reactionKind
+            ReactionKind reactionKind
     ) {
         if (message == null || message.isBlank()) {
             return new Timing(1, 1);
@@ -93,8 +93,8 @@ public final class UnknownEntityResponseTiming {
                                 * typingVariation
                 );
 
-        if (reactionKind == UnknownEntity.ReactionKind.UNSETTLING
-                || reactionKind == UnknownEntity.ReactionKind.META) {
+        if (reactionKind == ReactionKind.UNSETTLING
+                || reactionKind == ReactionKind.META) {
             typingSeconds +=
                     ThreadLocalRandom.current().nextDouble(
                             0.0,

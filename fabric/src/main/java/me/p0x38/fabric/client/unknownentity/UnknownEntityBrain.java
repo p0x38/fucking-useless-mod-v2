@@ -19,7 +19,7 @@ public final class UnknownEntityBrain {
 
     private record InteractionResponse(
             String message,
-            UnknownEntity.ReactionKind reactionKind
+            ReactionKind reactionKind
     ) {
     }
 
@@ -52,7 +52,7 @@ public final class UnknownEntityBrain {
                 entity,
                 chooseText("first.greeting", 6),
                 gameTick,
-                UnknownEntity.ReactionKind.GREETING
+                ReactionKind.GREETING
         );
         entity.markAction(gameTick);
     }
@@ -72,7 +72,7 @@ public final class UnknownEntityBrain {
                 UnknownEntityResponseTiming.calculate(
                         entity,
                         message,
-                        UnknownEntity.ReactionKind.META
+                        ReactionKind.META
                 );
 
         long delayTicks =
@@ -83,7 +83,7 @@ public final class UnknownEntityBrain {
 
         entity.queueResponse(
                 message,
-                UnknownEntity.ReactionKind.META,
+                ReactionKind.META,
                 baseTick,
                 timing.thinkingTicks(),
                 timing.typingTicks()
@@ -151,17 +151,17 @@ public final class UnknownEntityBrain {
             Memory memory,
             long gameTick
     ) {
-        UnknownEntity.ReactionKind reaction =
+        ReactionKind reaction =
                 entity.lastReactionKind();
 
-        if ((reaction == UnknownEntity.ReactionKind.UNSETTLING
-                || reaction == UnknownEntity.ReactionKind.OUT_OF_PLACE)
+        if ((reaction == ReactionKind.UNSETTLING
+                || reaction == ReactionKind.OUT_OF_PLACE)
                 && randomChance(0.35)) {
             say(
                     entity,
                     chooseText("self_aware", 8),
                     gameTick,
-                    UnknownEntity.ReactionKind.META
+                    ReactionKind.META
             );
 
             entity.markAction(gameTick);
@@ -186,14 +186,14 @@ public final class UnknownEntityBrain {
                         entity,
                         chooseText("quiet", 3),
                         gameTick,
-                        UnknownEntity.ReactionKind.META
+                        ReactionKind.META
                 );
             } else {
                 say(
                         entity,
                         chooseText("world_changed", 8),
                         gameTick,
-                        UnknownEntity.ReactionKind.META
+                        ReactionKind.META
                 );
             }
         }
@@ -213,7 +213,7 @@ public final class UnknownEntityBrain {
                     entity,
                     chooseText("quiet", 3),
                     gameTick,
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
         } else {
             say(
@@ -221,8 +221,8 @@ public final class UnknownEntityBrain {
                     chooseText("idle." + stage, 4),
                     gameTick,
                     stage >= 5
-                            ? UnknownEntity.ReactionKind.META
-                            : UnknownEntity.ReactionKind.NORMAL
+                            ? ReactionKind.META
+                            : ReactionKind.NORMAL
             );
         }
 
@@ -262,7 +262,7 @@ public final class UnknownEntityBrain {
                 entity,
                 chooseText("event.damage", 5),
                 gameTick,
-                UnknownEntity.ReactionKind.NORMAL
+                ReactionKind.NORMAL
         );
 
         markProcessed(entity, memory, gameTick);
@@ -278,7 +278,7 @@ public final class UnknownEntityBrain {
                     entity,
                     chooseText("event.creeper_death", 4),
                     gameTick,
-                    UnknownEntity.ReactionKind.META
+                    ReactionKind.META
             );
         }
 
@@ -328,7 +328,7 @@ public final class UnknownEntityBrain {
                     entity,
                     chooseText("seen", 6),
                     gameTick,
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
 
             markProcessed(entity, memory, gameTick);
@@ -354,7 +354,7 @@ public final class UnknownEntityBrain {
                             username
                     ),
                     gameTick,
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
 
             markProcessed(entity, memory, gameTick);
@@ -425,64 +425,64 @@ public final class UnknownEntityBrain {
         return switch (kind) {
             case CONTROL -> response(
                     chooseText("control", 6),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
             case UNSETTLING -> response(
                     chooseText("unsettling", 9),
-                    UnknownEntity.ReactionKind.UNSETTLING
+                    ReactionKind.UNSETTLING
             );
             case GREETING -> response(
                     chooseGreetingResponse(
                             interactionCount,
                             username
                     ),
-                    UnknownEntity.ReactionKind.GREETING
+                    ReactionKind.GREETING
             );
             case IDENTITY -> response(
                     interactionCount >= 5
                             ? chooseText("identity.again", 4)
                             : chooseText("identity", 8),
-                    UnknownEntity.ReactionKind.IDENTITY
+                    ReactionKind.IDENTITY
             );
             case ACTIVITY -> response(
                     chooseText("activity", 6),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
             case WELLBEING -> response(
                     chooseText("wellbeing", 6),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
             case LOCATION -> response(
                     chooseText("location", 6),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
             case NULL -> response(
                     chooseNullResponse(entity),
-                    UnknownEntity.ReactionKind.NULL
+                    ReactionKind.NULL
             );
             case CONFUSED -> response(
                     chooseText("confused", 6),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
             case INSULT -> response(
                     chooseText("insult", 6),
-                    UnknownEntity.ReactionKind.ANNOYED
+                    ReactionKind.ANNOYED
             );
             case THANKS -> response(
                     chooseText("thanks", 6),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
             case APOLOGY -> response(
                     chooseText("apology", 6),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
             case SLEEP -> response(
                     chooseSleepResponse(entity, memory),
-                    UnknownEntity.ReactionKind.SLEEP
+                    ReactionKind.SLEEP
             );
             case QUESTION -> response(
                     chooseText("question", 6),
-                    UnknownEntity.ReactionKind.QUESTION
+                    ReactionKind.QUESTION
             );
             case NORMAL -> response(
                     chooseNormalResponse(
@@ -491,7 +491,7 @@ public final class UnknownEntityBrain {
                             mood,
                             sillyMode
                     ),
-                    UnknownEntity.ReactionKind.NORMAL
+                    ReactionKind.NORMAL
             );
         };
     }
@@ -534,7 +534,7 @@ public final class UnknownEntityBrain {
 
     private static InteractionResponse chooseInteractionFollowUp(
             InteractionKind kind,
-            UnknownEntity.ReactionKind reactionKind
+            ReactionKind reactionKind
     ) {
         String prefix = switch (kind) {
             case CONTROL -> "control.followup";
@@ -861,7 +861,7 @@ public final class UnknownEntityBrain {
                 entity,
                 message,
                 gameTick,
-                UnknownEntity.ReactionKind.NORMAL
+                ReactionKind.NORMAL
         );
     }
 
@@ -869,7 +869,7 @@ public final class UnknownEntityBrain {
             UnknownEntity entity,
             String message,
             long gameTick,
-            UnknownEntity.ReactionKind reactionKind
+            ReactionKind reactionKind
     ) {
         UnknownEntityResponseTiming.Timing timing =
                 UnknownEntityResponseTiming.calculate(
@@ -952,7 +952,7 @@ public final class UnknownEntityBrain {
 
     private static InteractionResponse response(
             String message,
-            UnknownEntity.ReactionKind reactionKind
+            ReactionKind reactionKind
     ) {
         return new InteractionResponse(
                 message,

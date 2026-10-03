@@ -13,25 +13,35 @@ import java.util.Map;
 
 public final class UnknownEntity {
     public enum Mood {
+        /**
+         * When the entity is calm.
+         * Must be calm tone.
+         */
         CALM,
-        CURIOUS,
-        ANNOYED,
-        PLAYFUL,
-        AFRAID
-    }
 
-    public enum ReactionKind {
-        NORMAL,
-        GREETING,
-        IDENTITY,
-        QUESTION,
-        UNSETTLING,
-        OUT_OF_PLACE,
-        PLAYFUL,
-        NULL,
+        /**
+         * When the entity has curious to something.
+         * This can be triggered when player has doing familiar stuff to it.
+         */
+        CURIOUS,
+
+        /**
+         * When the entity has been annoyed.
+         * This can be triggered when player has been annoying it by its chat and their behavior taken to it.
+         */
         ANNOYED,
-        SLEEP,
-        META
+
+        /**
+         * When the entity has been silly mode.
+         * This can be triggered when silly mode are toggled on in config.
+         */
+        PLAYFUL,
+
+        /**
+         * When the entity has been afraid to something.
+         * This is currently unused, but planned to be used future.
+         */
+        AFRAID
     }
 
     public record PendingResponse(
