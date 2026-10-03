@@ -41,6 +41,35 @@ public final class SentientSignBrain {
         );
 
         /*
+         * The sign is aware when it produces an uncontrolled or
+         * unusually strange reaction. It cannot always suppress
+         * the follow-up thought either.
+         */
+        if (latest.type() == Memory.Type.SIGN_SPOKE
+                && (sign.lastReactionKind() == SentientSign.ReactionKind.UNSETTLING
+                || sign.lastReactionKind() == SentientSign.ReactionKind.OUT_OF_PLACE)
+                && randomChance(0.35)) {
+            say(
+                    sign,
+                    choose(
+                            text("self_aware.1"),
+                            text("self_aware.2"),
+                            text("self_aware.3"),
+                            text("self_aware.4"),
+                            text("self_aware.5"),
+                            text("self_aware.6"),
+                            text("self_aware.7"),
+                            text("self_aware.8")
+                    ),
+                    gameTick,
+                    SentientSign.ReactionKind.META
+            );
+
+            sign.markAction(gameTick);
+            return;
+        }
+
+        /*
          * Direct communication has priority over ambient thoughts.
          */
         if (latest.type() == Memory.Type.PLAYER_INTERACTED) {
@@ -78,7 +107,8 @@ public final class SentientSignBrain {
                             text("seen.5"),
                             text("seen.6")
                     ),
-                    gameTick
+                    gameTick,
+                    SentientSign.ReactionKind.NORMAL
             );
 
             sign.markAction(gameTick);
@@ -103,7 +133,8 @@ public final class SentientSignBrain {
                             text("returned.5"),
                             text("returned.6")
                     ),
-                    gameTick
+                    gameTick,
+                    SentientSign.ReactionKind.NORMAL
             );
 
             sign.markAction(gameTick);
@@ -173,6 +204,17 @@ public final class SentientSignBrain {
         int interactionCount = sign.interactionCount();
         int annoyanceCount = sign.annoyanceCount();
 
+        if (isControlQuestion(normalized)) {
+            return choose(
+                    text("control.1"),
+                    text("control.2"),
+                    text("control.3"),
+                    text("control.4"),
+                    text("control.5"),
+                    text("control.6")
+            );
+        }
+
         /*
          * Some questions are so specific that the sign reacts to
          * the subject itself instead of treating them as ordinary
@@ -198,7 +240,9 @@ public final class SentientSignBrain {
          */
         if (!isQuestion(normalized)
                 && !isGreeting(normalized)
-                && (randomChance(sign.interactionCount() >= 10 ? 0.18 : 0.08))) {
+                && randomChance(
+                        sign.interactionCount() >= 10 ? 0.18 : 0.08
+                )) {
             return choose(
                     text("out_of_place.1"),
                     text("out_of_place.2"),
@@ -366,6 +410,19 @@ public final class SentientSignBrain {
                 || message.contains("can you remember me when i'm gone");
     }
 
+    private static boolean isControlQuestion(String message) {
+        return message.contains("why do you say weird things")
+                || message.contains("why are you saying weird things")
+                || message.contains("do you know you're weird")
+                || message.contains("do you know you are weird")
+                || message.contains("can you control yourself")
+                || message.contains("can you control what you say")
+                || message.contains("why can't you control yourself")
+                || message.contains("why can't you stop")
+                || message.contains("can you stop yourself")
+                || message.contains("do you choose what you say");
+    }
+
     private static boolean isGreeting(String message) {
         return message.matches(
                 "^(hi+|hello+|hey+|hiya|yo+|sup|howdy)[!.,? ]*$"
@@ -407,6 +464,20 @@ public final class SentientSignBrain {
             String message,
             long gameTick
     ) {
+        say(
+                sign,
+                message,
+                gameTick,
+                SentientSign.ReactionKind.NORMAL
+        );
+    }
+
+    private static void say(
+            SentientSign sign,
+            String message,
+            long gameTick,
+            SentientSign.ReactionKind reactionKind
+    ) {
         DebugLogger.debug(
                 "[SentientSignBrain] speaking id={} tick={} message={}",
                 sign.id(),
@@ -414,6 +485,7 @@ public final class SentientSignBrain {
                 message
         );
 
+        sign.recordReaction(reactionKind);
         sign.setCurrentMessage(message);
 
         sign.remember(
