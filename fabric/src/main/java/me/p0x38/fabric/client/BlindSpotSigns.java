@@ -236,6 +236,46 @@ public final class BlindSpotSigns {
         return PLACED_SIGNS.get(signPosition);
     }
 
+    /**
+     * Checks whether the camera is aimed closely enough at the rendered
+     * client-only sign to count as looking at it when the vanilla block
+     * raycast misses the sign's thin outline.
+     */
+    public static BlockPos findLookedAtSupport(
+            Vec3 cameraPosition,
+            Vec3 forward,
+            BlockPos preferredSupportPosition
+    ) {
+        BlockPos signPosition =
+                SUPPORT_TO_SIGN.get(preferredSupportPosition);
+
+        if (signPosition == null) {
+            return null;
+        }
+
+        Vec3 signCenter =
+                Vec3.atCenterOf(signPosition)
+                        .add(0.0, 0.15, 0.0);
+
+        Vec3 toSign =
+                signCenter.subtract(cameraPosition);
+
+        double distanceSqr =
+                toSign.lengthSqr();
+
+        if (distanceSqr <= 0.0001
+                || distanceSqr > 64.0) {
+            return null;
+        }
+
+        double dot =
+                forward.dot(toSign.normalize());
+
+        return dot >= 0.965
+                ? preferredSupportPosition
+                : null;
+    }
+
     public static BlockPos getSupportPosition(
             BlockPos signPosition
     ) {
