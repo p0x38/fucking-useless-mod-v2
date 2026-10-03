@@ -3,7 +3,7 @@ package me.p0x38.fabric.client;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import me.p0x38.fabric.client.commands.CensorBoxCommand;
-import me.p0x38.fabric.client.commands.SentientSignCommand;
+import me.p0x38.fabric.client.commands.ChatEntityCommand;
 import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
@@ -32,7 +32,7 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
 
         CensorBoxRenderer.initialize();
         CensorBoxCommand.initialize();
-        SentientSignCommand.initialize();
+        ChatEntityCommand.initialize();
 
         ClientSendMessageEvents.MODIFY_CHAT.register(
                 ChatTransformer::transform
@@ -41,7 +41,7 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         ClientSendMessageEvents.ALLOW_CHAT.register(
                 message -> {
                     boolean handled =
-                            BlindSpotEventManager.talkToObservedSign(
+                            ChatEntityManager.talkToChatEntity(
                                     message
                             );
 
@@ -85,7 +85,7 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(
-                client -> BlindSpotEventManager.tick()
+                client -> ChatEntityManager.tick()
         );
     }
 }
