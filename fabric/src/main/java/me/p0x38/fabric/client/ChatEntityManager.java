@@ -34,6 +34,8 @@ public final class ChatEntityManager {
     private static final long IDLE_VERY_LONG_TICKS = 3 * 60 * 20L;
     private static final long IDLE_EXTREME_TICKS = 5 * 60 * 20L;
     private static final long IDLE_VERY_EXTREME_TICKS = 10 * 60 * 20L;
+    private static final long LONG_IDLE_BEFORE_SLEEP_RESPONSE_TICKS =
+            60 * 60 * 20L;
 
     private static final double IDLE_MOVEMENT_THRESHOLD_SQR = 0.0025;
     private static final float IDLE_ROTATION_THRESHOLD = 1.0F;
@@ -49,6 +51,8 @@ public final class ChatEntityManager {
     private static long playerIdleSince = Long.MIN_VALUE;
     private static int lastIdleChatlineStage;
     private static boolean activityStateInitialized;
+    private static float lastObservedHealth = Float.NaN;
+    private static boolean wasPlayerDead;
     private static double lastActivityX;
     private static double lastActivityY;
     private static double lastActivityZ;
@@ -126,10 +130,21 @@ public final class ChatEntityManager {
                 player.getZ()
         );
 
+        observePlayerCondition(
+                entity,
+                player,
+                gameTick
+        );
+
         processPendingResponses(
                 entity,
                 level,
                 gameTick
+        );
+
+        think(
+                entity,
+                level
         );
 
         processIdleChatline(
@@ -161,7 +176,10 @@ public final class ChatEntityManager {
         entityActivatedWhileHidden = true;
         entity.activate();
 
-        if (!ChatEntityPersistence.hasEverInteracted()) {
+        boolean firstEncounter =
+                !ChatEntityPersistence.hasEverInteracted();
+
+        if (firstEncounter) {
             ChatEntityBrain.initialGreeting(
                     entity,
                     gameTick
@@ -174,7 +192,12 @@ public final class ChatEntityManager {
                         gameTick,
                         0.85f,
                         entity.origin(),
-                        Map.of("phase", "hidden")
+                        Map.of(
+                                "phase",
+                                "hidden",
+                                "firstEncounter",
+                                Boolean.toString(firstEncounter)
+                        )
                 )
         );
 
@@ -209,10 +232,15 @@ public final class ChatEntityManager {
         String trimmed = message.trim();
         long gameTick = client.level.getGameTime();
 
+        long idleTicksBeforeChat =
+                getCurrentIdleTicks(gameTick);
+
         resetPlayerIdleTimer(
                 client.player,
                 gameTick
         );
+
+        entity.clearPendingResponses();
 
         client.gui.getChat().addMessage(
                 Component.literal("<" + username + "> " + trimmed)
@@ -232,7 +260,8 @@ public final class ChatEntityManager {
                 trimmed,
                 gameTick,
                 ChatConnectionMode.detect(client),
-                username
+                username,
+                idleTicksBeforeChat
         );
 
         hasSpokenInCurrentWorld = true;
@@ -417,6 +446,17 @@ public final class ChatEntityManager {
         lastActivityPitch = pitch;
     }
 
+    private static long getCurrentIdleTicks(long gameTick) {
+        if (playerIdleSince == Long.MIN_VALUE) {
+            return 0L;
+        }
+
+        return Math.max(
+                0L,
+                gameTick - playerIdleSince
+        );
+    }
+
     private static void resetPlayerIdleTimer(
             Player player,
             long gameTick
@@ -429,6 +469,73 @@ public final class ChatEntityManager {
         lastActivityZ = player.getZ();
         lastActivityYaw = player.getYRot();
         lastActivityPitch = player.getXRot();
+    }
+
+    private static void observePlayerCondition(
+            ChatEntity entity,
+            Player player,
+            long gameTick
+    ) {
+        float health = player.getHealth();
+        boolean dead = player.isDeadOrDying();
+
+        if (Float.isNaN(lastObservedHealth)) {
+            lastObservedHealth = health;
+            wasPlayerDead = dead;
+            return;
+        }
+
+        if (!entity.isActive()) {
+            lastObservedHealth = health;
+            wasPlayerDead = dead;
+            return;
+        }
+
+        if (!wasPlayerDead && dead) {
+            boolean creeperDeath =
+                    player.getLastHurtByMob()
+                            instanceof net.minecraft.world.entity.monster.Creeper;
+
+            entity.remember(
+                    new Memory(
+                            Memory.Type.PLAYER_DIED,
+                            gameTick,
+                            1.0f,
+                            entity.origin(),
+                            Map.of(
+                                    "cause",
+                                    creeperDeath
+                                            ? "creeper"
+                                            : "other"
+                            )
+                    )
+            );
+
+            DebugLogger.debug(
+                    "[ChatEntityManager] player died id={} cause={}",
+                    entity.id(),
+                    creeperDeath ? "creeper" : "other"
+            );
+        } else if (!dead
+                && health < lastObservedHealth - 0.001F) {
+            entity.remember(
+                    new Memory(
+                            Memory.Type.PLAYER_DAMAGED,
+                            gameTick,
+                            1.0f,
+                            entity.origin(),
+                            Map.of(
+                                    "amount",
+                                    Float.toString(
+                                            lastObservedHealth - health
+                                    )
+                            )
+                    )
+            );
+        }
+
+        lastObservedHealth = health;
+        wasPlayerDead = dead;
     }
 
     private static void processPendingResponses(
@@ -529,5 +636,7 @@ public final class ChatEntityManager {
         lastActivityZ = 0.0;
         lastActivityYaw = 0.0F;
         lastActivityPitch = 0.0F;
+        lastObservedHealth = Float.NaN;
+        wasPlayerDead = false;
     }
 }
