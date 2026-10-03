@@ -626,5 +626,8 @@
   "text.fuckinguselessmod.config.value.mode.replace": "Replace",
   "text.fuckinguselessmod.config.value.text_case.lowercase": "Lowercase",
   "text.fuckinguselessmod.config.value.text_case.preserve": "Preserve",
-  "text.fuckinguselessmod.config.value.text_case.uppercase": "Uppercase"
+  "text.fuckinguselessmod.config.value.text_case.uppercase": "Uppercase",
+  "text.fuckinguselessmod.chat.entity.silly.1": ":3",
+  "text.fuckinguselessmod.chat.entity.silly.2": "mrow",
+  "text.fuckinguselessmod.chat.entity.silly.3": "hehe"
 }
