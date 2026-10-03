@@ -233,6 +233,12 @@ public final class BlindSpotEventManager {
                         )
                 )
         );
+
+        BlindSpotSigns.place(
+                level,
+                sign.position(),
+                sign.currentMessage()
+        );
     }
 
     private static void onReveal(
