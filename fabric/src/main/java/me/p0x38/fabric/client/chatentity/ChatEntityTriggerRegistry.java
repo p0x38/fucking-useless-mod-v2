@@ -29,9 +29,6 @@ public final class ChatEntityTriggerRegistry
     public static final ChatEntityTriggerRegistry INSTANCE =
             new ChatEntityTriggerRegistry();
 
-    private static final int REGEX_FLAGS =
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
-
     private volatile Map<String, Pattern> patterns =
             Collections.emptyMap();
 
@@ -176,7 +173,7 @@ public final class ChatEntityTriggerRegistry
         try {
             return Pattern.compile(
                     combined.toString(),
-                    REGEX_FLAGS
+                    Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
             );
         } catch (PatternSyntaxException exception) {
             DebugLogger.debug(

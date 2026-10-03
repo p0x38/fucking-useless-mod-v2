@@ -60,11 +60,8 @@ public final class ChatEntity {
     private ReactionKind lastReactionKind = ReactionKind.NORMAL;
     private ChatConnectionMode connectionMode = ChatConnectionMode.DISCONNECTED;
 
-    private boolean hasBeenSeen;
     private boolean playerLooking;
-    private boolean playerLookingAway;
 
-    private long lastSeenTick = Long.MIN_VALUE;
     private long lastActionTick = Long.MIN_VALUE;
     private Memory lastProcessedMemory;
 

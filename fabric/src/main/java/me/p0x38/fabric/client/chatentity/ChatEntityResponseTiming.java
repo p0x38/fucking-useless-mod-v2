@@ -25,7 +25,7 @@ public final class ChatEntityResponseTiming {
                     case IDENTITY -> 0.55;
                     case QUESTION -> 0.65;
                     case UNSETTLING -> 1.15;
-                    case OUT_OF_PLACE -> 0.55;
+                    case OUT_OF_PLACE -> 0.50;
                     case PLAYFUL -> 0.20;
                     case ANNOYED -> 0.10;
                     case META -> 0.90;
@@ -54,26 +54,7 @@ public final class ChatEntityResponseTiming {
                                 * thinkingVariation
                 );
 
-        long characterCount =
-                message.codePointCount(
-                        0,
-                        message.length()
-                );
-
-        double charactersPerSecond =
-                switch (entity.mood()) {
-                    case CALM -> 10.5;
-                    case CURIOUS -> 9.5;
-                    case PLAYFUL -> 14.0;
-                    case ANNOYED -> 18.0;
-                    case AFRAID -> 6.5;
-                };
-
-        double typingSeconds =
-                Math.min(
-                        4.5,
-                        characterCount / charactersPerSecond
-                );
+        double typingSeconds = getTypingSeconds(entity, message);
 
         double punctuationPause = 0.0;
 
@@ -82,7 +63,7 @@ public final class ChatEntityResponseTiming {
                 case ',' -> 0.06;
                 case '.' -> 0.08;
                 case '?' -> 0.14;
-                case '!' -> 0.14;
+                case '!' -> 0.13;
                 case ':' -> 0.07;
                 case ';' -> 0.09;
                 case '…' -> 0.22;
@@ -134,6 +115,28 @@ public final class ChatEntityResponseTiming {
         return new Timing(
                 thinkingTicks,
                 typingTicks
+        );
+    }
+
+    private static double getTypingSeconds(ChatEntity entity, String message) {
+        long characterCount =
+                message.codePointCount(
+                        0,
+                        message.length()
+                );
+
+        double charactersPerSecond =
+                switch (entity.mood()) {
+                    case CALM -> 10.5;
+                    case CURIOUS -> 9.5;
+                    case PLAYFUL -> 14.0;
+                    case ANNOYED -> 18.0;
+                    case AFRAID -> 6.5;
+                };
+
+        return Math.min(
+                4.5,
+                characterCount / charactersPerSecond
         );
     }
 }
