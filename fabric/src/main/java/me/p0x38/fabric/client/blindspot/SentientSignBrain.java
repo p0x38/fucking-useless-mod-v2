@@ -173,6 +173,44 @@ public final class SentientSignBrain {
         int interactionCount = sign.interactionCount();
         int annoyanceCount = sign.annoyanceCount();
 
+        /*
+         * Some questions are so specific that the sign reacts to
+         * the subject itself instead of treating them as ordinary
+         * conversation.
+         */
+        if (isUnsettlingQuestion(normalized)) {
+            return choose(
+                    text("unsettling.1"),
+                    text("unsettling.2"),
+                    text("unsettling.3"),
+                    text("unsettling.4"),
+                    text("unsettling.5"),
+                    text("unsettling.6"),
+                    text("unsettling.7"),
+                    text("unsettling.8")
+            );
+        }
+
+        /*
+         * The sign occasionally answers with something only loosely
+         * connected to the conversation. This becomes more common
+         * as it grows familiar with the player.
+         */
+        if (!isQuestion(normalized)
+                && !isGreeting(normalized)
+                && (randomChance(sign.interactionCount() >= 10 ? 0.18 : 0.08))) {
+            return choose(
+                    text("out_of_place.1"),
+                    text("out_of_place.2"),
+                    text("out_of_place.3"),
+                    text("out_of_place.4"),
+                    text("out_of_place.5"),
+                    text("out_of_place.6"),
+                    text("out_of_place.7"),
+                    text("out_of_place.8")
+            );
+        }
+
         if (isGreeting(normalized)) {
             if (interactionCount == 1) {
                 return choose(
@@ -307,6 +345,25 @@ public final class SentientSignBrain {
                 text("interacted.default.7"),
                 text("interacted.default.8")
         );
+    }
+
+    private static boolean isUnsettlingQuestion(String message) {
+        return message.contains("do you feel pain")
+                || message.contains("are you afraid")
+                || message.contains("are you scared")
+                || message.contains("can you die")
+                || message.contains("do signs die")
+                || message.contains("can i break you")
+                || message.contains("what happens if i break you")
+                || message.contains("what happens if i destroy you")
+                || message.contains("what happens when i break you")
+                || message.contains("what happens when i look away")
+                || message.contains("where do you go when i look away")
+                || message.contains("do you know when i'm not looking")
+                || message.contains("are you watching me")
+                || message.contains("are you following me")
+                || message.contains("can you see me when i'm not looking")
+                || message.contains("can you remember me when i'm gone");
     }
 
     private static boolean isGreeting(String message) {
