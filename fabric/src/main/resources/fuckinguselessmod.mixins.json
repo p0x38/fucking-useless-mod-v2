@@ -6,6 +6,7 @@
     "GameRendererMixin",
     "ItemInHandRendererMixin",
     "AvatarRendererMixin",
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "SentientSignEditScreenMixin"
   ]
 }
