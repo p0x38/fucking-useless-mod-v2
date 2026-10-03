@@ -158,7 +158,7 @@ public final class ChatEntityBrain {
                 && randomChance(0.35)) {
             say(
                     entity,
-                    chooseText("self_aware", 20),
+                    chooseText("self_aware", 8),
                     gameTick,
                     ChatEntity.ReactionKind.META
             );
@@ -190,7 +190,7 @@ public final class ChatEntityBrain {
             } else {
                 say(
                         entity,
-                        chooseText("world_changed", 20),
+                        chooseText("world_changed", 8),
                         gameTick,
                         ChatEntity.ReactionKind.META
                 );
@@ -367,7 +367,7 @@ public final class ChatEntityBrain {
                 && randomChance(0.25)) {
             say(
                     entity,
-                    chooseText("curious", 18),
+                    chooseText("curious", 8),
                     gameTick
             );
 
@@ -416,7 +416,7 @@ public final class ChatEntityBrain {
 
         return switch (kind) {
             case CONTROL -> response(
-                    chooseText("control", 14),
+                    chooseText("control", 6),
                     ChatEntity.ReactionKind.NORMAL
             );
             case UNSETTLING -> response(
@@ -501,7 +501,7 @@ public final class ChatEntityBrain {
             return chooseText("sleep.returned", 6);
         }
 
-        return chooseText("wellbeing", 10);
+        return chooseText("wellbeing", 6);
     }
 
     private static long parseLongContext(
@@ -575,7 +575,7 @@ public final class ChatEntityBrain {
                                 ? 0.18
                                 : 0.08
                 )) {
-            return chooseText("out_of_place", 18);
+            return chooseText("out_of_place", 8);
         }
 
         if (annoyanceCount >= 6) {
@@ -594,7 +594,7 @@ public final class ChatEntityBrain {
 
         if (sillyMode
                 && mood == ChatEntity.Mood.PLAYFUL) {
-            return chooseText("playful", 16);
+            return chooseText("playful", 6);
         }
 
         if (mood == ChatEntity.Mood.ANNOYED) {
