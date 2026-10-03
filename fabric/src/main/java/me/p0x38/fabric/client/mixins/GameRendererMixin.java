@@ -14,3 +14,8 @@ public interface GameRendererMixin {
             boolean applyEffects
     );
 }
+
+    @Invoker("getProjectionMatrix")
+    org.joml.Matrix4f fuckingUselessMod$getProjectionMatrix(
+            float fov
+    );
