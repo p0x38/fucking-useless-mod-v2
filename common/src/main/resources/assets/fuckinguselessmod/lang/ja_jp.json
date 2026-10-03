@@ -209,5 +209,14 @@
   "text.fuckinguselessmod.blindspot.sign.curious.4": "私を見てるの？",
   "text.fuckinguselessmod.blindspot.sign.annoyed.1": "前からここにいたわけじゃないよ",
   "text.fuckinguselessmod.blindspot.sign.annoyed.2": "記憶違いだよ",
-  "text.fuckinguselessmod.blindspot.sign.annoyed.3": "ずっとここに看板はあったよ"
+  "text.fuckinguselessmod.blindspot.sign.annoyed.3": "ずっとここに看板はあったよ",
+  "text.fuckinguselessmod.config.category.misc": "その他",
+  "text.fuckinguselessmod.config.option.uwuifierBlacklist": "ブラックリストワード",
+  "text.fuckinguselessmod.config.description.uwuifierBlacklist": "Uwuifier変換でそのまま残す単語の一覧です。",
+  "text.fuckinguselessmod.config.option.dialoguePitch": "ピッチ",
+  "text.fuckinguselessmod.config.description.dialoguePitch": "ダイアログ音声の基本再生ピッチです。範囲: 0.5〜2.0。",
+  "text.fuckinguselessmod.config.option.dialoguePitchVariation": "ピッチ変動",
+  "text.fuckinguselessmod.config.description.dialoguePitchVariation": "設定した基本ピッチを中心に加えるランダムなピッチ変動です。範囲: 0.0〜0.5。",
+  "text.fuckinguselessmod.config.option.debugLoggingEnabled": "デバッグログを有効化",
+  "text.fuckinguselessmod.config.description.debugLoggingEnabled": "トラブルシューティングや診断用の追加デバッグログを有効化します。"
 }
