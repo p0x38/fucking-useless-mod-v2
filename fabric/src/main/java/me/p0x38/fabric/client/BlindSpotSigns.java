@@ -135,6 +135,25 @@ public final class BlindSpotSigns {
         );
     }
 
+    public static SignBlockEntity getSignAt(
+            BlockPos signPosition
+    ) {
+        return PLACED_SIGNS.get(signPosition);
+    }
+
+    public static BlockPos getSupportPosition(
+            BlockPos signPosition
+    ) {
+        for (Map.Entry<BlockPos, BlockPos> entry :
+                SUPPORT_TO_SIGN.entrySet()) {
+            if (entry.getValue().equals(signPosition)) {
+                return entry.getKey();
+            }
+        }
+
+        return null;
+    }
+
     public static BlockPos resolveSupportPosition(
             BlockPos lookedAt
     ) {
@@ -207,9 +226,9 @@ public final class BlindSpotSigns {
             );
         }
 
-        return text.withColor(
-                DyeColor.BLACK
-        );
+        return text
+                .withColor(DyeColor.RED)
+                .withGlowing(true);
     }
 
     private static int getPlayerFacingRotation() {
