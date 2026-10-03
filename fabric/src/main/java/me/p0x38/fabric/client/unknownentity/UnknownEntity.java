@@ -11,7 +11,9 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
+/** Stores client-side state, memories, perception state, and pending responses. */
 public final class UnknownEntity {
+    /** Represents the entity's current emotional or behavioral state. */
     public enum Mood {
         /**
          * When the entity is calm.
@@ -44,6 +46,7 @@ public final class UnknownEntity {
         AFRAID
     }
 
+    /** Represents a response waiting to be delivered. */
     public record PendingResponse(
             String message,
             ReactionKind reactionKind,
@@ -88,6 +91,7 @@ public final class UnknownEntity {
     private final List<Memory> memories =
             new ArrayList<>();
 
+    /** Creates an inactive entity at the specified origin. */
     public UnknownEntity(BlockPos origin) {
         this.origin = origin;
     }
@@ -104,10 +108,12 @@ public final class UnknownEntity {
 
     public String currentMessage() { return currentMessage; }
 
+    /** @return whether the entity is active. */
     public boolean isActive() {
         return active;
     }
 
+    /** Activates the entity. */
     public void activate() {
         if (!active) {
             active = true;
@@ -120,19 +126,33 @@ public final class UnknownEntity {
         }
     }
 
+    /** @return the entity's awareness value. */
     public int awareness() { return awareness; }
+    /** @return the entity's suspicion value. */
     public int suspicion() { return suspicion; }
+    /** @return the entity's curiosity value. */
     public float curiosity() { return curiosity; }
+    /** @return the entity's trust value. */
     public float trust() { return trust; }
+    /** @return the entity's irritation value. */
     public float irritation() { return irritation; }
+    /** @return the number of recorded player interactions. */
     public int interactionCount() { return interactionCount; }
+    /** @return the number of recorded annoyance events. */
     public int annoyanceCount() { return annoyanceCount; }
+    /** @return the number of times the player has been observed. */
     public int seenCount() { return seenCount; }
+    /** @return the number of times the player has returned. */
     public int returnCount() { return returnCount; }
+    /** @return the number of uncontrolled unsettling or out-of-place reactions. */
     public int uncontrolledReactionCount() { return uncontrolledReactionCount; }
+    /** @return the entity's self-awareness factor. */
     public float selfAwareness() { return SELF_AWARENESS; }
+    /** @return the entity's self-control factor. */
     public float selfControl() { return SELF_CONTROL; }
+    /** @return the most recently delivered reaction kind. */
     public ReactionKind lastReactionKind() { return lastReactionKind; }
+    /** @return the current chat connection mode. */
     public ChatConnectionMode connectionMode() { return connectionMode; }
     public Memory lastProcessedMemory() { return lastProcessedMemory; }
 
@@ -466,6 +486,7 @@ public final class UnknownEntity {
         return dueResponse;
     }
 
+    /** Clears all queued responses. */
     public void clearPendingResponses() {
         if (pendingResponses.isEmpty()) {
             return;
@@ -481,6 +502,7 @@ public final class UnknownEntity {
         );
     }
 
+    /** @return the number of queued responses. */
     public int pendingResponseCount() {
         return pendingResponses.size();
     }
