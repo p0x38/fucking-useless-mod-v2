@@ -28,6 +28,32 @@ public final class SentientSignBrain {
         Memory latest = memories.getLast();
 
         /*
+         * Direct communication has priority over ambient thoughts.
+         */
+        if (latest.type() == Memory.Type.PLAYER_INTERACTED) {
+            String message = latest.context("message");
+
+            say(
+                    sign,
+                    sign.mood() == SentientSign.Mood.CURIOUS
+                            ? choose(
+                                    "tell me more.",
+                                    "why?",
+                                    "i'm listening."
+                            )
+                            : choose(
+                                    "i heard you.",
+                                    "interesting.",
+                                    "keep talking."
+                            ),
+                    gameTick
+            );
+
+            sign.markAction(gameTick);
+            return;
+        }
+
+        /*
          * React to the moment the player first notices the sign.
          */
         if (latest.type() == Memory.Type.PLAYER_SEEN
