@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "categories": {
+    "control": [
+      "\\bwhy\\s+(?:do|are)\\s+you\\s+(?:say|saying)\\s+(?:weird|strange)\\s+things?\\b",
+      "\\bwhy\\s+do\\s+you\\s+say\\s+that\\b",
+      "\\bwhy\\s+are\\s+you\\s+like\\s+this\\b",
+      "\\bdo\\s+you\\s+know\\s+(?:you're|you\\s+are)\\s+weird\\b",
+      "\\bcan\\s+you\\s+control\\s+(?:yourself|what\\s+you\\s+say|your\\s+speech)\\b",
+      "\\bwhy\\s+can't\\s+you\\s+(?:control\\s+yourself|stop)\\b",
+      "\\bcan\\s+you\\s+(?:stop\\s+(?:yourself|talking)|control\\s+yourself)\\b",
+      "\\bdo\\s+you\\s+choose\\s+(?:what\\s+you\\s+say|your\\s+words)\\b"
+    ],
+    "unsettling": [
+      "\\bdo\\s+you\\s+feel\\s+pain\\b",
+      "\\bdoes\\s+it\\s+hurt\\b",
+      "\\bare\\s+you\\s+(?:afraid|scared|frightened)\\b",
+      "\\bcan\\s+you\\s+(?:die|be\\s+killed)\\b",
+      "\\bare\\s+you\\s+(?:watching|following|stalking)\\s+me\\b",
+      "\\bcan\\s+you\\s+see\\s+me\\s+when\\s+i['’]?m\\s+not\\s+looking\\b",
+      "\\bdo\\s+you\\s+know\\s+when\\s+i['’]?m\\s+not\\s+looking\\b",
+      "\\b(?:do|can)\\s+you\\s+remember\\s+me\\s+when\\s+i['’]?m\\s+gone\\b",
+      "\\bwhat\\s+happens\\s+(?:if|when)\\s+i\\s+(?:break|destroy)\\s+you\\b",
+      "\\bwhere\\s+do\\s+you\\s+go\\s+when\\s+i\\s+look\\s+away\\b",
+      "\\bwhat\\s+happens\\s+when\\s+i\\s+look\\s+away\\b",
+      "\\b(?:break|destroy|kill)\\s+(?:you|yourself)\\b"
+    ],
+    "greeting": [
+      "\\b(?:hi|hello|hey|hiya|sup|yo|howdy)\\b",
+      "\\bh+i+\\b",
+      "\\bhell+o+\\b",
+      "\\bhe+y+\\b",
+      "\\by+o+\\b"
+    ],
+    "identity": [
+      "\\bwho\\s+(?:are|r)\\s+(?:you|u)\\b",
+      "\\bwhat\\s+(?:are|r)\\s+(?:you|u)\\b",
+      "\\bwhat['’]?re\\s+(?:you|u)\\b",
+      "\\b(?:what['’]?s|what\\s+is|whats)\\s+(?:your|ur)\\s+name\\b",
+      "\\bdo\\s+(?:you|u)\\s+have\\s+a\\s+name\\b",
+      "\\bare\\s+(?:you|u)\\s+(?:alive|real|sentient|conscious)\\b"
+    ],
+    "activity": [
+      "\\bwhat\\s+(?:(?:are|r)\\s+)?(?:you|u)\\s+(?:doing|up\\s+to)\\b",
+      "\\bwhat['’]?re\\s+(?:you|u)\\s+(?:doing|up\\s+to)\\b",
+      "\\bwhat\\s+have\\s+you\\s+been\\s+(?:doing|up\\s+to)\\b",
+      "\\bwhat\\s+did\\s+you\\s+do\\b",
+      "\\bwhat\\s+were\\s+you\\s+doing\\b",
+      "\\bwhat['’]?cha\\s+(?:doing|up\\s+to)\\b",
+      "\\bwhat\\s+u\\s+doing\\b",
+      "\\bwhat\\s+r\\s+u\\s+doing\\b",
+      "\\bwyd(?:\\s+rn)?\\b",
+      "\\bwhat\\s+are\\s+you\\s+up\\s+to\\b",
+      "\\bwhat\\s+are\\s+u\\s+up\\s+to\\b"
+    ],
+    "wellbeing": [
+      "\\bhow\\s+(?:are|r)\\s+(?:you|u)\\b",
+      "\\bhow['’]?re\\s+(?:you|u)(?:\\s+doing)?\\b",
+      "\\bhow\\s+(?:you|u)\\s+doing\\b",
+      "\\bhow\\s+have\\s+you\\s+been\\b",
+      "\\bhow['’]?s\\s+(?:it\\s+going|everything|things?)\\b",
+      "\\bhow\\s+are\\s+things(?:\\s+going)?\\b",
+      "\\bhow\\s+(?:you|u)\\s+feeling\\b",
+      "\\b(?:are\\s+you|you)\\s+(?:okay|ok|good)\\b",
+      "\\b(?:is|are)\\s+everything\\s+(?:okay|ok)\\b",
+      "\\bfeeling\\s+(?:okay|ok)\\b",
+      "\\bhow['’]?s\\s+it\\s+going\\b"
+    ],
+    "null": [
+      "\\bnull\\b"
+    ],
+    "confused": [
+      "^(?:\\?{2,}|!{2,}|\\.{3,}|…+)$",
+      "\\b(?:wtf|wth|bruh|huh|bro\\s+what|what\\s+bro|huh\\s+what)\\b",
+      "\\bwhat\\s+the\\s+(?:fuck|hell)\\b"
+    ],
+    "insult": [
+      "\\b(?:fuck|screw)\\s+(?:you|u|off)\\b",
+      "\\bf\\s*u\\b",
+      "\\b(?:shut\\s+up|stfu)\\b",
+      "\\b(?:you['’]?re|you\\s+are)\\s+(?:useless|stupid|dumb|trash|an\\s+idiot)\\b",
+      "\\bget\\s+lost\\b"
+    ],
+    "thanks": [
+      "\\b(?:thanks?|thx|ty|tysm)\\b",
+      "\\bthank\\s+(?:you|u)(?:\\s+so\\s+much)?\\b",
+      "\\b(?:appreciate\\s+(?:it|that)|much\\s+appreciated|cheers)\\b"
+    ],
+    "apology": [
+      "\\b(?:sorry|oops|whoops|apologies)\\b",
+      "\\b(?:i['’]?m|im)\\s+sorry\\b",
+      "\\b(?:my\\s+(?:bad|fault)|my\\s+apologies|i\\s+apolog(?:ize|ise)|forgive\\s+me)\\b"
+    ],
+    "question": [
+      "[?？]",
+      "^\\s*(?:why|how|what|where|when|who)\\b",
+      "^\\s*(?:can|could|would|will|do|did|are|is)\\s+(?:you|u|it|there)\\b"
+    ]
+  }
+}

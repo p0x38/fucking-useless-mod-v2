@@ -13,243 +13,6 @@ public final class ChatEntityBrain {
     private static final String TEXT_PREFIX =
             "text.fuckinguselessmod.chat.entity.";
 
-    private static final String[] UNSETTLING_TRIGGERS = {
-            "do you feel pain",
-            "does it hurt",
-            "are you afraid",
-            "are you scared",
-            "are you frightened",
-            "can you die",
-            "can you be killed",
-            "are you watching me",
-            "are you following me",
-            "are you stalking me",
-            "can you see me when i'm not looking",
-            "do you know when i'm not looking",
-            "do you remember me when i'm gone",
-            "can you remember me when i'm gone",
-            "what happens if i break you",
-            "what happens if i destroy you",
-            "what happens when i break you",
-            "what happens when i destroy you",
-            "where do you go when i look away",
-            "what happens when i look away"
-    };
-
-    private static final String[] EXTRA_UNSETTLING_TRIGGERS = {
-            "break you",
-            "break yourself",
-            "destroy you",
-            "destroy yourself",
-            "kill you",
-            "kill yourself"
-    };
-
-    private static final String[] CONTROL_TRIGGERS = {
-            "why do you say weird things",
-            "why are you saying weird things",
-            "why do you say that",
-            "why are you like this",
-            "do you know you're weird",
-            "do you know you are weird",
-            "can you control yourself",
-            "can you control what you say",
-            "can you control your speech",
-            "why can't you control yourself",
-            "why can't you stop",
-            "can you stop yourself",
-            "can you stop talking",
-            "do you choose what you say",
-            "do you choose your words"
-    };
-
-    private static final String[] ACTIVITY_TRIGGERS = {
-            "what are you doing",
-            "what're you doing",
-            "what are u doing",
-            "what r u doing",
-            "what're u doing",
-            "what u doing",
-            "whatcha doing",
-            "whatchu doing",
-            "what have you been doing",
-            "what were you doing",
-            "what have you been up to",
-            "what did you do",
-            "what're you up to",
-            "wyd",
-            "wut r u doing"
-    };
-
-    private static final String[] EXTRA_ACTIVITY_TRIGGERS = {
-            "what are you up to",
-            "what are u up to",
-            "what r u up to",
-            "what u up to",
-            "whatcha up to",
-            "whatchu up to",
-            "what're you up 2",
-            "wyd rn"
-    };
-
-    private static final String[] WELLBEING_TRIGGERS = {
-            "how are you",
-            "how're you",
-            "how r u",
-            "how are u",
-            "how you doing",
-            "how're you doing",
-            "how have you been",
-            "are you okay",
-            "are you ok",
-            "you okay",
-            "you ok",
-            "you good",
-            "u good",
-            "are you good",
-            "everything okay",
-            "everything ok",
-            "feeling okay",
-            "feeling ok",
-            "how's everything",
-            "how is everything"
-    };
-
-    private static final String[] EXTRA_WELLBEING_TRIGGERS = {
-            "how's it going",
-            "hows it going",
-            "how is it going",
-            "how's things",
-            "how are things",
-            "how you feeling",
-            "how are things going"
-    };
-
-    private static final String[] INSULT_TRIGGERS = {
-            "fuck you",
-            "fuck u",
-            "f u",
-            "fuck off",
-            "screw you",
-            "screw u",
-            "shut up",
-            "stfu",
-            "you're useless",
-            "you are useless",
-            "you're stupid",
-            "you are stupid",
-            "you're an idiot",
-            "you are an idiot",
-            "you're trash",
-            "you are trash",
-            "you're dumb",
-            "you are dumb",
-            "get lost"
-    };
-
-    private static final String[] THANKS_TRIGGERS = {
-            "thanks",
-            "thank you",
-            "thank u",
-            "thx",
-            "ty",
-            "tysm",
-            "thanks a lot",
-            "thank you so much",
-            "appreciate it",
-            "much appreciated",
-            "cheers"
-    };
-
-    private static final String[] APOLOGY_TRIGGERS = {
-            "sorry",
-            "i'm sorry",
-            "im sorry",
-            "my bad",
-            "my fault",
-            "oops",
-            "whoops",
-            "i apologize",
-            "my apologies",
-            "apologies",
-            "forgive me"
-    };
-
-    private static final String[] CONFUSED_TRIGGERS = {
-            "wtf",
-            "wth",
-            "what the fuck",
-            "what the hell",
-            "huh",
-            "bruh",
-            "bro what",
-            "what bro",
-            "huh what"
-    };
-
-    private static final String[] IDENTITY_TRIGGERS = {
-            "who are you",
-            "who r u",
-            "who are u",
-            "who r you",
-            "who're you",
-            "what are you",
-            "what are u",
-            "what're you",
-            "what is your name",
-            "what's your name",
-            "whats your name",
-            "what is ur name",
-            "whats ur name",
-            "do you have a name",
-            "do u have a name",
-            "are you alive",
-            "are you real",
-            "are you sentient",
-            "are you conscious"
-    };
-
-    private static final String[] EXTRA_QUESTION_PREFIXES = {
-            "why?",
-            "how?",
-            "what?",
-            "where?",
-            "when?",
-            "who?",
-            "can u?",
-            "could u?",
-            "would u?",
-            "will u?",
-            "do u?",
-            "did u?",
-            "are u?"
-    };
-
-    private static final String[] QUESTION_PREFIXES = {
-            "why ",
-            "how ",
-            "what ",
-            "where ",
-            "when ",
-            "who ",
-            "can you ",
-            "can u ",
-            "could you ",
-            "could u ",
-            "would you ",
-            "would u ",
-            "will you ",
-            "will u ",
-            "do you ",
-            "do u ",
-            "did you ",
-            "did u ",
-            "are you ",
-            "are u ",
-            "is it ",
-            "is there "
-    };
-
     private enum InteractionKind {
         CONTROL,
         UNSETTLING,
@@ -662,255 +425,53 @@ public final class ChatEntityBrain {
     private static InteractionKind classifyInteraction(
             String normalized
     ) {
-        if (isControlQuestion(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("control", normalized)) {
             return InteractionKind.CONTROL;
         }
 
-        if (isUnsettlingQuestion(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("unsettling", normalized)) {
             return InteractionKind.UNSETTLING;
         }
 
-        if (isGreeting(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("greeting", normalized)) {
             return InteractionKind.GREETING;
         }
 
-        if (isIdentityQuestion(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("identity", normalized)) {
             return InteractionKind.IDENTITY;
         }
 
-        if (isActivityQuestion(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("activity", normalized)) {
             return InteractionKind.ACTIVITY;
         }
 
-        if (isWellbeingQuestion(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("wellbeing", normalized)) {
             return InteractionKind.WELLBEING;
         }
 
-        if (isNullQuestion(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("null", normalized)) {
             return InteractionKind.NULL;
         }
 
-        if (isInsult(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("insult", normalized)) {
             return InteractionKind.INSULT;
         }
 
-        if (isThanks(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("thanks", normalized)) {
             return InteractionKind.THANKS;
         }
 
-        if (isApology(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("apology", normalized)) {
             return InteractionKind.APOLOGY;
         }
 
-        if (isConfusedMessage(normalized)) {
+        if (ChatEntityTriggerRegistry.matches("confused", normalized)) {
             return InteractionKind.CONFUSED;
         }
 
-        if (isQuestion(normalized)) {
-            return InteractionKind.QUESTION;
-        }
-
-        return InteractionKind.NORMAL;
-    }
-
-    private static boolean isUnsettlingQuestion(String message) {
-        return containsAny(message, UNSETTLING_TRIGGERS)
-                || containsAny(message, EXTRA_UNSETTLING_TRIGGERS);
-    }
-
-    private static boolean isControlQuestion(String message) {
-        return containsAny(message, CONTROL_TRIGGERS);
-    }
-
-    private static boolean isGreeting(String message) {
-        String greeting = stripTrailingPunctuation(message);
-
-        return switch (greeting) {
-            case "hi", "hello", "hey", "hiya", "sup", "yo", "howdy" -> true;
-            default ->
-                    startsWithWord(greeting, "hi")
-                            || startsWithWord(greeting, "hello")
-                            || startsWithWord(greeting, "hey")
-                            || startsWithWord(greeting, "yo")
-                            || isRepeatedGreeting(greeting, "h", 'i')
-                            || isRepeatedGreeting(greeting, "hell", 'o')
-                            || isRepeatedGreeting(greeting, "he", 'y')
-                            || isRepeatedGreeting(greeting, "y", 'o');
-        };
-    }
-
-    private static boolean isRepeatedGreeting(
-            String value,
-            String prefix,
-            char repeatedCharacter
-    ) {
-        if (!value.startsWith(prefix)
-                || value.length() <= prefix.length()) {
-            return false;
-        }
-
-        for (int i = prefix.length(); i < value.length(); i++) {
-            if (value.charAt(i) != repeatedCharacter) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static boolean isActivityQuestion(String message) {
-        return containsAny(message, ACTIVITY_TRIGGERS)
-                || containsAny(message, EXTRA_ACTIVITY_TRIGGERS);
-    }
-
-    private static boolean isWellbeingQuestion(String message) {
-        return containsAny(message, WELLBEING_TRIGGERS)
-                || containsAny(message, EXTRA_WELLBEING_TRIGGERS);
-    }
-
-    private static boolean isNullQuestion(String message) {
-        return containsWord(message, "null");
-    }
-
-    private static boolean isInsult(String message) {
-        return containsAny(message, INSULT_TRIGGERS);
-    }
-
-    private static boolean isThanks(String message) {
-        return containsAny(message, THANKS_TRIGGERS);
-    }
-
-    private static boolean isApology(String message) {
-        return containsAny(message, APOLOGY_TRIGGERS);
-    }
-
-    private static boolean isConfusedMessage(String message) {
-        return message.equals("...")
-                || message.equals("…")
-                || isRepeatedCharacter(message, '?')
-                || isRepeatedCharacter(message, '!')
-                || containsAny(message, CONFUSED_TRIGGERS);
-    }
-
-    private static boolean isRepeatedCharacter(
-            String value,
-            char character
-    ) {
-        if (value.length() < 2) {
-            return false;
-        }
-
-        for (int i = 0; i < value.length(); i++) {
-            if (value.charAt(i) != character) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static boolean isIdentityQuestion(String message) {
-        return containsAny(message, IDENTITY_TRIGGERS);
-    }
-
-    private static boolean isQuestion(String message) {
-        return message.endsWith("?")
-                || startsWithAny(message, QUESTION_PREFIXES)
-                || startsWithAny(message, EXTRA_QUESTION_PREFIXES);
-    }
-
-    private static String stripTrailingPunctuation(String message) {
-        int end = message.length();
-
-        while (end > 0) {
-            char character = message.charAt(end - 1);
-
-            if (character == '!'
-                    || character == '.'
-                    || character == ','
-                    || character == '?'
-                    || character == '…') {
-                end--;
-                continue;
-            }
-
-            break;
-        }
-
-        return end == message.length()
-                ? message
-                : message.substring(0, end);
-    }
-
-    private static boolean startsWithWord(
-            String message,
-            String word
-    ) {
-        if (!message.startsWith(word)) {
-            return false;
-        }
-
-        return message.length() == word.length()
-                || !Character.isLetterOrDigit(
-                        message.charAt(word.length())
-                );
-    }
-
-    private static boolean startsWithAny(
-            String message,
-            String[] prefixes
-    ) {
-        for (String prefix : prefixes) {
-            if (message.startsWith(prefix)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean containsAny(
-            String message,
-            String[] phrases
-    ) {
-        for (String phrase : phrases) {
-            if (message.contains(phrase)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean containsWord(
-            String message,
-            String word
-    ) {
-        int start = message.indexOf(word);
-
-        while (start >= 0) {
-            int end = start + word.length();
-
-            boolean leftBoundary =
-                    start == 0
-                            || !Character.isLetterOrDigit(
-                                    message.charAt(start - 1)
-                            );
-
-            boolean rightBoundary =
-                    end == message.length()
-                            || !Character.isLetterOrDigit(
-                                    message.charAt(end)
-                            );
-
-            if (leftBoundary && rightBoundary) {
-                return true;
-            }
-
-            start = message.indexOf(word, start + 1);
-        }
-
-        return false;
+        return ChatEntityTriggerRegistry.matches("question", normalized)
+                ? InteractionKind.QUESTION
+                : InteractionKind.NORMAL;
     }
 
     private static String normalize(String message) {

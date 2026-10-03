@@ -10,6 +10,8 @@ import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import me.p0x38.fuckinguselessmod.entity.ModEntities;
 import me.p0x38.fuckinguselessmod.transformers.ChatTransformer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.server.packs.PackType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -27,6 +29,12 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
     @Override
     public void onInitializeClient() {
         FuckingUselessMod.init();
+
+        ResourceManagerHelper.get(
+                PackType.CLIENT_RESOURCES
+        ).registerReloadListener(
+                ChatEntityTriggerRegistry.INSTANCE
+        );
 
         EntityRenderers.register(ModEntities.USELESS_ENTITY, UselessEntityRenderer::new);
 
