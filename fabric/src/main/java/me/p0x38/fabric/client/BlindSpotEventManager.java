@@ -73,18 +73,11 @@ public final class BlindSpotEventManager {
                 client.gameRenderer.getMainCamera();
 
         BlockPos lookedAtBlock =
-                getLookedAtBlock(
+                resolveLookedAtSupport(
                         level,
                         player,
                         camera
                 );
-
-        if (lookedAtBlock != null) {
-            lookedAtBlock =
-                    BlindSpotSigns.resolveSupportPosition(
-                            lookedAtBlock
-                    );
-        }
 
         /*
          * Start observing the first block the player looks at.
@@ -217,18 +210,11 @@ public final class BlindSpotEventManager {
         }
 
         BlockPos lookedAtBlock =
-                getLookedAtBlock(
+                resolveLookedAtSupport(
                         client.level,
                         client.player,
                         client.gameRenderer.getMainCamera()
                 );
-
-        if (lookedAtBlock != null) {
-            lookedAtBlock =
-                    BlindSpotSigns.resolveSupportPosition(
-                            lookedAtBlock
-                    );
-        }
 
         if (!observedBlock.equals(lookedAtBlock)) {
             DebugLogger.debug(
@@ -371,6 +357,46 @@ public final class BlindSpotEventManager {
         }
     }
 
+    private static BlockPos resolveLookedAtSupport(
+            ClientLevel level,
+            Player player,
+            Camera camera
+    ) {
+        BlockPos lookedAtBlock =
+                getLookedAtBlock(
+                        level,
+                        player,
+                        camera
+                );
+
+        if (lookedAtBlock != null) {
+            lookedAtBlock =
+                    BlindSpotSigns.resolveSupportPosition(
+                            lookedAtBlock
+                    );
+        }
+
+        if (observedBlock != null) {
+            BlockPos signSupport =
+                    BlindSpotSigns.findLookedAtSupport(
+                            camera.position(),
+                            camera.forwardVector(),
+                            observedBlock
+                    );
+
+            if (signSupport != null) {
+                DebugLogger.debug(
+                        "[BlindSpot] sign gaze fallback observed={} raycast={}",
+                        observedBlock,
+                        lookedAtBlock
+                );
+                return signSupport;
+            }
+        }
+
+        return lookedAtBlock;
+    }
+
     private static BlockPos getLookedAtBlock(
             ClientLevel level,
             Player player,
@@ -504,6 +530,11 @@ public final class BlindSpotEventManager {
                 level,
                 sign.position(),
                 sign.currentMessage()
+        );
+
+        thinkAndSync(
+                sign,
+                level
         );
     }
 
