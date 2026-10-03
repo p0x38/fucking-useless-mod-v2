@@ -17,6 +17,18 @@ public final class SentientSign {
         AFRAID
     }
 
+    public enum ReactionKind {
+        NORMAL,
+        GREETING,
+        IDENTITY,
+        QUESTION,
+        UNSETTLING,
+        OUT_OF_PLACE,
+        PLAYFUL,
+        ANNOYED,
+        META
+    }
+
     private final BlockPos position;
 
     private Mood mood = Mood.CALM;
@@ -30,6 +42,10 @@ public final class SentientSign {
     private int annoyanceCount = 0;
     private int seenCount = 0;
     private int returnCount = 0;
+    private int uncontrolledReactionCount = 0;
+    private float selfAwareness = 0.95f;
+    private float selfControl = 0.30f;
+    private ReactionKind lastReactionKind = ReactionKind.NORMAL;
     private SignConnectionMode connectionMode = SignConnectionMode.DISCONNECTED;
 
     private boolean hasBeenSeen;
@@ -68,6 +84,10 @@ public final class SentientSign {
     public int annoyanceCount() { return annoyanceCount; }
     public int seenCount() { return seenCount; }
     public int returnCount() { return returnCount; }
+    public int uncontrolledReactionCount() { return uncontrolledReactionCount; }
+    public float selfAwareness() { return selfAwareness; }
+    public float selfControl() { return selfControl; }
+    public ReactionKind lastReactionKind() { return lastReactionKind; }
     public SignConnectionMode connectionMode() { return connectionMode; }
 
     public List<Memory> memories() {
@@ -247,6 +267,15 @@ public final class SentientSign {
 
         if (memories.size() > 128) {
             memories.removeFirst();
+        }
+    }
+
+    public void recordReaction(ReactionKind reactionKind) {
+        lastReactionKind = reactionKind;
+
+        if (reactionKind == ReactionKind.UNSETTLING
+                || reactionKind == ReactionKind.OUT_OF_PLACE) {
+            uncontrolledReactionCount++;
         }
     }
 
