@@ -209,5 +209,14 @@
   "text.fuckinguselessmod.blindspot.sign.curious.4": "are you watching me?",
   "text.fuckinguselessmod.blindspot.sign.annoyed.1": "i wasn't here before",
   "text.fuckinguselessmod.blindspot.sign.annoyed.2": "you remember incorrectly",
-  "text.fuckinguselessmod.blindspot.sign.annoyed.3": "there has always been a sign here"
+  "text.fuckinguselessmod.blindspot.sign.annoyed.3": "there has always been a sign here",
+  "text.fuckinguselessmod.config.category.misc": "Miscellaneous",
+  "text.fuckinguselessmod.config.option.uwuifierBlacklist": "Blacklist Words",
+  "text.fuckinguselessmod.config.description.uwuifierBlacklist": "List of words that should be left unchanged by the Uwuifier transformation.",
+  "text.fuckinguselessmod.config.option.dialoguePitch": "Pitch",
+  "text.fuckinguselessmod.config.description.dialoguePitch": "Base playback pitch of dialogue sounds. Range: 0.5-2.0.",
+  "text.fuckinguselessmod.config.option.dialoguePitchVariation": "Pitch Variation",
+  "text.fuckinguselessmod.config.description.dialoguePitchVariation": "Random pitch variation applied around the configured base pitch. Range: 0.0-0.5.",
+  "text.fuckinguselessmod.config.option.debugLoggingEnabled": "Enable Debug Logging",
+  "text.fuckinguselessmod.config.description.debugLoggingEnabled": "Enable additional debug logging for troubleshooting and diagnostics."
 }
