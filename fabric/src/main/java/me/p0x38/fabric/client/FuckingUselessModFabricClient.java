@@ -3,6 +3,7 @@ package me.p0x38.fabric.client;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
 import me.p0x38.fabric.client.commands.CensorBoxCommand;
+import me.p0x38.fabric.client.chatentity.ChatEntityTriggerRegistry;
 import me.p0x38.fabric.client.commands.ChatEntityCommand;
 import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
