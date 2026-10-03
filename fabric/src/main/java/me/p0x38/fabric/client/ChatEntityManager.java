@@ -247,13 +247,6 @@ public final class ChatEntityManager {
         boolean firstChatInWorld =
                 !hasSpokenInCurrentWorld;
 
-        if (firstChatInWorld) {
-            ChatEntityBrain.firstChatAmbient(
-                    entity,
-                    gameTick
-            );
-        }
-
         entity.interact(
                 trimmed,
                 gameTick,
@@ -266,6 +259,14 @@ public final class ChatEntityManager {
         ChatEntityPersistence.markEverInteracted();
 
         think(entity, client.level);
+
+        if (firstChatInWorld) {
+            ChatEntityBrain.firstChatAmbient(
+                    entity,
+                    gameTick
+            );
+        }
+
         return true;
     }
 
