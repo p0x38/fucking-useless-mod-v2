@@ -349,6 +349,10 @@ public final class ChatEntityBrain {
          * Silly responses are only possible for otherwise ordinary messages.
          * Classification already ruled out greetings and questions.
          */
+        if (randomChance(0.0035)) {
+            return chooseText("rare", 16);
+        }
+
         if (sillyMode
                 && randomChance(
                         interactionCount >= 10
