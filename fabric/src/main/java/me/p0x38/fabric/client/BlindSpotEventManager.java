@@ -257,14 +257,6 @@ public final class BlindSpotEventManager {
                 client.level
         );
 
-        if (BlindSpotSigns.isPlaced(sign.position())) {
-            BlindSpotSigns.update(
-                    client.level,
-                    sign.position(),
-                    sign.currentMessage()
-            );
-        }
-
         return true;
     }
 
@@ -348,13 +340,6 @@ public final class BlindSpotEventManager {
                 client.level
         );
 
-        if (BlindSpotSigns.isPlaced(sign.position())) {
-            BlindSpotSigns.update(
-                    client.level,
-                    sign.position(),
-                    sign.currentMessage()
-            );
-        }
     }
 
     private static BlockPos resolveLookedAtSupport(
@@ -376,7 +361,8 @@ public final class BlindSpotEventManager {
                     );
         }
 
-        if (observedBlock != null) {
+        if (observedBlock != null
+                && !observedBlock.equals(lookedAtBlock)) {
             var cameraForward =
                     camera.forwardVector();
 
