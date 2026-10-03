@@ -135,7 +135,7 @@ public final class BlindSpotEventManager {
         /*
          * Give the sign's brain the latest perception event.
          */
-        SentientSignBrain.think(
+        thinkAndSync(
                 sign,
                 level
         );
@@ -266,7 +266,7 @@ public final class BlindSpotEventManager {
                 client.player.getGameProfile().name()
         );
 
-        SentientSignBrain.think(
+        thinkAndSync(
                 sign,
                 client.level
         );
@@ -357,7 +357,7 @@ public final class BlindSpotEventManager {
                 client.player.getGameProfile().name()
         );
 
-        SentientSignBrain.think(
+        thinkAndSync(
                 sign,
                 client.level
         );
@@ -434,6 +434,42 @@ public final class BlindSpotEventManager {
         }
 
         return blockPos;
+    }
+
+    private static void thinkAndSync(
+            SentientSign sign,
+            ClientLevel level
+    ) {
+        String before =
+                sign.currentMessage();
+
+        SentientSignBrain.think(
+                sign,
+                level
+        );
+
+        /*
+         * The brain can act later, after its cooldown expires. Keep the
+         * actual client-side sign synchronized whenever that happens.
+         */
+        if (BlindSpotSigns.isPlaced(sign.position())
+                && !java.util.Objects.equals(
+                        before,
+                        sign.currentMessage()
+                )) {
+            DebugLogger.debug(
+                    "[BlindSpot] syncing brain message to rendered sign id={} old={} new={}",
+                    sign.id(),
+                    before,
+                    sign.currentMessage()
+            );
+
+            BlindSpotSigns.update(
+                    level,
+                    sign.position(),
+                    sign.currentMessage()
+            );
+        }
     }
 
     private static void onHiddenChange(
