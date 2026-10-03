@@ -121,6 +121,8 @@ public final class UnknownEntityManager {
                 player.getGameProfile().name()
         );
 
+        entity.updateSillyState(gameTick);
+
         entity.observeLocation(
                 gameTick,
                 level.dimension().identifier().toString(),
@@ -647,12 +649,18 @@ public final class UnknownEntityManager {
         wasPlayerDead = false;
     }
 
-    private static void onSecretMode() {
+    /**
+     * Activates the temporary silly mode of the currently observed entity
+     * after the Konami Code has been entered.
+     */
+    public static void onSecretMode() {
         Minecraft client = Minecraft.getInstance();
 
         if (client.level == null
-        || observedLevel != client.level
-        || observedOrigin == null) return;
+                || observedLevel != client.level
+                || observedOrigin == null) {
+            return;
+        }
 
         UnknownEntity entity = ENTITIES.get(observedOrigin);
 
