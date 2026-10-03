@@ -6,6 +6,7 @@ import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -292,6 +293,11 @@ public final class ChatEntityBrain {
         String message = memory.context("message");
         String username = memory.context("username");
 
+        InteractionKind kind =
+                classifyInteraction(
+                        normalize(message)
+                );
+
         InteractionResponse response =
                 chooseInteractionResponse(
                         message,
@@ -300,11 +306,13 @@ public final class ChatEntityBrain {
                         memory
                 );
 
-        say(
+        saySequence(
                 entity,
-                response.message(),
-                gameTick,
-                response.reactionKind()
+                expandInteractionResponse(
+                        kind,
+                        response
+                ),
+                gameTick
         );
 
         markProcessed(entity, memory, gameTick);
@@ -486,6 +494,123 @@ public final class ChatEntityBrain {
                     ChatEntity.ReactionKind.NORMAL
             );
         };
+    }
+
+    private static List<InteractionResponse> expandInteractionResponse(
+            InteractionKind kind,
+            InteractionResponse response
+    ) {
+        if (!randomChance(multiResponseChance(kind))) {
+            return List.of(response);
+        }
+
+        InteractionResponse followUp =
+                chooseInteractionFollowUp(
+                        kind,
+                        response.reactionKind()
+                );
+
+        return followUp == null
+                ? List.of(response)
+                : List.of(response, followUp);
+    }
+
+    private static double multiResponseChance(
+            InteractionKind kind
+    ) {
+        return switch (kind) {
+            case GREETING -> 0.08;
+            case IDENTITY -> 0.12;
+            case ACTIVITY, WELLBEING, LOCATION -> 0.15;
+            case NULL -> 0.10;
+            case CONFUSED -> 0.14;
+            case UNSETTLING -> 0.10;
+            case QUESTION -> 0.18;
+            case SLEEP -> 0.20;
+            case CONTROL, INSULT, THANKS, APOLOGY -> 0.07;
+            case NORMAL -> 0.15;
+        };
+    }
+
+    private static InteractionResponse chooseInteractionFollowUp(
+            InteractionKind kind,
+            ChatEntity.ReactionKind reactionKind
+    ) {
+        String prefix = switch (kind) {
+            case CONTROL -> "control.followup";
+            case UNSETTLING -> "unsettling.followup";
+            case GREETING -> "greeting.followup";
+            case IDENTITY -> "identity.followup";
+            case ACTIVITY -> "activity.followup";
+            case WELLBEING -> "wellbeing.followup";
+            case LOCATION -> "location.followup";
+            case NULL -> "null.followup";
+            case CONFUSED -> "confused.followup";
+            case INSULT -> "insult.followup";
+            case THANKS -> "thanks.followup";
+            case APOLOGY -> "apology.followup";
+            case QUESTION -> "question.followup";
+            case SLEEP -> "sleep.returned.followup";
+            case NORMAL -> "normal.followup";
+        };
+
+        int count = switch (kind) {
+            case CONTROL, INSULT, THANKS, APOLOGY -> 4;
+            default -> 6;
+        };
+
+        if (kind == InteractionKind.SLEEP
+                && prefix.equals("sleep.returned.followup")) {
+            return new InteractionResponse(
+                    chooseText(prefix, count),
+                    reactionKind
+            );
+        }
+
+        return new InteractionResponse(
+                chooseText(prefix, count),
+                reactionKind
+        );
+    }
+
+    private static void saySequence(
+            ChatEntity entity,
+            List<InteractionResponse> responses,
+            long gameTick
+    ) {
+        long nextStartTick = gameTick;
+
+        for (InteractionResponse response : responses) {
+            ChatEntityResponseTiming.Timing timing =
+                    ChatEntityResponseTiming.calculate(
+                            entity,
+                            response.message(),
+                            response.reactionKind()
+                    );
+
+            DebugLogger.debug(
+                    "[ChatEntityBrain] scheduling speech id={} startTick={} thinkingTicks={} typingTicks={} kind={} message={}",
+                    entity.id(),
+                    nextStartTick,
+                    timing.thinkingTicks(),
+                    timing.typingTicks(),
+                    response.reactionKind(),
+                    response.message()
+            );
+
+            entity.queueResponse(
+                    response.message(),
+                    response.reactionKind(),
+                    nextStartTick,
+                    timing.thinkingTicks(),
+                    timing.typingTicks()
+            );
+
+            nextStartTick +=
+                    timing.thinkingTicks()
+                            + timing.typingTicks()
+                            + ThreadLocalRandom.current().nextLong(6, 19);
+        }
     }
 
     private static String chooseSleepResponse(
