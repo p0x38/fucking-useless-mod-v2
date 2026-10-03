@@ -135,6 +135,14 @@ public final class BlindSpotSigns {
         );
     }
 
+    public static boolean isPlaced(
+            BlockPos supportPosition
+    ) {
+        return SUPPORT_TO_SIGN.containsKey(
+                supportPosition
+        );
+    }
+
     public static SignBlockEntity getSignAt(
             BlockPos signPosition
     ) {
@@ -212,23 +220,24 @@ public final class BlindSpotSigns {
                         .replace("\\r", "")
                         .split("\\n", -1);
 
-        SignText text =
-                new SignText();
+        Component[] messages =
+                new Component[SignText.LINES];
 
         for (int index = 0;
-             index < Math.min(4, lines.length);
+             index < messages.length;
              index++) {
-            text = text.withMessage(
-                    index,
-                    Component.literal(
-                            lines[index]
-                    )
-            );
+            messages[index] =
+                    index < lines.length
+                            ? Component.literal(lines[index])
+                            : Component.empty();
         }
 
-        return text
-                .withColor(DyeColor.RED)
-                .withGlowing(true);
+        return new SignText(
+                messages,
+                messages.clone(),
+                DyeColor.RED,
+                true
+        );
     }
 
     private static int getPlayerFacingRotation() {
