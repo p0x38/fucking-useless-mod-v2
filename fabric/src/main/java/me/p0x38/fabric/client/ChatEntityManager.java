@@ -117,7 +117,7 @@ public final class ChatEntityManager {
 
         entity.observeLocation(
                 gameTick,
-                level.dimension().location().toString(),
+                level.dimension().identifier().toString(),
                 player.blockPosition(),
                 player.getX(),
                 player.getY(),
