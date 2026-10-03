@@ -162,32 +162,17 @@ public final class UnknownEntityBrain {
 
         entity.scheduleNextSillyAction(gameTick);
 
-        switch (ThreadLocalRandom.current().nextInt(4)) {
-            case 0 -> entity.queueResponse(
-                    ":3",
-                    ReactionKind.PLAYFUL,
-                    gameTick,
-                    5L,
-                    8L
-            );
-            case 1 -> entity.queueResponse(
-                    "mrow",
-                    ReactionKind.PLAYFUL,
-                    gameTick,
-                    8L,
-                    12L
-            );
-            case 2 -> entity.queueResponse(
-                    "hehe",
-                    ReactionKind.PLAYFUL,
-                    gameTick,
-                    6L,
-                    10L
-            );
-            default -> {
-                // TODO: add some silly actions without speaking
-            }
+        if (ThreadLocalRandom.current().nextInt(4) == 3) {
+            // TODO: add some silly actions without speaking
+            return true;
         }
+
+        say(
+                entity,
+                chooseText("silly", 3),
+                gameTick,
+                ReactionKind.PLAYFUL
+        );
 
         return true;
     }
