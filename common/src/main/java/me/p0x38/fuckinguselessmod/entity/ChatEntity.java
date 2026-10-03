@@ -11,11 +11,14 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+/** Common base entity for Chat Entity implementations. */
 public class ChatEntity extends PathfinderMob {
+    /** Creates a Chat Entity in the supplied world. */
     public ChatEntity(EntityType<? extends ChatEntity> type, Level level) {
         super(type, level);
     }
 
+    /** @return a builder containing the entity's default attributes. */
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0)
