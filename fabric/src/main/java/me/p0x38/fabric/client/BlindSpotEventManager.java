@@ -72,6 +72,13 @@ public final class BlindSpotEventManager {
                         camera
                 );
 
+        if (lookedAtBlock != null) {
+            lookedAtBlock =
+                    BlindSpotSigns.resolveSupportPosition(
+                            lookedAtBlock
+                    );
+        }
+
         /*
          * Start observing the first block the player looks at.
          * The selected target remains fixed until the client world
