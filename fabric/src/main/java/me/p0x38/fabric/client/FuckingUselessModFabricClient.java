@@ -63,5 +63,9 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
                     DialogueSoundManager.tick();
                 }
         );
+
+        ClientTickEvents.END_CLIENT_TICK.register(
+                client -> BlindSpotEventManager.tick()
+        );
     }
 }
