@@ -16,6 +16,12 @@ public final class ChatEntityBrain {
     private static final long LONG_IDLE_BEFORE_SLEEP_RESPONSE_TICKS =
             60 * 60 * 20L;
 
+    private record InteractionResponse(
+            String message,
+            ChatEntity.ReactionKind reactionKind
+    ) {
+    }
+
     private enum InteractionKind {
         CONTROL,
         UNSETTLING,
@@ -29,6 +35,7 @@ public final class ChatEntityBrain {
         THANKS,
         APOLOGY,
         QUESTION,
+        LOCATION,
         NORMAL,
         SLEEP
     }
@@ -57,11 +64,32 @@ public final class ChatEntityBrain {
             return;
         }
 
-        say(
-                entity,
-                chooseText("first.ambient", 8),
-                gameTick,
-                ChatEntity.ReactionKind.META
+        String message =
+                chooseText("first.ambient", 12);
+
+        ChatEntityResponseTiming.Timing timing =
+                ChatEntityResponseTiming.calculate(
+                        entity,
+                        message,
+                        ChatEntity.ReactionKind.META
+                );
+
+        long delayTicks =
+                20
+                        + ThreadLocalRandom.current().nextLong(20, 60);
+
+        long baseTick =
+                entity.getNextAvailableResponseTick(
+                        gameTick,
+                        delayTicks
+                );
+
+        entity.queueResponse(
+                message,
+                ChatEntity.ReactionKind.META,
+                baseTick,
+                timing.thinkingTicks(),
+                timing.typingTicks()
         );
         entity.markAction(gameTick);
     }
@@ -268,15 +296,19 @@ public final class ChatEntityBrain {
         String message = memory.context("message");
         String username = memory.context("username");
 
-        say(
-                entity,
+        InteractionResponse response =
                 chooseInteractionResponse(
                         message,
                         username,
                         entity,
                         memory
-                ),
-                gameTick
+                );
+
+        say(
+                entity,
+                response.message(),
+                gameTick,
+                response.reactionKind()
         );
 
         markProcessed(entity, memory, gameTick);
@@ -371,7 +403,7 @@ public final class ChatEntityBrain {
         entity.markAction(gameTick);
     }
 
-    private static String chooseInteractionResponse(
+    private static InteractionResponse chooseInteractionResponse(
             String message,
             String username,
             ChatEntity entity,
@@ -387,32 +419,75 @@ public final class ChatEntityBrain {
                 classifyInteraction(normalized);
 
         return switch (kind) {
-            case CONTROL -> chooseText("control", 14);
-            case UNSETTLING -> chooseText("unsettling", 16);
-            case ACTIVITY -> chooseText("activity", 10);
-            case WELLBEING -> chooseText("wellbeing", 10);
-            case NULL -> chooseNullResponse(entity);
-            case CONFUSED -> chooseText("confused", 14);
-            case INSULT -> chooseText("insult", 14);
-            case THANKS -> chooseText("thanks", 14);
-            case APOLOGY -> chooseText("apology", 14);
-            case SLEEP ->
-                    chooseSleepResponse(entity, memory);
-            case GREETING ->
+            case CONTROL -> response(
+                    chooseText("control", 14),
+                    ChatEntity.ReactionKind.NORMAL
+            );
+            case UNSETTLING -> response(
+                    chooseText("unsettling", 9),
+                    ChatEntity.ReactionKind.UNSETTLING
+            );
+            case GREETING -> response(
                     chooseGreetingResponse(
                             interactionCount,
                             username
-                    );
-            case IDENTITY ->
+                    ),
+                    ChatEntity.ReactionKind.GREETING
+            );
+            case IDENTITY -> response(
                     interactionCount >= 5
                             ? chooseText("identity.again", 4)
-                            : chooseText("identity", 8);
-            case QUESTION -> chooseText("question", 16);
-            case NORMAL -> chooseNormalResponse(
-                    interactionCount,
-                    annoyanceCount,
-                    mood,
-                    sillyMode
+                            : chooseText("identity", 8),
+                    ChatEntity.ReactionKind.IDENTITY
+            );
+            case ACTIVITY -> response(
+                    chooseText("activity", 6),
+                    ChatEntity.ReactionKind.NORMAL
+            );
+            case WELLBEING -> response(
+                    chooseText("wellbeing", 6),
+                    ChatEntity.ReactionKind.NORMAL
+            );
+            case LOCATION -> response(
+                    chooseText("location", 6),
+                    ChatEntity.ReactionKind.NORMAL
+            );
+            case NULL -> response(
+                    chooseNullResponse(entity),
+                    ChatEntity.ReactionKind.NULL
+            );
+            case CONFUSED -> response(
+                    chooseText("confused", 6),
+                    ChatEntity.ReactionKind.NORMAL
+            );
+            case INSULT -> response(
+                    chooseText("insult", 6),
+                    ChatEntity.ReactionKind.ANNOYED
+            );
+            case THANKS -> response(
+                    chooseText("thanks", 6),
+                    ChatEntity.ReactionKind.NORMAL
+            );
+            case APOLOGY -> response(
+                    chooseText("apology", 6),
+                    ChatEntity.ReactionKind.NORMAL
+            );
+            case SLEEP -> response(
+                    chooseSleepResponse(entity, memory),
+                    ChatEntity.ReactionKind.SLEEP
+            );
+            case QUESTION -> response(
+                    chooseText("question", 6),
+                    ChatEntity.ReactionKind.QUESTION
+            );
+            case NORMAL -> response(
+                    chooseNormalResponse(
+                            interactionCount,
+                            annoyanceCount,
+                            mood,
+                            sillyMode
+                    ),
+                    ChatEntity.ReactionKind.NORMAL
             );
         };
     }
@@ -621,6 +696,10 @@ public final class ChatEntityBrain {
             return InteractionKind.SLEEP;
         }
 
+        if (ChatEntityTriggerRegistry.matches("location", normalized)) {
+            return InteractionKind.LOCATION;
+        }
+
         if (ChatEntityTriggerRegistry.matches("null", normalized)) {
             return InteractionKind.NULL;
         }
@@ -748,6 +827,16 @@ public final class ChatEntityBrain {
 
         return ThreadLocalRandom.current()
                 .nextInt(count) + 1;
+    }
+
+    private static InteractionResponse response(
+            String message,
+            ChatEntity.ReactionKind reactionKind
+    ) {
+        return new InteractionResponse(
+                message,
+                reactionKind
+        );
     }
 
     private static boolean randomChance(double chance) {
