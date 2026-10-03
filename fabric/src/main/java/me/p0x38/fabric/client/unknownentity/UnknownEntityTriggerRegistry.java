@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+/** Loads and matches configurable chat trigger patterns. */
 public final class UnknownEntityTriggerRegistry
         implements ResourceManagerReloadListener {
     public static final Identifier RESOURCE_ID =
@@ -35,6 +36,7 @@ public final class UnknownEntityTriggerRegistry
     private UnknownEntityTriggerRegistry() {
     }
 
+    /** Tests whether a message matches a loaded trigger category. */
     public static boolean matches(
             String category,
             String message
@@ -49,6 +51,7 @@ public final class UnknownEntityTriggerRegistry
                 && pattern.matcher(message).find();
     }
 
+    /** Reloads trigger definitions from the resource manager. */
     @Override
     public void onResourceManagerReload(
             ResourceManager resourceManager
