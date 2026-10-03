@@ -5,6 +5,7 @@ import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -44,20 +45,17 @@ public final class SentientSignBrain {
          */
         if (latest.type() == Memory.Type.PLAYER_INTERACTED) {
             String message = latest.context("message");
+            String username = latest.context("username");
+
+            String response = chooseInteractionResponse(
+                    message,
+                    username,
+                    sign
+            );
 
             say(
                     sign,
-                    sign.mood() == SentientSign.Mood.CURIOUS
-                            ? choose(
-                                    text("interacted.curious.1"),
-                                    text("interacted.curious.2"),
-                                    "i'm listening."
-                            )
-                            : choose(
-                                    text("interacted.default.1"),
-                                    text("interacted.default.2"),
-                                    text("interacted.default.3")
-                            ),
+                    response,
                     gameTick
             );
 
@@ -69,10 +67,17 @@ public final class SentientSignBrain {
          * React to the moment the player first notices the sign.
          */
         if (latest.type() == Memory.Type.PLAYER_SEEN
-                && randomChance(0.10)) {
+                && randomChance(0.18)) {
             say(
                     sign,
-                    text("seen"),
+                    choose(
+                            text("seen.1"),
+                            text("seen.2"),
+                            text("seen.3"),
+                            text("seen.4"),
+                            text("seen.5"),
+                            text("seen.6")
+                    ),
                     gameTick
             );
 
@@ -85,14 +90,18 @@ public final class SentientSignBrain {
          * simply continuing to stare at it.
          */
         if (latest.type() == Memory.Type.PLAYER_RETURNED
-                && randomChance(0.35)) {
+                && randomChance(0.50)) {
+            String username = latest.context("username");
+
             say(
                     sign,
                     choose(
-                            "you're back",
-                            "i knew you'd return",
-                            text("returned.3"),
-                            text("returned.4")
+                            text("returned.1", username),
+                            text("returned.2", username),
+                            text("returned.3", username),
+                            text("returned.4", username),
+                            text("returned.5"),
+                            text("returned.6")
                     ),
                     gameTick
             );
@@ -108,14 +117,18 @@ public final class SentientSignBrain {
         if (sign.mood() == SentientSign.Mood.CURIOUS
                 && (latest.type() == Memory.Type.PLAYER_RETURNED
                 || latest.type() == Memory.Type.PLAYER_LOOKED_AWAY)
-                && randomChance(0.20)) {
+                && randomChance(0.25)) {
             say(
                     sign,
                     choose(
                             text("curious.1"),
                             text("curious.2"),
                             text("curious.3"),
-                            text("curious.4")
+                            text("curious.4"),
+                            text("curious.5"),
+                            text("curious.6"),
+                            text("curious.7"),
+                            text("curious.8")
                     ),
                     gameTick
             );
@@ -135,13 +148,153 @@ public final class SentientSignBrain {
             say(
                     sign,
                     choose(
-                            "i wasn't here before",
+                            text("annoyed.1"),
                             text("annoyed.2"),
-                            text("annoyed.3")
+                            text("annoyed.3"),
+                            text("annoyed.4"),
+                            text("annoyed.5"),
+                            text("annoyed.6"),
+                            text("annoyed.7"),
+                            text("annoyed.8")
                     ),
                     gameTick
             );
+
+            sign.markAction(gameTick);
         }
+    }
+
+    private static String chooseInteractionResponse(
+            String message,
+            String username,
+            SentientSign sign
+    ) {
+        String normalized = normalize(message);
+
+        if (isGreeting(normalized)) {
+            if (randomChance(0.75)) {
+                return choose(
+                        text("greeting.1", username),
+                        text("greeting.2", username),
+                        text("greeting.3", username),
+                        text("greeting.4", username),
+                        text("greeting.5"),
+                        text("greeting.6")
+                );
+            }
+
+            return choose(
+                    text("greeting.short.1"),
+                    text("greeting.short.2"),
+                    text("greeting.short.3"),
+                    text("greeting.short.4")
+            );
+        }
+
+        if (isIdentityQuestion(normalized)) {
+            return choose(
+                    text("identity.1"),
+                    text("identity.2"),
+                    text("identity.3"),
+                    text("identity.4"),
+                    text("identity.5"),
+                    text("identity.6"),
+                    text("identity.7"),
+                    text("identity.8")
+            );
+        }
+
+        if (isQuestion(normalized)) {
+            return choose(
+                    text("question.1"),
+                    text("question.2"),
+                    text("question.3"),
+                    text("question.4"),
+                    text("question.5"),
+                    text("question.6")
+            );
+        }
+
+        if (sign.mood() == SentientSign.Mood.PLAYFUL) {
+            return choose(
+                    text("playful.1"),
+                    text("playful.2"),
+                    text("playful.3"),
+                    text("playful.4"),
+                    text("playful.5"),
+                    text("playful.6")
+            );
+        }
+
+        if (sign.mood() == SentientSign.Mood.ANNOYED) {
+            return choose(
+                    text("annoyed.interaction.1"),
+                    text("annoyed.interaction.2"),
+                    text("annoyed.interaction.3"),
+                    text("annoyed.interaction.4"),
+                    text("annoyed.interaction.5"),
+                    text("annoyed.interaction.6")
+            );
+        }
+
+        if (sign.mood() == SentientSign.Mood.CURIOUS) {
+            return choose(
+                    text("interacted.curious.1"),
+                    text("interacted.curious.2"),
+                    text("interacted.curious.3"),
+                    text("interacted.curious.4"),
+                    text("interacted.curious.5"),
+                    text("interacted.curious.6"),
+                    text("interacted.curious.7")
+            );
+        }
+
+        return choose(
+                text("interacted.default.1"),
+                text("interacted.default.2"),
+                text("interacted.default.3"),
+                text("interacted.default.4"),
+                text("interacted.default.5"),
+                text("interacted.default.6"),
+                text("interacted.default.7"),
+                text("interacted.default.8")
+        );
+    }
+
+    private static boolean isGreeting(String message) {
+        return message.matches(
+                "^(hi+|hello+|hey+|hiya|yo+|sup|howdy)[!.,? ]*$"
+        );
+    }
+
+    private static boolean isIdentityQuestion(String message) {
+        return message.equals("who are you")
+                || message.equals("who r u")
+                || message.equals("what are you")
+                || message.equals("what's your name")
+                || message.equals("what is your name")
+                || message.equals("do you have a name")
+                || message.equals("are you alive")
+                || message.equals("are you real")
+                || message.equals("are you sentient")
+                || message.equals("are you conscious");
+    }
+
+    private static boolean isQuestion(String message) {
+        return message.endsWith("?")
+                || message.startsWith("why ")
+                || message.startsWith("how ")
+                || message.startsWith("what ")
+                || message.startsWith("where ")
+                || message.startsWith("when ")
+                || message.startsWith("can you ")
+                || message.startsWith("do you ");
+    }
+
+    private static String normalize(String message) {
+        return message
+                .trim()
+                .toLowerCase(Locale.ROOT);
     }
 
     private static void say(
@@ -176,6 +329,16 @@ public final class SentientSignBrain {
         return Component.translatable(
                 "text.fuckinguselessmod.blindspot.sign." + key
         ).getString();
+    }
+
+    private static String text(String key, String username) {
+        String resolvedUsername =
+                username == null || username.isBlank()
+                        ? "you"
+                        : username;
+
+        return text(key)
+                .replace("<username>", resolvedUsername);
     }
 
     private static boolean randomChance(double chance) {
