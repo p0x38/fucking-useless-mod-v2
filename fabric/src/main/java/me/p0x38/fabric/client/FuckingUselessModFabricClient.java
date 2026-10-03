@@ -6,6 +6,7 @@ import me.p0x38.fabric.client.unknownentity.UnknownEntityTriggerRegistry;
 import me.p0x38.fabric.client.commands.ChatEntityCommand;
 import me.p0x38.fabric.client.renderers.CensorBoxRenderer;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
+import me.p0x38.fuckinguselessmod.detectors.KonamiCodeDetector;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import me.p0x38.fuckinguselessmod.entity.ModEntities;
 import me.p0x38.fuckinguselessmod.transformers.ChatTransformer;
@@ -87,7 +88,13 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(
-                client -> UnknownEntityManager.tick()
+                client -> {
+                    UnknownEntityManager.tick();
+
+                    if (KonamiCodeDetector.tick(client)) {
+                        UnknownEntityManager.onSecretMode();
+                    }
+                }
         );
     }
 }

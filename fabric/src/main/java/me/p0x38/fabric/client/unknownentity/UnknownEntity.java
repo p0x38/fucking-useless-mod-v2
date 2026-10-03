@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 /** Stores client-side state, memories, perception state, and pending responses. */
 public final class UnknownEntity {
@@ -59,6 +60,9 @@ public final class UnknownEntity {
     private final BlockPos origin;
 
     private Mood mood = Mood.CALM;
+
+    private long sillyUntil = Long.MIN_VALUE;
+    private long nextSillyAction = Long.MIN_VALUE;
 
     private int awareness = 0;
     private int suspicion = 0;
@@ -591,5 +595,68 @@ public final class UnknownEntity {
         }
 
         mood = Mood.CALM;
+    }
+
+    /**
+     * Puts the entity into its temporary silly state.
+     *
+     * @param gameTick the current game tick
+     * @param duration the duration of the silly state in ticks
+     */
+    public void makeSilly(
+            long gameTick,
+            long duration
+    ) {
+        sillyUntil = gameTick + Math.max(0L, duration);
+        nextSillyAction = gameTick;
+        mood = Mood.PLAYFUL;
+    }
+
+    /**
+     * Updates the temporary silly state.
+     *
+     * @param gameTick the current game tick
+     */
+    public void updateSillyState(long gameTick) {
+        if (isSilly(gameTick)) {
+            mood = Mood.PLAYFUL;
+            return;
+        }
+
+        if (sillyUntil != Long.MIN_VALUE) {
+            sillyUntil = Long.MIN_VALUE;
+            nextSillyAction = Long.MIN_VALUE;
+            updateMood();
+        }
+    }
+
+    /**
+     * Returns whether the entity is currently in its silly state.
+     *
+     * @param gameTick the current game tick
+     * @return {@code true} while the silly state is active
+     */
+    public boolean isSilly(long gameTick) {
+        return gameTick < sillyUntil;
+    }
+
+    /**
+     * Returns whether another silly action may currently be performed.
+     *
+     * @param gameTick the current game tick
+     * @return {@code true} when a silly action is available
+     */
+    public boolean canDoSillyAction(long gameTick) {
+        return isSilly(gameTick) && gameTick >= nextSillyAction;
+    }
+
+    /**
+     * Schedules the next silly action.
+     *
+     * @param gameTick the current game tick
+     */
+    public void scheduleNextSillyAction(long gameTick) {
+        nextSillyAction =
+                gameTick + ThreadLocalRandom.current().nextLong(40L, 100L);
     }
 }

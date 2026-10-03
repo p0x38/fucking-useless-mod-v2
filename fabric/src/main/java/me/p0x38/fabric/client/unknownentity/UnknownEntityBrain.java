@@ -100,6 +100,9 @@ public final class UnknownEntityBrain {
             ClientLevel level
     ) {
         long gameTick = level.getGameTime();
+
+        if (handleSillyMode(entity, gameTick)) return;
+
         Memory latest = entity.latestMemory();
 
         if (latest == null
@@ -150,6 +153,45 @@ public final class UnknownEntityBrain {
         }
     }
 
+    private static boolean handleSillyMode(
+            UnknownEntity entity,
+            long gameTick
+    ) {
+        if (!entity.isSilly(gameTick)) return false;
+        if (!entity.canDoSillyAction(gameTick)) return true;
+
+        entity.scheduleNextSillyAction(gameTick);
+
+        switch (ThreadLocalRandom.current().nextInt(4)) {
+            case 0 -> entity.queueResponse(
+                    ":3",
+                    ReactionKind.PLAYFUL,
+                    gameTick,
+                    5L,
+                    8L
+            );
+            case 1 -> entity.queueResponse(
+                    "mrow",
+                    ReactionKind.PLAYFUL,
+                    gameTick,
+                    8L,
+                    12L
+            );
+            case 2 -> entity.queueResponse(
+                    "hehe",
+                    ReactionKind.PLAYFUL,
+                    gameTick,
+                    6L,
+                    10L
+            );
+            default -> {
+                // TODO: add some silly actions without speaking
+            }
+        }
+
+        return true;
+    }
+
     private static void handleEntitySpoke(
             UnknownEntity entity,
             Memory memory,
@@ -179,8 +221,8 @@ public final class UnknownEntityBrain {
             Memory memory,
             long gameTick
     ) {
-        if ("hidden".equals(memory.context("phase"))) {
-            if ("true".equals(memory.context("firstEncounter"))) {
+        if ("hidden".equals(memory.context().get("phase"))) {
+            if ("true".equals(memory.context().get("firstEncounter"))) {
                 markProcessed(entity, memory, gameTick);
                 return;
             }
@@ -234,7 +276,7 @@ public final class UnknownEntityBrain {
     }
 
     private static int parseIdleStage(Memory memory) {
-        String value = memory.context("stage");
+        String value = memory.context().get("stage");
 
         if (value == null) {
             return 1;
@@ -277,7 +319,7 @@ public final class UnknownEntityBrain {
             Memory memory,
             long gameTick
     ) {
-        if ("creeper".equals(memory.context("cause"))) {
+        if ("creeper".equals(memory.context().get("cause"))) {
             say(
                     entity,
                     chooseText("event.creeper_death", 4),
@@ -294,8 +336,8 @@ public final class UnknownEntityBrain {
             Memory memory,
             long gameTick
     ) {
-        String message = memory.context("message");
-        String username = memory.context("username");
+        String message = memory.context().get("message");
+        String username = memory.context().get("username");
 
         InteractionKind kind =
                 classifyInteraction(
@@ -348,7 +390,7 @@ public final class UnknownEntityBrain {
             long gameTick
     ) {
         if (randomChance(0.50)) {
-            String username = memory.context("username");
+            String username = memory.context().get("username");
 
             say(
                     entity,
@@ -636,7 +678,7 @@ public final class UnknownEntityBrain {
     private static long parseLongContext(
             Memory memory
     ) {
-        String value = memory.context("idleTicksBeforeInteraction");
+        String value = memory.context().get("idleTicksBeforeInteraction");
 
         if (value == null) {
             return 0L;

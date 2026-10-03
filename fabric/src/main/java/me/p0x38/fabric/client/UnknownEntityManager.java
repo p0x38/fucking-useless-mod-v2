@@ -646,4 +646,33 @@ public final class UnknownEntityManager {
         lastObservedHealth = Float.NaN;
         wasPlayerDead = false;
     }
+
+    private static void onSecretMode() {
+        Minecraft client = Minecraft.getInstance();
+
+        if (client.level == null
+        || observedLevel != client.level
+        || observedOrigin == null) return;
+
+        UnknownEntity entity = ENTITIES.get(observedOrigin);
+
+        if (entity == null) return;
+
+        long gameTick = client.level.getGameTime();
+
+        entity.makeSilly(
+                gameTick,
+                30L * 20L
+        );
+
+        DebugLogger.debug(
+                "[ChatEntityManager] Konami Code detected id={}",
+                entity.id()
+        );
+
+        think(
+                entity,
+                client.level
+        );
+    }
 }
