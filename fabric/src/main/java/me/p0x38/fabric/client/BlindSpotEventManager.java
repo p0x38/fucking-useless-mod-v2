@@ -3,6 +3,7 @@ package me.p0x38.fabric.client;
 import me.p0x38.fabric.client.blindspot.Memory;
 import me.p0x38.fabric.client.blindspot.SentientSign;
 import me.p0x38.fabric.client.blindspot.SentientSignBrain;
+import me.p0x38.fabric.client.blindspot.SignConnectionMode;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -100,7 +101,8 @@ public final class BlindSpotEventManager {
 
         sign.observe(
                 lookingAtObservedBlock,
-                gameTick
+                gameTick,
+                SignConnectionMode.detect(client)
         );
 
         /*
@@ -157,6 +159,48 @@ public final class BlindSpotEventManager {
                 sign,
                 level
         );
+    }
+
+    public static void handleSignInput(
+            BlockPos supportPosition,
+            String message
+    ) {
+        Minecraft client = Minecraft.getInstance();
+
+        if (client.level == null
+                || client.player == null
+                || message == null
+                || message.isBlank()) {
+            return;
+        }
+
+        SentientSign sign =
+                SIGNS.computeIfAbsent(
+                        supportPosition,
+                        SentientSign::new
+                );
+
+        long gameTick =
+                client.level.getGameTime();
+
+        sign.interact(
+                message,
+                gameTick,
+                SignConnectionMode.detect(client)
+        );
+
+        SentientSignBrain.think(
+                sign,
+                client.level
+        );
+
+        if (BlindSpotSigns.isPlaced(sign.position())) {
+            BlindSpotSigns.update(
+                    client.level,
+                    sign.position(),
+                    sign.currentMessage()
+            );
+        }
     }
 
     private static BlockPos getLookedAtBlock(
