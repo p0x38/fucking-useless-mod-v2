@@ -28,6 +28,7 @@ public final class ChatEntity {
         UNSETTLING,
         OUT_OF_PLACE,
         PLAYFUL,
+        NULL,
         ANNOYED,
         META
     }
