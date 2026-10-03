@@ -52,8 +52,8 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
                     Minecraft.getInstance().setScreen(
                             new SignEditScreen(
                                     sign,
-                                    true,
-                                    false
+                                    false,
+                                    true
                             )
                     );
 
