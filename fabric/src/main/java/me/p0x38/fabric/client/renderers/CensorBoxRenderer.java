@@ -1290,10 +1290,22 @@ public final class CensorBoxRenderer {
                         RenderSystem.getModelViewMatrix()
                 );
 
+        Minecraft minecraft =
+                Minecraft.getInstance();
+
+        Camera camera =
+                minecraft.gameRenderer.getMainCamera();
+
+        float fov =
+                ((GameRendererMixin) minecraft.gameRenderer)
+                        .fuckingUselessMod$getFov(
+                                camera,
+                                0.0F,
+                                true
+                        );
+
         Matrix4f projectionMatrix =
-                new Matrix4f(
-                        RenderSystem.getProjectionMatrix()
-                );
+                minecraft.gameRenderer.getProjectionMatrix(fov);
 
         Matrix4f mvpMatrix =
                 new Matrix4f(projectionMatrix)
