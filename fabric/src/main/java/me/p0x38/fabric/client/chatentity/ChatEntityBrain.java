@@ -18,6 +18,13 @@ public final class ChatEntityBrain {
         UNSETTLING,
         GREETING,
         IDENTITY,
+        ACTIVITY,
+        WELLBEING,
+        NULL,
+        CONFUSED,
+        INSULT,
+        THANKS,
+        APOLOGY,
         QUESTION,
         NORMAL
     }
@@ -287,6 +294,13 @@ public final class ChatEntityBrain {
         return switch (kind) {
             case CONTROL -> chooseText("control", 6);
             case UNSETTLING -> chooseText("unsettling", 8);
+            case ACTIVITY -> chooseText("activity", 6);
+            case WELLBEING -> chooseText("wellbeing", 6);
+            case NULL -> chooseText("null", 8);
+            case CONFUSED -> chooseText("confused", 6);
+            case INSULT -> chooseText("insult", 6);
+            case THANKS -> chooseText("thanks", 6);
+            case APOLOGY -> chooseText("apology", 6);
             case GREETING ->
                     chooseGreetingResponse(
                             interactionCount,
@@ -427,6 +441,34 @@ public final class ChatEntityBrain {
             return InteractionKind.IDENTITY;
         }
 
+        if (isActivityQuestion(normalized)) {
+            return InteractionKind.ACTIVITY;
+        }
+
+        if (isWellbeingQuestion(normalized)) {
+            return InteractionKind.WELLBEING;
+        }
+
+        if (isNullQuestion(normalized)) {
+            return InteractionKind.NULL;
+        }
+
+        if (isInsult(normalized)) {
+            return InteractionKind.INSULT;
+        }
+
+        if (isThanks(normalized)) {
+            return InteractionKind.THANKS;
+        }
+
+        if (isApology(normalized)) {
+            return InteractionKind.APOLOGY;
+        }
+
+        if (isConfusedMessage(normalized)) {
+            return InteractionKind.CONFUSED;
+        }
+
         if (isQuestion(normalized)) {
             return InteractionKind.QUESTION;
         }
@@ -520,6 +562,90 @@ public final class ChatEntityBrain {
 
         for (int i = prefix.length(); i < value.length(); i++) {
             if (value.charAt(i) != repeatedCharacter) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean isActivityQuestion(String message) {
+        return message.equals("what are you doing")
+                || message.equals("whatcha doing")
+                || message.equals("what're you doing")
+                || message.equals("what are u doing")
+                || message.equals("wyd");
+    }
+
+    private static boolean isWellbeingQuestion(String message) {
+        return message.equals("how are you")
+                || message.equals("how are you doing")
+                || message.equals("how are u")
+                || message.equals("are you okay")
+                || message.equals("are you ok")
+                || message.equals("you okay")
+                || message.equals("you ok");
+    }
+
+    private static boolean isNullQuestion(String message) {
+        return message.equals("do you know null")
+                || message.equals("do you know about null")
+                || message.equals("have you heard of null")
+                || message.equals("what do you know about null")
+                || message.equals("who is null");
+    }
+
+    private static boolean isInsult(String message) {
+        return message.equals("fuck you")
+                || message.startsWith("fuck you ")
+                || message.equals("fuck off")
+                || message.startsWith("fuck off ")
+                || message.equals("screw you")
+                || message.startsWith("screw you ")
+                || message.equals("shut up")
+                || message.startsWith("shut up ")
+                || message.equals("you're an idiot")
+                || message.equals("you are an idiot");
+    }
+
+    private static boolean isThanks(String message) {
+        return message.equals("thanks")
+                || message.equals("thank you")
+                || message.equals("thx")
+                || message.equals("ty")
+                || message.equals("thank u")
+                || message.equals("thanks a lot");
+    }
+
+    private static boolean isApology(String message) {
+        return message.equals("sorry")
+                || message.equals("i'm sorry")
+                || message.equals("im sorry")
+                || message.equals("my bad")
+                || message.equals("oops")
+                || message.equals("whoops");
+    }
+
+    private static boolean isConfusedMessage(String message) {
+        return message.equals("...")
+                || isRepeatedCharacter(message, '?')
+                || isRepeatedCharacter(message, '!')
+                || message.equals("wtf")
+                || message.equals("bruh")
+                || message.equals("huh")
+                || message.equals("what");
+    }
+
+    private static boolean isRepeatedCharacter(
+            String value,
+            char character
+    ) {
+        if (value.length() < 2) {
+            return false;
+        }
+
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) != character) {
                 return false;
             }
         }
