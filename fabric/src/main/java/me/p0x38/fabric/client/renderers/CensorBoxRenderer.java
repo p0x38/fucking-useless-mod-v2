@@ -656,6 +656,9 @@ public final class CensorBoxRenderer {
              * tracking effect while keeping the box itself
              * completely flat and fixed-size.
              */
+            final int initialBoxWidth = boxWidth;
+            final int initialBoxHeight = boxHeight;
+
             CensorMotionState state =
                     MOTION_STATES.computeIfAbsent(
                             uuid,
@@ -668,8 +671,8 @@ public final class CensorBoxRenderer {
                                             y,
                                             config.censorBoxPositionStep
                                     ),
-                                    boxWidth,
-                                    boxHeight,
+                                    initialBoxWidth,
+                                    initialBoxHeight,
                                     gameTick
                             )
                     );
