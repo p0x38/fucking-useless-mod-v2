@@ -17,7 +17,7 @@ public abstract class SentientSignEditScreenMixin {
     private String[] messages;
 
     @Shadow @Final
-    protected SignBlockEntity blockEntity;
+    protected SignBlockEntity sign;
 
     @Inject(method = "finishEditing", at = @At("HEAD"))
     private void fuckingUselessMod$captureSentientSignMessage(
@@ -25,7 +25,7 @@ public abstract class SentientSignEditScreenMixin {
     ) {
         var supportPosition =
                 BlindSpotSigns.getSupportPosition(
-                        blockEntity.getBlockPos()
+                        sign.getBlockPos()
                 );
 
         if (supportPosition == null) {
