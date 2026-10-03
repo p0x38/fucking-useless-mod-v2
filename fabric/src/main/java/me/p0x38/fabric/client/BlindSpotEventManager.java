@@ -168,6 +168,115 @@ public final class BlindSpotEventManager {
         );
     }
 
+    public static boolean talkToObservedSign(
+            String message
+    ) {
+        Minecraft client = Minecraft.getInstance();
+
+        if (client.level == null
+                || client.player == null
+                || observedLevel != client.level
+                || observedBlock == null
+                || message == null
+                || message.isBlank()) {
+            return false;
+        }
+
+        BlockPos lookedAtBlock =
+                getLookedAtBlock(
+                        client.level,
+                        client.player,
+                        client.gameRenderer.getMainCamera()
+                );
+
+        if (lookedAtBlock != null) {
+            lookedAtBlock =
+                    BlindSpotSigns.resolveSupportPosition(
+                            lookedAtBlock
+                    );
+        }
+
+        if (!observedBlock.equals(lookedAtBlock)) {
+            return false;
+        }
+
+        SentientSign sign =
+                SIGNS.computeIfAbsent(
+                        observedBlock,
+                        SentientSign::new
+                );
+
+        long gameTick =
+                client.level.getGameTime();
+
+        sign.interact(
+                message,
+                gameTick,
+                SignConnectionMode.detect(client)
+        );
+
+        SentientSignBrain.think(
+                sign,
+                client.level
+        );
+
+        if (BlindSpotSigns.isPlaced(sign.position())) {
+            BlindSpotSigns.update(
+                    client.level,
+                    sign.position(),
+                    sign.currentMessage()
+            );
+        }
+
+        return true;
+    }
+
+    public static String getObservedSignId() {
+        SentientSign sign =
+                getObservedSign();
+
+        return sign == null
+                ? null
+                : sign.id();
+    }
+
+    public static String getObservedSignInfo() {
+        SentientSign sign =
+                getObservedSign();
+
+        if (sign == null) {
+            return null;
+        }
+
+        return "Sign ID: "
+                + sign.id()
+                + " | mode: "
+                + sign.connectionMode().name().toLowerCase()
+                + " | mood: "
+                + sign.mood().name().toLowerCase()
+                + " | awareness: "
+                + sign.awareness()
+                + " | suspicion: "
+                + sign.suspicion()
+                + " | curiosity: "
+                + sign.curiosity()
+                + " | trust: "
+                + sign.trust()
+                + " | irritation: "
+                + sign.irritation()
+                + " | memories: "
+                + sign.memories().size();
+    }
+
+    private static SentientSign getObservedSign() {
+        if (observedLevel == null
+                || observedBlock == null) {
+            return null;
+        }
+
+        return SIGNS.get(observedBlock);
+    }
+
     public static void handleSignInput(
             BlockPos supportPosition,
             String message
