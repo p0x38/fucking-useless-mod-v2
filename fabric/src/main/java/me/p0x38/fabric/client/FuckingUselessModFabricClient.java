@@ -34,6 +34,33 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         CensorBoxRenderer.initialize();
         CensorBoxCommand.initialize();
 
+        UseBlockCallback.EVENT.register(
+                (player, level, hand, hitResult) -> {
+                    if (!(level instanceof net.minecraft.client.multiplayer.ClientLevel)) {
+                        return InteractionResult.PASS;
+                    }
+
+                    var sign =
+                            BlindSpotSigns.getSignAt(
+                                    hitResult.getBlockPos()
+                            );
+
+                    if (sign == null) {
+                        return InteractionResult.PASS;
+                    }
+
+                    Minecraft.getInstance().setScreen(
+                            new SignEditScreen(
+                                    sign,
+                                    true,
+                                    false
+                            )
+                    );
+
+                    return InteractionResult.FAIL;
+                }
+        );
+
         ClientSendMessageEvents.MODIFY_CHAT.register(
                 ChatTransformer::transform
         );
