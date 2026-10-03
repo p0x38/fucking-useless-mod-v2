@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 import java.io.BufferedReader;
 import java.util.Collections;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class ChatEntityTriggerRegistry
-        implements IdentifiableResourceReloadListener {
+        implements IdentifiableResourceReloadListener, ResourceManagerReloadListener {
     private static final Identifier RESOURCE_ID =
             Identifier.fromNamespaceAndPath(
                     "fuckinguselessmod",
