@@ -151,13 +151,53 @@ public final class BlindSpotSigns {
         SignBlockEntity sign =
                 PLACED_SIGNS.get(signPosition);
 
-        if (sign == null) {
+        /*
+         * Breaking a client-only sign removes its live BlockEntity from
+         * the ClientLevel. Keep the sentient state, but recreate the
+         * actual BlockEntity before applying new text.
+         */
+        if (sign == null
+                || level.getBlockEntity(signPosition) != sign
+                || !level.getBlockState(signPosition).is(Blocks.OAK_SIGN)) {
+            BlockState signState =
+                    sign != null
+                            ? sign.getBlockState()
+                            : Blocks.OAK_SIGN.defaultBlockState()
+                                    .setValue(
+                                            BlockStateProperties.ROTATION_16,
+                                            getPlayerFacingRotation()
+                                    );
+
+            if (!level.getBlockState(signPosition).is(Blocks.OAK_SIGN)) {
+                level.setBlock(
+                        signPosition,
+                        signState,
+                        19
+                );
+            }
+
+            if (level.getBlockEntity(signPosition) != null) {
+                level.removeBlockEntity(signPosition);
+            }
+
+            sign =
+                    new SignBlockEntity(
+                            signPosition,
+                            level.getBlockState(signPosition)
+                    );
+
+            level.setBlockEntity(sign);
+
+            PLACED_SIGNS.put(
+                    signPosition.immutable(),
+                    sign
+            );
+
             DebugLogger.debug(
-                    "[BlindSpotSigns] update skipped: missing sign support={} signPosition={}",
+                    "[BlindSpotSigns] recreated sign block entity support={} signPosition={}",
                     supportPosition,
                     signPosition
             );
-            return;
         }
 
         DebugLogger.debug(
