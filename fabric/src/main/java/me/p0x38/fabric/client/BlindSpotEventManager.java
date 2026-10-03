@@ -245,6 +245,12 @@ public final class BlindSpotEventManager {
             SentientSign sign,
             ClientLevel level
     ) {
+        BlindSpotSigns.update(
+                level,
+                sign.position(),
+                sign.currentMessage()
+        );
+
         sign.remember(
                 new Memory(
                         Memory.Type.WORLD_CHANGED,
@@ -260,6 +266,12 @@ public final class BlindSpotEventManager {
     }
 
     private static void reset() {
+        Minecraft client = Minecraft.getInstance();
+
+        if (client.level != null) {
+            BlindSpotSigns.clear(client.level);
+        }
+
         SIGNS.clear();
         observedBlock = null;
         hiddenSince = Long.MIN_VALUE;
