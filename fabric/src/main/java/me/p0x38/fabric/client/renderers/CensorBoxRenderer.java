@@ -1,5 +1,6 @@
 package me.p0x38.fabric.client.renderers;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.p0x38.fabric.client.mixins.GameRendererMixin;
 import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
@@ -21,6 +22,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NonNull;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -529,6 +532,90 @@ public final class CensorBoxRenderer {
                             stepSize(
                                     (int) Math.ceil(
                                             projectedHalfHeight * 2.0
+                                                    + config.censorBoxPadding * 2.0
+                                    ),
+                                    config.censorBoxSizeStep
+                            )
+                    );
+
+            /*
+             * The entity hitbox is only an approximation of what the
+             * renderer actually draws. Humanoid arms can swing outside
+             * it, so expand the 2D bounds with the live rendered arm
+             * extents captured during LivingEntityRenderer.submit().
+             */
+            double minScreenX =
+                    screenX - boxWidth * 0.5;
+            double maxScreenX =
+                    screenX + boxWidth * 0.5;
+            double minScreenY =
+                    screenY - boxHeight * 0.5;
+            double maxScreenY =
+                    screenY + boxHeight * 0.5;
+
+            ThirdPersonArmBounds armBounds =
+                    THIRD_PERSON_ARM_BOUNDS.get(uuid);
+
+            if (armBounds != null && armBounds.isValid()) {
+                minScreenX =
+                        Math.min(
+                                minScreenX,
+                                ndcToScreenX(
+                                        armBounds.minX,
+                                        screenWidth
+                                )
+                        );
+                maxScreenX =
+                        Math.max(
+                                maxScreenX,
+                                ndcToScreenX(
+                                        armBounds.maxX,
+                                        screenWidth
+                                )
+                        );
+                minScreenY =
+                        Math.min(
+                                minScreenY,
+                                ndcToScreenY(
+                                        armBounds.maxY,
+                                        screenHeight
+                                )
+                        );
+                maxScreenY =
+                        Math.max(
+                                maxScreenY,
+                                ndcToScreenY(
+                                        armBounds.minY,
+                                        screenHeight
+                                )
+                        );
+            }
+
+            screenX =
+                    (minScreenX + maxScreenX) * 0.5;
+            screenY =
+                    (minScreenY + maxScreenY) * 0.5;
+
+            boxWidth =
+                    Math.max(
+                            MIN_BOX_WIDTH,
+                            stepSize(
+                                    (int) Math.ceil(
+                                            maxScreenX
+                                                    - minScreenX
+                                                    + config.censorBoxPadding * 2.0
+                                    ),
+                                    config.censorBoxSizeStep
+                            )
+                    );
+
+            boxHeight =
+                    Math.max(
+                            MIN_BOX_HEIGHT,
+                            stepSize(
+                                    (int) Math.ceil(
+                                            maxScreenY
+                                                    - minScreenY
                                                     + config.censorBoxPadding * 2.0
                                     ),
                                     config.censorBoxSizeStep
@@ -1188,18 +1275,40 @@ public final class CensorBoxRenderer {
         ThirdPersonArmBounds bounds =
                 new ThirdPersonArmBounds();
 
+        /*
+         * Capture the same transforms vanilla uses for the actual
+         * third-person model, then project the arm vertices with the
+         * live world camera matrices. This produces screen-space
+         * bounds instead of relying on the entity hitbox.
+         */
         poseStack.pushPose();
 
         model.body.translateAndRotate(poseStack);
 
+        Matrix4f modelViewMatrix =
+                new Matrix4f(
+                        RenderSystem.getModelViewMatrix()
+                );
+
+        Matrix4f projectionMatrix =
+                new Matrix4f(
+                        RenderSystem.getProjectionMatrix()
+                );
+
+        Matrix4f mvpMatrix =
+                new Matrix4f(projectionMatrix)
+                        .mul(modelViewMatrix);
+
         captureArmExtents(
                 model.rightArm,
                 poseStack,
+                mvpMatrix,
                 bounds
         );
         captureArmExtents(
                 model.leftArm,
                 poseStack,
+                mvpMatrix,
                 bounds
         );
 
@@ -1211,6 +1320,7 @@ public final class CensorBoxRenderer {
     private static void captureArmExtents(
             net.minecraft.client.model.geom.ModelPart arm,
             com.mojang.blaze3d.vertex.PoseStack poseStack,
+            Matrix4f mvpMatrix,
             ThirdPersonArmBounds bounds
     ) {
         if (!arm.visible || arm.skipDraw) {
@@ -1219,13 +1329,49 @@ public final class CensorBoxRenderer {
 
         arm.getExtentsForGui(
                 poseStack,
-                position -> bounds.points.add(
-                        new Vec3(
-                                position.x(),
-                                position.y(),
-                                position.z()
-                        )
-                )
+                position -> {
+                    Vector3f projected =
+                            new Vector3f(position);
+
+                    mvpMatrix.transformProject(projected);
+
+                    if (projected.x() < -1.0F
+                            || projected.x() > 1.0F
+                            || projected.y() < -1.0F
+                            || projected.y() > 1.0F) {
+                        return;
+                    }
+
+                    if (Float.isFinite(projected.x())
+                            && Float.isFinite(projected.y())) {
+                        bounds.include(
+                                projected.x(),
+                                projected.y()
+                        );
+                    }
+                }
+        );
+    }
+
+    private static int ndcToScreenX(
+            float ndcX,
+            int screenWidth
+    ) {
+        return Math.round(
+                (ndcX + 1.0F)
+                        * 0.5F
+                        * screenWidth
+        );
+    }
+
+    private static int ndcToScreenY(
+            float ndcY,
+            int screenHeight
+    ) {
+        return Math.round(
+                (1.0F - ndcY)
+                        * 0.5F
+                        * screenHeight
         );
     }
 
@@ -1358,8 +1504,29 @@ public final class CensorBoxRenderer {
             new HashMap<>();
 
     private static final class ThirdPersonArmBounds {
-        private final List<Vec3> points =
-                new ArrayList<>();
+        private float minX = Float.POSITIVE_INFINITY;
+        private float minY = Float.POSITIVE_INFINITY;
+        private float maxX = Float.NEGATIVE_INFINITY;
+        private float maxY = Float.NEGATIVE_INFINITY;
+
+        private void include(
+                float x,
+                float y
+        ) {
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        }
+
+        private boolean isValid() {
+            return Float.isFinite(minX)
+                    && Float.isFinite(minY)
+                    && Float.isFinite(maxX)
+                    && Float.isFinite(maxY)
+                    && minX <= maxX
+                    && minY <= maxY;
+        }
     }
 
     private static final class CensorMotionState {
