@@ -349,5 +349,6 @@
   "text.fuckinguselessmod.chat.entity.world_changed.5": "there you are again.",
   "text.fuckinguselessmod.chat.entity.world_changed.6": "did you notice?",
   "text.fuckinguselessmod.chat.entity.world_changed.7": "i was waiting.",
-  "text.fuckinguselessmod.chat.entity.world_changed.8": "you missed something."
+  "text.fuckinguselessmod.chat.entity.world_changed.8": "you missed something.",
+  "text.fuckinguselessmod.chat.entity.name": "Chat Entity"
 }
