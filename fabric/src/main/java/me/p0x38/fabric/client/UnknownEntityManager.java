@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
+/** Coordinates the client-side lifecycle and behavior of Unknown Entity instances. */
 public final class UnknownEntityManager {
     private static final int MIN_HIDDEN_TICKS = 10;
     private static final int MAX_HIDDEN_TICKS = 60;
@@ -61,6 +62,7 @@ public final class UnknownEntityManager {
 
     private UnknownEntityManager() {}
 
+    /** Updates the currently observed entity for the current client tick. */
     public static void tick() {
         Minecraft client = Minecraft.getInstance();
         ClientLevel level = client.level;
@@ -208,6 +210,10 @@ public final class UnknownEntityManager {
         think(entity, level);
     }
 
+    /** Sends a player message to the currently observed active entity.
+     * @param message the player's chat message
+     * @return whether the message was consumed by the entity
+     */
     public static boolean talkToChatEntity(String message) {
         Minecraft client = Minecraft.getInstance();
 
@@ -270,11 +276,13 @@ public final class UnknownEntityManager {
         return true;
     }
 
+    /** @return the observed entity identifier, or {@code null} when none is observed. */
     public static String getObservedChatEntityId() {
         UnknownEntity entity = getObservedChatEntity();
         return entity == null ? null : entity.id();
     }
 
+    /** @return a human-readable state summary, or {@code null} when none is observed. */
     public static String getObservedChatEntityInfo() {
         UnknownEntity entity = getObservedChatEntity();
 
