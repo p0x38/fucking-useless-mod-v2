@@ -43,8 +43,8 @@ public final class ChatEntity {
     private int seenCount = 0;
     private int returnCount = 0;
     private int uncontrolledReactionCount = 0;
-    private float SELF_AWARENESS = 0.95f;
-    private float SELF_CONTROL = 0.30f;
+    private static final float SELF_AWARENESS = 0.95f;
+    private static final float SELF_CONTROL = 0.30f;
     private ReactionKind lastReactionKind = ReactionKind.NORMAL;
     private ChatConnectionMode connectionMode = ChatConnectionMode.DISCONNECTED;
 
@@ -104,8 +104,8 @@ public final class ChatEntity {
     public int seenCount() { return seenCount; }
     public int returnCount() { return returnCount; }
     public int uncontrolledReactionCount() { return uncontrolledReactionCount; }
-    public float SELF_AWARENESS() { return SELF_AWARENESS; }
-    public float SELF_CONTROL() { return SELF_CONTROL; }
+    public float selfAwareness() { return SELF_AWARENESS; }
+    public float selfControl() { return SELF_CONTROL; }
     public ReactionKind lastReactionKind() { return lastReactionKind; }
     public ChatConnectionMode connectionMode() { return connectionMode; }
     public Memory lastProcessedMemory() { return lastProcessedMemory; }
