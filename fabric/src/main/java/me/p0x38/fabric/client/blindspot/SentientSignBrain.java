@@ -1,5 +1,7 @@
 package me.p0x38.fabric.client.blindspot;
 
+import me.p0x38.fuckinguselessmod.util.DebugLogger;
+
 import net.minecraft.client.multiplayer.ClientLevel;
 
 import java.util.Map;
@@ -26,6 +28,15 @@ public final class SentientSignBrain {
         }
 
         Memory latest = memories.getLast();
+
+        DebugLogger.debug(
+                "[SentientSignBrain] think id={} tick={} mood={} latestMemory={} message={}",
+                sign.id(),
+                gameTick,
+                sign.mood(),
+                latest.type(),
+                sign.currentMessage()
+        );
 
         /*
          * Direct communication has priority over ambient thoughts.
@@ -137,6 +148,13 @@ public final class SentientSignBrain {
             String message,
             long gameTick
     ) {
+        DebugLogger.debug(
+                "[SentientSignBrain] speaking id={} tick={} message={}",
+                sign.id(),
+                gameTick,
+                message
+        );
+
         sign.setCurrentMessage(message);
 
         sign.remember(
