@@ -114,6 +114,35 @@ public final class ChatEntityBrain {
         }
 
         /*
+         * Idle chatlines escalate based on how long the player has been
+         * inactive. The manager only creates one memory for each idle stage.
+         */
+        if (latest.type() == Memory.Type.PLAYER_IDLE) {
+            int stage;
+
+            try {
+                stage = Integer.parseInt(
+                        latest.context("stage")
+                );
+            } catch (NumberFormatException exception) {
+                stage = 1;
+            }
+
+            say(
+                    entity,
+                    chooseIdleResponse(stage),
+                    gameTick,
+                    stage >= 5
+                            ? ChatEntity.ReactionKind.META
+                            : ChatEntity.ReactionKind.NORMAL
+            );
+
+            entity.markMemoryProcessed(latest);
+            entity.markAction(gameTick);
+            return;
+        }
+
+        /*
          * Location memories are background knowledge, not a direct reason
          * to speak. Consume them so they don't become stuck as the latest
          * unprocessed memory.
@@ -445,6 +474,48 @@ public final class ChatEntityBrain {
                 text("interacted.default.7"),
                 text("interacted.default.8")
         );
+    }
+
+    private static String chooseIdleResponse(int stage) {
+        return switch (stage) {
+            case 1 -> choose(
+                    text("idle.short.1"),
+                    text("idle.short.2"),
+                    text("idle.short.3"),
+                    text("idle.short.4")
+            );
+            case 2 -> choose(
+                    text("idle.medium.1"),
+                    text("idle.medium.2"),
+                    text("idle.medium.3"),
+                    text("idle.medium.4")
+            );
+            case 3 -> choose(
+                    text("idle.long.1"),
+                    text("idle.long.2"),
+                    text("idle.long.3"),
+                    text("idle.long.4")
+            );
+            case 4 -> choose(
+                    text("idle.very_long.1"),
+                    text("idle.very_long.2"),
+                    text("idle.very_long.3"),
+                    text("idle.very_long.4")
+            );
+            case 5 -> choose(
+                    text("idle.extreme.1"),
+                    text("idle.extreme.2"),
+                    text("idle.extreme.3"),
+                    text("idle.extreme.4")
+            );
+            case 6 -> choose(
+                    text("idle.very_extreme.1"),
+                    text("idle.very_extreme.2"),
+                    text("idle.very_extreme.3"),
+                    text("idle.very_extreme.4")
+            );
+            default -> text("idle.short.1");
+        };
     }
 
     private static boolean isUnsettlingQuestion(String message) {
