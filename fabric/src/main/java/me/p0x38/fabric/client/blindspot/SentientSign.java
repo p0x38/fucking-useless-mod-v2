@@ -1,5 +1,7 @@
 package me.p0x38.fabric.client.blindspot;
 
+import me.p0x38.fuckinguselessmod.util.DebugLogger;
+
 import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
@@ -99,6 +101,16 @@ public final class SentientSign {
         this.connectionMode = connectionMode;
         boolean wasLooking = playerLooking;
 
+        if (wasLooking != looking) {
+            DebugLogger.debug(
+                    "[SentientSign] perception transition id={} looking={} tick={} connection={}",
+                    id(),
+                    looking,
+                    gameTick,
+                    connectionMode
+            );
+        }
+
         playerLooking = looking;
         playerLookingAway = !looking;
 
@@ -151,6 +163,15 @@ public final class SentientSign {
         if (message == null || message.isBlank()) return;
         this.connectionMode = connectionMode;
         interactionCount++;
+
+        DebugLogger.debug(
+                "[SentientSign] interaction id={} count={} tick={} message={}",
+                id(),
+                interactionCount,
+                gameTick,
+                message.trim()
+        );
+
         trust = Math.clamp(trust + 0.04f, 0.0f, 1.0f);
         curiosity = Math.clamp(curiosity + 0.05f, 0.0f, 1.0f);
         irritation = Math.clamp(irritation - 0.03f, 0.0f, 1.0f);
@@ -172,6 +193,15 @@ public final class SentientSign {
     }
 
     public void setCurrentMessage(String message) {
+        if (!java.util.Objects.equals(currentMessage, message)) {
+            DebugLogger.debug(
+                    "[SentientSign] message changed id={} old={} new={}",
+                    id(),
+                    currentMessage,
+                    message
+            );
+        }
+
         currentMessage = message;
     }
 
