@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
 
+/** Client renderer for the Unknown Entity using a humanoid model and armor layer. */
 public class UnknownEntityRenderer extends HumanoidMobRenderer<
         ChatEntity,
         HumanoidRenderState,
@@ -23,6 +24,7 @@ public class UnknownEntityRenderer extends HumanoidMobRenderer<
                     "textures/entity/blackpoint.png"
             );
 
+    /** Creates the renderer and attaches the humanoid armor layer. */
     public UnknownEntityRenderer(EntityRendererProvider.Context context) {
         super(
                 context,
@@ -43,11 +45,13 @@ public class UnknownEntityRenderer extends HumanoidMobRenderer<
         ));
     }
 
+    /** @return a new humanoid render state. */
     @Override
     public @NonNull HumanoidRenderState createRenderState() {
         return new HumanoidRenderState();
     }
 
+    /** @return the texture used by the entity's base model. */
     @Override
     public @NonNull Identifier getTextureLocation(@NonNull HumanoidRenderState state) {
         return TEXTURE;
