@@ -1,5 +1,6 @@
 package me.p0x38.fabric.client;
 
+import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -36,7 +37,18 @@ public final class BlindSpotSigns {
             BlockPos supportPosition,
             String message
     ) {
+        DebugLogger.debug(
+                "[BlindSpotSigns] place requested support={} message={}",
+                supportPosition,
+                message
+        );
+
         if (SUPPORT_TO_SIGN.containsKey(supportPosition)) {
+            DebugLogger.debug(
+                    "[BlindSpotSigns] sign already exists; updating support={}",
+                    supportPosition
+            );
+
             update(
                     level,
                     supportPosition,
@@ -49,10 +61,19 @@ public final class BlindSpotSigns {
                 supportPosition.above();
 
         if (!level.getBlockState(signPosition).isAir()) {
+            DebugLogger.debug(
+                    "[BlindSpotSigns] placement blocked by block position={} state={}",
+                    signPosition,
+                    level.getBlockState(signPosition)
+            );
             return;
         }
 
         if (level.getBlockEntity(signPosition) != null) {
+            DebugLogger.debug(
+                    "[BlindSpotSigns] placement blocked by existing block entity position={}",
+                    signPosition
+            );
             return;
         }
 
@@ -80,6 +101,13 @@ public final class BlindSpotSigns {
 
         level.setBlockEntity(sign);
 
+        DebugLogger.debug(
+                "[BlindSpotSigns] created sign position={} rotation={} levelBound={}",
+                signPosition,
+                rotation,
+                sign.getLevel() != null
+        );
+
         sign.setText(
                 createText(message),
                 true
@@ -93,6 +121,13 @@ public final class BlindSpotSigns {
         PLACED_SIGNS.put(
                 signPosition.immutable(),
                 sign
+        );
+
+        DebugLogger.debug(
+                "[BlindSpotSigns] sign registered support={} signPosition={} count={}",
+                supportPosition,
+                signPosition,
+                PLACED_SIGNS.size()
         );
     }
 
@@ -117,8 +152,20 @@ public final class BlindSpotSigns {
                 PLACED_SIGNS.get(signPosition);
 
         if (sign == null) {
+            DebugLogger.debug(
+                    "[BlindSpotSigns] update skipped: missing sign support={} signPosition={}",
+                    supportPosition,
+                    signPosition
+            );
             return;
         }
+
+        DebugLogger.debug(
+                "[BlindSpotSigns] updating sign support={} signPosition={} message={}",
+                supportPosition,
+                signPosition,
+                message
+        );
 
         SignText text =
                 createText(message);
@@ -201,6 +248,11 @@ public final class BlindSpotSigns {
                 }
             }
         }
+
+        DebugLogger.debug(
+                "[BlindSpotSigns] clearing {} placed signs",
+                PLACED_SIGNS.size()
+        );
 
         SUPPORT_TO_SIGN.clear();
         PLACED_SIGNS.clear();
