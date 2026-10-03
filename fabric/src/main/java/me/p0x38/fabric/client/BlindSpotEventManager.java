@@ -377,10 +377,20 @@ public final class BlindSpotEventManager {
         }
 
         if (observedBlock != null) {
+            var cameraForward =
+                    camera.forwardVector();
+
+            Vec3 forward =
+                    new Vec3(
+                            cameraForward.x(),
+                            cameraForward.y(),
+                            cameraForward.z()
+                    );
+
             BlockPos signSupport =
                     BlindSpotSigns.findLookedAtSupport(
                             camera.position(),
-                            camera.forwardVector(),
+                            forward,
                             observedBlock
                     );
 
