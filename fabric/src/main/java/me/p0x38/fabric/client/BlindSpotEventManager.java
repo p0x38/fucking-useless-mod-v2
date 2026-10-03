@@ -4,6 +4,7 @@ import me.p0x38.fabric.client.blindspot.Memory;
 import me.p0x38.fabric.client.blindspot.SentientSign;
 import me.p0x38.fabric.client.blindspot.SentientSignBrain;
 import me.p0x38.fabric.client.blindspot.SignConnectionMode;
+import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -53,6 +54,12 @@ public final class BlindSpotEventManager {
         }
 
         if (observedLevel != null && observedLevel != level) {
+            DebugLogger.debug(
+                    "[BlindSpot] client world changed; clearing previous state oldLevel={} newLevel={}",
+                    observedLevel.dimension().location(),
+                    level.dimension().location()
+            );
+
             BlindSpotSigns.clear(observedLevel);
             SIGNS.clear();
             observedBlock = null;
@@ -92,12 +99,24 @@ public final class BlindSpotEventManager {
             observedBlock = lookedAtBlock;
             hiddenSince = Long.MIN_VALUE;
             changedWhileHidden = false;
+
+            DebugLogger.debug(
+                    "[BlindSpot] observing new target block={}",
+                    observedBlock
+            );
         }
 
         SentientSign sign =
                 SIGNS.computeIfAbsent(
                         observedBlock,
-                        SentientSign::new
+                        position -> {
+                            DebugLogger.debug(
+                                    "[BlindSpot] created sentient sign position={} id={}",
+                                    position,
+                                    "sign-" + Long.toUnsignedString(position.asLong(), 36)
+                            );
+                            return new SentientSign(position);
+                        }
                 );
 
         boolean lookingAtObservedBlock =
@@ -140,6 +159,13 @@ public final class BlindSpotEventManager {
          */
         if (hiddenSince == Long.MIN_VALUE) {
             hiddenSince = gameTick;
+
+            DebugLogger.debug(
+                    "[BlindSpot] target became hidden position={} tick={} message={}",
+                    sign.position(),
+                    gameTick,
+                    sign.currentMessage()
+            );
             return;
         }
 
@@ -161,6 +187,13 @@ public final class BlindSpotEventManager {
         }
 
         changedWhileHidden = true;
+
+        DebugLogger.debug(
+                "[BlindSpot] hidden world-change triggered position={} hiddenTicks={} tick={}",
+                sign.position(),
+                hiddenTicks,
+                gameTick
+        );
 
         onHiddenChange(
                 sign,
@@ -197,6 +230,11 @@ public final class BlindSpotEventManager {
         }
 
         if (!observedBlock.equals(lookedAtBlock)) {
+            DebugLogger.debug(
+                    "[BlindSpot] chat ignored: player is not looking at observed sign target observed={} lookedAt={}",
+                    observedBlock,
+                    lookedAtBlock
+            );
             return false;
         }
 
@@ -209,10 +247,21 @@ public final class BlindSpotEventManager {
         long gameTick =
                 client.level.getGameTime();
 
+        SignConnectionMode connectionMode =
+                SignConnectionMode.detect(client);
+
+        DebugLogger.debug(
+                "[BlindSpot] player communicated with sign={} tick={} connection={} message={}",
+                sign.id(),
+                gameTick,
+                connectionMode,
+                message.trim()
+        );
+
         sign.interact(
                 message,
                 gameTick,
-                SignConnectionMode.detect(client)
+                connectionMode
         );
 
         SentientSignBrain.think(
@@ -405,6 +454,13 @@ public final class BlindSpotEventManager {
                 )
         );
 
+        DebugLogger.debug(
+                "[BlindSpot] placing sign after hidden change position={} message={} state={}",
+                sign.position(),
+                sign.currentMessage(),
+                level.getBlockState(sign.position())
+        );
+
         BlindSpotSigns.place(
                 level,
                 sign.position(),
@@ -416,6 +472,12 @@ public final class BlindSpotEventManager {
             SentientSign sign,
             ClientLevel level
     ) {
+        DebugLogger.debug(
+                "[BlindSpot] player returned to sign position={} message={}",
+                sign.position(),
+                sign.currentMessage()
+        );
+
         BlindSpotSigns.update(
                 level,
                 sign.position(),
