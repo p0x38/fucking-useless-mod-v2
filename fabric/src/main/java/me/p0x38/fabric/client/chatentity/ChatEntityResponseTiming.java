@@ -27,6 +27,7 @@ public final class ChatEntityResponseTiming {
                     case UNSETTLING -> 1.15;
                     case OUT_OF_PLACE -> 0.50;
                     case PLAYFUL -> 0.20;
+                    case NULL -> 0.3;
                     case ANNOYED -> 0.10;
                     case META -> 0.90;
                     case SLEEP -> 0.45;

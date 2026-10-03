@@ -98,23 +98,23 @@ public final class Config {
     }
 
     public static final class Data {
-        @ConfigOption(name = "Enabled", category = "General")
-        public boolean enabled = true;
+        @ConfigOption(name = "Enabled")
+        public final boolean enabled = true;
 
-        @ConfigOption(name = "Mode", category = "General")
-        public Mode mode = Mode.REPLACE;
+        @ConfigOption(name = "Mode")
+        public final Mode mode = Mode.REPLACE;
 
         @ConfigOption(name = "Text Case", category = "Text Case")
-        public TextCase textCase = TextCase.PRESERVE;
+        public final TextCase textCase = TextCase.PRESERVE;
 
         @ConfigOption(name = "Block Mode", category = "Blocks")
-        public BlockMode blockMode = BlockMode.DYNAMIC;
+        public final BlockMode blockMode = BlockMode.DYNAMIC;
 
         @ConfigOption(
                 name = "Encoding Pipeline",
                 category = "Encoding"
         )
-        public List<String> encodingPipeline = new ArrayList<>(List.of(
+        public final List<String> encodingPipeline = new ArrayList<>(List.of(
                 "binary",
                 "bit_rotate",
                 "bit_xor",
@@ -145,7 +145,7 @@ public final class Config {
         public int xorKey = 38;
 
         @ConfigOption(name = "Enable Uwuifier", category = "Effects")
-        public boolean uwuifierEnabled = true;
+        public final boolean uwuifierEnabled = true;
 
         @ConfigOption(name = "Replace R/L with W", category = "Uwuifier")
         public boolean uwuifierReplaceRl = true;
@@ -169,7 +169,6 @@ public final class Config {
                 name = "Word Transformation Chance",
                 category = "Uwuifier",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -193,7 +192,6 @@ public final class Config {
                 name = "Stutter Chance",
                 category = "Uwuifier",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -206,7 +204,6 @@ public final class Config {
                 name = "Action Text Chance",
                 category = "Uwuifier",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -228,7 +225,6 @@ public final class Config {
                 name = "Emoticon Chance",
                 category = "Uwuifier",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -251,7 +247,6 @@ public final class Config {
                 name = "Exclamation Chance",
                 category = "Uwuifier",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -267,26 +262,24 @@ public final class Config {
         ));
 
         @ConfigOption(name = "Enable Zalgo", category = "Zalgo")
-        public boolean zalgoEnabled = true;
+        public final boolean zalgoEnabled = true;
 
         @ConfigOption(
                 name = "Zalgo Chance",
                 category = "Zalgo",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
         public float zalgoChance = 0.40f;
 
         @ConfigOption(name = "Enable Blocks", category = "Blocks")
-        public boolean blocksEnabled = true;
+        public final boolean blocksEnabled = true;
 
         @ConfigOption(
                 name = "Block Chance",
                 category = "Blocks",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -303,58 +296,55 @@ public final class Config {
         public int maxLength = 256;
 
         @ConfigOption(name = "Enable Leet Speak", category = "Leet Speak")
-        public boolean leetSpeakEnabled = false;
+        public final boolean leetSpeakEnabled = false;
 
         @ConfigOption(
                 name = "Leet Speak Chance",
                 category = "Leet Speak",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
         public float leetSpeakChance = 1.0f;
 
         @ConfigOption(name = "Leet Speak Rules", category = "Leet Speak")
-        public List<String> leetSpeakRules = new ArrayList<>(List.of(
+        public final List<String> leetSpeakRules = new ArrayList<>(List.of(
                 "a=>4", "e=>3", "i=>1", "o=>0", "s=>5", "t=>7"
         ));
 
         @ConfigOption(name = "Enable Gamer Slang", category = "Gamer Slang")
-        public boolean gamerSlangEnabled = false;
+        public final boolean gamerSlangEnabled = false;
 
         @ConfigOption(
                 name = "Gamer Slang Chance",
                 category = "Gamer Slang",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
         public float gamerSlangChance = 1.0f;
 
         @ConfigOption(name = "Gamer Slang Rules", category = "Gamer Slang")
-        public List<String> gamerSlangRules = new ArrayList<>(List.of(
+        public final List<String> gamerSlangRules = new ArrayList<>(List.of(
                 "\\byou\\b=>u", "\\byour\\b=>ur", "\\bare\\b=>r", "\\bwhy\\b=>y", "\\bpeople\\b=>ppl",
                 "\\bplease\\b=>pls", "\\bthanks\\b=>thx", "\\bthank\\b=>thx", "\\bbecause\\b=>cuz",
                 "\\bbefore\\b=>b4", "\\breally\\b=>rly", "\\bprobably\\b=>prolly"
         ));
 
         @ConfigOption(name = "Enable Text Speak", category = "Text Speak")
-        public boolean textSpeakEnabled = false;
+        public final boolean textSpeakEnabled = false;
 
         @ConfigOption(
                 name = "Text Speak Chance",
                 category = "Text Speak",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
         public float textSpeakChance = 1.0f;
 
         @ConfigOption(name = "Text Speak Rules", category = "Text Speak")
-        public List<String> textSpeakRules = new ArrayList<>(List.of(
+        public final List<String> textSpeakRules = new ArrayList<>(List.of(
                 "\\bsee you\\b=>c u", "\\bsee\\b=>c", "\\byou\\b=>u", "\\bare\\b=>r", "\\bwhy\\b=>y",
                 "\\bbe right back\\b=>brb", "\\bas soon as possible\\b=>asap",
                 "\\blaughing out loud\\b=>lol", "\\bby the way\\b=>btw",
@@ -370,7 +360,6 @@ public final class Config {
                 name = "Lolcat Chance",
                 category = "Lolcat",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -383,17 +372,16 @@ public final class Config {
                 "\\bhas\\b=>haz", "\\bhave\\b=>hav"
         ));
         @ConfigOption(name = "Enable Dialogue Sounds", category = "Dialogue")
-        public boolean dialogueSoundsEnabled = false;
+        public final boolean dialogueSoundsEnabled = false;
 
         @ConfigOption(name = "Playback Mode", category = "Dialogue")
-        public DialoguePlaybackMode dialoguePlaybackMode =
+        public final DialoguePlaybackMode dialoguePlaybackMode =
                 DialoguePlaybackMode.CHARACTER;
 
         @ConfigOption(
                 name = "Sound Chance",
                 category = "Dialogue",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -423,7 +411,6 @@ public final class Config {
                 name = "Volume",
                 category = "Dialogue",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 1.0
         )
@@ -443,23 +430,22 @@ public final class Config {
                 name = "Pitch Variation",
                 category = "Dialogue",
                 hasMin = true,
-                min = 0.0,
                 hasMax = true,
                 max = 0.5
         )
         public float dialoguePitchVariation = 0.2f;
 
         @ConfigOption(name = "Randomize Pitch", category = "Dialogue")
-        public boolean dialogueRandomizePitch = true;
+        public final boolean dialogueRandomizePitch = true;
 
         @ConfigOption(name = "Skip Whitespace", category = "Dialogue")
-        public boolean dialogueSkipWhitespace = true;
+        public final boolean dialogueSkipWhitespace = true;
 
         @ConfigOption(name = "Skip Punctuation", category = "Dialogue")
-        public boolean dialogueSkipPunctuation = true;
+        public final boolean dialogueSkipPunctuation = true;
 
         @ConfigOption(name = "Skip Numbers", category = "Dialogue")
-        public boolean dialogueSkipNumbers = false;
+        public final boolean dialogueSkipNumbers = false;
 
         @ConfigOption(
                 name = "Maximum Sounds Per Message",
@@ -475,20 +461,20 @@ public final class Config {
         public boolean dialogueAvoidRepeats = true;
 
         @ConfigOption(name = "Queue Messages", category = "Dialogue")
-        public boolean dialogueQueueMessages = true;
+        public final boolean dialogueQueueMessages = true;
 
         @ConfigOption(name = "Seed Mode", category = "Dialogue")
         public DialogueSeedMode dialogueSeedMode =
                 DialogueSeedMode.UUID_MESSAGE_COUNTER;
 
         @ConfigOption(name = "Sound Pool", category = "Dialogue")
-        public List<String> dialogueSoundPool = createDialogueSoundPool();
+        public final List<String> dialogueSoundPool = createDialogueSoundPool();
 
         @ConfigOption(name = "Enable Censor Box", category = "Censor Box")
-        public boolean censorBoxEnabled = true;
+        public final boolean censorBoxEnabled = true;
 
         @ConfigOption(name = "Default Censor Selectors", category = "Censor Box")
-        public List<String> censorBoxDefaultSelectors = new ArrayList<>();
+        public final List<String> censorBoxDefaultSelectors = new ArrayList<>();
 
         @ConfigOption(name = "Color", category = "Censor Box")
         public String censorBoxColor = "#FF000000";
@@ -512,30 +498,30 @@ public final class Config {
         public int censorBoxMaxUpdateTicks = 6;
 
         @ConfigOption(name = "Effects", category = "Censor Box")
-        public List<CensorBoxEffect> censorBoxEffects = new ArrayList<>(List.of(
+        public final List<CensorBoxEffect> censorBoxEffects = new ArrayList<>(List.of(
                 CensorBoxEffect.STEPPY,
                 CensorBoxEffect.JITTER
         ));
 
         @ConfigOption(name = "Enable Motion Prediction", category = "Censor Box")
-        public boolean censorBoxPredictionEnabled = true;
+        public final boolean censorBoxPredictionEnabled = true;
 
-        @ConfigOption(name = "Prediction Strength", category = "Censor Box", hasMin = true, min = 0.0, hasMax = true, max = 8.0)
+        @ConfigOption(name = "Prediction Strength", category = "Censor Box", hasMin = true, hasMax = true, max = 8.0)
         public float censorBoxPredictionStrength = 1.0f;
 
         @ConfigOption(name = "Predict Acceleration", category = "Censor Box")
-        public boolean censorBoxPredictionAcceleration = true;
+        public final boolean censorBoxPredictionAcceleration = true;
 
         @ConfigOption(name = "Dynamic Update Interval", category = "Censor Box")
-        public boolean censorBoxDynamicUpdateInterval = true;
+        public final boolean censorBoxDynamicUpdateInterval = true;
 
         @ConfigOption(name = "Fast Movement Threshold", category = "Censor Box", hasMin = true, min = 1.0, hasMax = true, max = 64.0)
         public float censorBoxDynamicUpdateSpeed = 8.0f;
 
-        @ConfigOption(name = "Pulse Amount", category = "Censor Box", hasMin = true, min = 0.0, hasMax = true, max = 1.0)
+        @ConfigOption(name = "Pulse Amount", category = "Censor Box", hasMin = true, hasMax = true, max = 1.0)
         public float censorBoxPulseAmount = 0.15f;
 
-        @ConfigOption(name = "Rainbow Speed", category = "Censor Box", hasMin = true, min = 0.0, hasMax = true, max = 10.0)
+        @ConfigOption(name = "Rainbow Speed", category = "Censor Box", hasMin = true, hasMax = true, max = 10.0)
         public float censorBoxRainbowSpeed = 1.0f;
 
         @ConfigOption(name = "Flash Period", category = "Censor Box", hasMin = true, min = 1, hasMax = true, max = 40)
@@ -545,7 +531,7 @@ public final class Config {
         public int censorBoxDoubleOffset = 2;
 
         @ConfigOption(name = "Presets", category = "Effects")
-        public List<String> presets = new ArrayList<>();
+        public final List<String> presets = new ArrayList<>();
 
         @ConfigOption(name = "Enable Sentence End Effects", category = "Effects")
         public boolean sentenceEndEffectsEnabled = true;
@@ -559,7 +545,7 @@ public final class Config {
                 ));
 
         @ConfigOption(name = "Enable Debug Logging", category = "Misc")
-        public boolean debugLoggingEnabled = false;
+        public final boolean debugLoggingEnabled = false;
 
         private static List<String> createDialogueSoundPool() {
             List<String> pool = new ArrayList<>();
@@ -570,10 +556,10 @@ public final class Config {
         }
 
         @ConfigOption(name = "Enable Silly Mode", category = "Chat Entity")
-        public boolean chatEntitySillyMode = false;
+        public final boolean chatEntitySillyMode = false;
 
         @ConfigOption(name = "Allow Chat Entity Location Awareness", category = "Chat Entity")
-        public boolean chatEntityLocationAwareness = false;
+        public final boolean chatEntityLocationAwareness = false;
 
         public void clamp() {
             zalgoChance = Math.clamp(zalgoChance, 0.0f, 1.0f);

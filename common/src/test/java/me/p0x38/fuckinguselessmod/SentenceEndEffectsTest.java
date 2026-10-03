@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SentenceEndEffectsTest {
@@ -52,18 +53,13 @@ class SentenceEndEffectsTest {
         Config.Data config = new Config.Data();
         config.sentenceEndEffectsEnabled = false;
 
-        assertTrue(
-                SentenceEndEffects.apply("Hello. World?", config)
-                        .equals("Hello. World?")
-        );
+        assertEquals("Hello. World?", SentenceEndEffects.apply("Hello. World?", config));
     }
 
     @Test
     void leavesTextWithoutSentenceEndUntouched() {
         Config.Data config = new Config.Data();
 
-        assertTrue(
-                SentenceEndEffects.apply("Hello", config).equals("Hello")
-        );
+        assertEquals("Hello", SentenceEndEffects.apply("Hello", config));
     }
 }

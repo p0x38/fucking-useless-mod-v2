@@ -157,9 +157,7 @@ public final class ConfigToml {
                 output.append("# Examples: @e[type=minecraft:zombie], @e[type=!minecraft:player,distance=..16]\n");
                 output.append("# Leave empty to disable automatic censoring.\n");
             }
-            case "censorBoxColor" -> {
-                output.append("# ARGB color in #AARRGGBB form. #RRGGBB is also accepted with full opacity.\n");
-            }
+            case "censorBoxColor" -> output.append("# ARGB color in #AARRGGBB form. #RRGGBB is also accepted with full opacity.\n");
             case "censorBoxEffects" -> {
                 output.append("# Effects: STEPPY, JITTER, PULSE, RAINBOW, FLASH, DOUBLE.\n");
                 output.append("# STEPPY and JITTER reproduce the default broken tracking behavior.\n");

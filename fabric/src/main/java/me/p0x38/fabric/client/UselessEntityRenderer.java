@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.NonNull;
 
 public class UselessEntityRenderer extends HumanoidMobRenderer<
         UselessEntity,
@@ -31,12 +32,12 @@ public class UselessEntityRenderer extends HumanoidMobRenderer<
     }
 
     @Override
-    public HumanoidRenderState createRenderState() {
+    public @NonNull HumanoidRenderState createRenderState() {
         return new HumanoidRenderState();
     }
 
     @Override
-    public Identifier getTextureLocation(HumanoidRenderState state) {
+    public @NonNull Identifier getTextureLocation(@NonNull HumanoidRenderState state) {
         return TEXTURE;
     }
 }

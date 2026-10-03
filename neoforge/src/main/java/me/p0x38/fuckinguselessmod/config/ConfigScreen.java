@@ -303,7 +303,7 @@ public final class ConfigScreen {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     private static void addEnumList(
             ConfigCategory category,
             ConfigEntryBuilder entries,

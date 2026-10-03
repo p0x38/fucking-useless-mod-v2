@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.architectury.platform.Platform;
 import me.p0x38.fuckinguselessmod.config.ConfigToml;
+import me.p0x38.fuckinguselessmod.util.DebugLogger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,10 +70,10 @@ public final class ConfigManager {
             Config.set(new Config.Data());
             save();
         } catch (IOException | RuntimeException exception) {
-            System.err.println(
-                    "[Fucking Useless Mod] Failed to load config"
+            DebugLogger.error(
+                    "[Fucking Useless Mod] Failed to load config",
+                    exception
             );
-            exception.printStackTrace();
             Config.set(new Config.Data());
         }
     }
@@ -97,10 +98,10 @@ public final class ConfigManager {
             Files.writeString(CONFIG_PATH, serialized);
             return true;
         } catch (IOException | RuntimeException exception) {
-            System.err.println(
-                    "[Fucking Useless Mod] Failed to save config"
+            DebugLogger.error(
+                    "[Fucking Useless Mod] Failed to save config",
+                    exception
             );
-            exception.printStackTrace();
             return false;
         }
     }

@@ -243,8 +243,6 @@ public final class Uwuifier {
             return randomValue(config.uwuifierActionTexts, random);
         }
 
-        roll -= config.uwuifierActionChance;
-
         return null;
     }
 

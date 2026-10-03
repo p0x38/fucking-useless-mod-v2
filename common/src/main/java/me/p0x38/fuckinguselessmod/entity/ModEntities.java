@@ -13,7 +13,7 @@ import net.minecraft.world.entity.MobCategory;
 public final class ModEntities {
     public static final EntityType<UselessEntity> USELESS_ENTITY = register(
             "useless",
-            EntityType.Builder.<UselessEntity>of(
+            EntityType.Builder.of(
                     UselessEntity::new,
                     MobCategory.CREATURE
             )
@@ -23,7 +23,7 @@ public final class ModEntities {
 
     private ModEntities() {}
 
-    private static <T extends Entity> EntityType<T> register(String name, EntityType.Builder<T> builder) {
+    private static <T extends Entity> EntityType<T> register(@SuppressWarnings("SameParameterValue") String name, EntityType.Builder<T> builder) {
         ResourceKey<EntityType<?>> key = ResourceKey.create(
                 Registries.ENTITY_TYPE,
                 Identifier.fromNamespaceAndPath(

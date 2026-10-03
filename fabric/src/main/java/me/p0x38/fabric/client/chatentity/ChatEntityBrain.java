@@ -423,8 +423,7 @@ public final class ChatEntityBrain {
     ) {
         long idleTicks =
                 parseLongContext(
-                        memory,
-                        "idleTicksBeforeInteraction"
+                        memory
                 );
 
         if (idleTicks >= LONG_IDLE_BEFORE_SLEEP_RESPONSE_TICKS) {
@@ -435,10 +434,9 @@ public final class ChatEntityBrain {
     }
 
     private static long parseLongContext(
-            Memory memory,
-            String key
+            Memory memory
     ) {
-        String value = memory.context(key);
+        String value = memory.context("idleTicksBeforeInteraction");
 
         if (value == null) {
             return 0L;

@@ -30,6 +30,7 @@ public final class ChatEntity {
         PLAYFUL,
         NULL,
         ANNOYED,
+        SLEEP,
         META
     }
 

@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import me.p0x38.fabric.client.ChatEntityManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
 public final class ChatEntityCommand {

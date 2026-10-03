@@ -25,10 +25,10 @@ public abstract class AvatarRendererMixin {
     private void fuckingUselessMod$captureHand(
             PoseStack poseStack,
             SubmitNodeCollector submitNodeCollector,
-            int lightCoords,
-            Identifier skinTexture,
-            ModelPart arm,
-            boolean hasSleeve,
+            int i,
+            Identifier identifier,
+            ModelPart modelPart,
+            boolean bl,
             CallbackInfo callbackInfo
     ) {
         Minecraft client = Minecraft.getInstance();
@@ -49,7 +49,7 @@ public abstract class AvatarRendererMixin {
          * so this reliably identifies the actual arm being drawn.
          */
         HumanoidArm humanoidArm =
-                arm.x > 0.0f
+                modelPart.x > 0.0f
                 ? HumanoidArm.LEFT
                         : HumanoidArm.RIGHT;
 
@@ -103,7 +103,7 @@ public abstract class AvatarRendererMixin {
                 maxY
         };
 
-        arm.getExtentsForGui(
+        modelPart.getExtentsForGui(
                 poseStack,
                 position -> {
                     Vector3f projected =

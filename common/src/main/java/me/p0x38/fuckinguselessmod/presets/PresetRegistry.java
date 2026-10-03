@@ -3,6 +3,7 @@ package me.p0x38.fuckinguselessmod.presets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.architectury.platform.Platform;
+import me.p0x38.fuckinguselessmod.util.DebugLogger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,10 +44,10 @@ public final class PresetRegistry {
         try {
             Files.createDirectories(PRESET_DIRECTORY);
         } catch (IOException exception) {
-            System.err.println(
-                    "[Fucking Useless Mod] Failed to create preset directory."
+            DebugLogger.error(
+                    "[Fucking Useless Mod] Failed to create preset directory.",
+                    exception
             );
-            exception.printStackTrace();
             return;
         }
 
@@ -57,10 +58,10 @@ public final class PresetRegistry {
                             .endsWith(".json")
             ).forEach(PresetRegistry::loadFile);
         } catch (IOException exception) {
-            System.err.println(
-                    "[Fucking Useless Mod] Failed to scan preset directory."
+            DebugLogger.error(
+                    "[Fucking Useless Mod] Failed to scan preset directory.",
+                    exception
             );
-            exception.printStackTrace();
         }
     }
 
@@ -96,10 +97,10 @@ public final class PresetRegistry {
                             + file.id()
             );
         } catch (Exception exception) {
-            System.err.println(
-                    "[Fucking Useless Mod] Failed to load preset: " + path
+            DebugLogger.error(
+                    "[Fucking Useless Mod] Failed to load preset: " + path,
+                    exception
             );
-            exception.printStackTrace();
         }
     }
 }

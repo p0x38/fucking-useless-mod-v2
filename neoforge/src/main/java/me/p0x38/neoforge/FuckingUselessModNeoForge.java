@@ -20,6 +20,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import org.jspecify.annotations.NonNull;
 
 @Mod(value = FuckingUselessMod.MOD_ID, dist = Dist.CLIENT)
 public final class FuckingUselessModNeoForge {
@@ -94,13 +95,13 @@ public final class FuckingUselessModNeoForge {
         }
 
         @Override
-        public HumanoidRenderState createRenderState() {
+        public @NonNull HumanoidRenderState createRenderState() {
             return new HumanoidRenderState();
         }
 
         @Override
-        public Identifier getTextureLocation(
-                HumanoidRenderState state
+        public @NonNull Identifier getTextureLocation(
+                @NonNull HumanoidRenderState state
         ) {
             return TEXTURE;
         }

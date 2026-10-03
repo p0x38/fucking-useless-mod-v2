@@ -5,7 +5,6 @@ import me.p0x38.fabric.client.chatentity.ChatEntity;
 import me.p0x38.fabric.client.chatentity.ChatEntityBrain;
 import me.p0x38.fabric.client.chatentity.ChatEntityPersistence;
 import me.p0x38.fabric.client.chatentity.Memory;
-import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -106,8 +105,7 @@ public final class ChatEntityManager {
 
         long gameTick = level.getGameTime();
         boolean looking =
-                lookedAt != null
-                        && observedOrigin.equals(lookedAt);
+                observedOrigin.equals(lookedAt);
 
         updatePlayerActivity(
                 player,

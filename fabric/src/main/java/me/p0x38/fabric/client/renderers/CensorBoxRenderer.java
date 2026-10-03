@@ -21,7 +21,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.NonNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -905,7 +904,7 @@ public final class CensorBoxRenderer {
                     || gameTick >= handState.nextUpdateTick) {
                 handState.x =
                         stepPosition(
-                                (int) Math.round(
+                                Math.round(
                                         liveCenterX
                                                 + handState.velocityX
                                                 * predictionAmount(
@@ -927,7 +926,7 @@ public final class CensorBoxRenderer {
 
                 handState.y =
                         stepPosition(
-                                (int) Math.round(
+                                Math.round(
                                         liveCenterY
                                                 + handState.velocityY
                                                 * predictionAmount(
@@ -1088,8 +1087,7 @@ public final class CensorBoxRenderer {
             Config.Data config,
             Config.CensorBoxEffect effect
     ) {
-        return config.censorBoxEffects != null
-                && config.censorBoxEffects.contains(effect);
+        return config.censorBoxEffects.contains(effect);
     }
 
     private static int parseColor(String value) {

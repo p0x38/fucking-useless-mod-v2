@@ -20,36 +20,28 @@ public abstract class LivingEntityRendererMixin {
     @Accessor("model")
     protected abstract EntityModel<?> fuckingUselessMod$getModel();
 
-    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    @Inject(method = "extractRenderState*", at = @At("TAIL"))
     private void fuckingUselessMod$rememberRenderState(
-            LivingEntity entity,
-            LivingEntityRenderState state,
-            float partialTick,
+            LivingEntity livingEntity,
+            LivingEntityRenderState livingEntityRenderState,
+            float f,
             CallbackInfo ci
     ) {
-        CensorBoxRenderer.rememberThirdPersonRenderState(entity, state);
+        CensorBoxRenderer.rememberThirdPersonRenderState(livingEntity, livingEntityRenderState);
     }
 
-    @Inject(
-            method = "submit",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/model/EntityModel;setupAnim(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;)V",
-                    shift = At.Shift.AFTER
-            )
-    )
     private void fuckingUselessMod$captureArms(
-            LivingEntityRenderState state,
+            LivingEntityRenderState livingEntityRenderState,
             PoseStack poseStack,
-            SubmitNodeCollector collector,
-            CameraRenderState camera,
+            SubmitNodeCollector submitNodeCollector,
+            CameraRenderState cameraRenderState,
             CallbackInfo ci
     ) {
         EntityModel<?> model = fuckingUselessMod$getModel();
 
         if (model instanceof HumanoidModel<?> humanoidModel) {
             CensorBoxRenderer.captureThirdPersonArms(
-                    state,
+                    livingEntityRenderState,
                     humanoidModel,
                     poseStack
             );

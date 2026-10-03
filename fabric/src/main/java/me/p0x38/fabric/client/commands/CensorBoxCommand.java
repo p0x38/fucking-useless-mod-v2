@@ -322,10 +322,6 @@ public final class CensorBoxCommand {
         lastDefaultLevel = client.level;
         Config.Data config = Config.get();
 
-        if (config.censorBoxDefaultSelectors == null) {
-            return;
-        }
-
         for (String selector : config.censorBoxDefaultSelectors) {
             for (Entity entity : resolve(null, selector)) {
                 CensorBoxRenderer.add(entity.getUUID());
@@ -380,8 +376,7 @@ public final class CensorBoxCommand {
             List<Entity> entities = new ArrayList<>(
                     switch (parsed.selectorType) {
                         case SELF -> List.of(client.player);
-                        case ALL_PLAYERS -> client.level.players();
-                        case NEAREST_PLAYER, RANDOM_PLAYER -> client.level.players();
+                        case ALL_PLAYERS, NEAREST_PLAYER, RANDOM_PLAYER -> client.level.players();
                         case ALL_ENTITIES, NEAREST_ENTITY -> collectAllEntities(client);
                     }
             );
@@ -407,9 +402,8 @@ public final class CensorBoxCommand {
                                 Comparator.comparingDouble(
                                         (Entity entity) -> entity.distanceToSqr(origin)
                                 ).reversed();
-                        case RANDOM ->
+                        case RANDOM, ARBITRARY ->
                                 null;
-                        case ARBITRARY -> null;
                     };
 
             if (comparator != null) {
@@ -629,7 +623,7 @@ public final class CensorBoxCommand {
                 }
                 case "distance" -> {
                     DoubleRange range =
-                            DoubleRange.parse(value, "distance");
+                            DoubleRange.parse(value);
                     result.minDistance = range.min;
                     result.maxDistance = range.max;
                 }
@@ -722,12 +716,10 @@ public final class CensorBoxCommand {
                 double highY = Math.max(minY, maxY);
                 double highZ = Math.max(minZ, maxZ);
 
-                if (!entity.getBoundingBox().intersects(
+                return entity.getBoundingBox().intersects(
                         lowX, lowY, lowZ,
                         highX, highY, highZ
-                )) {
-                    return false;
-                }
+                );
             }
 
             return true;
@@ -793,65 +785,53 @@ public final class CensorBoxCommand {
         ARBITRARY;
 
         private static SelectorSort parse(String value) {
-            try {
-                return switch (value.toLowerCase()) {
-                    case "nearest" -> NEAREST;
-                    case "furthest" -> FURTHEST;
-                    case "random" -> RANDOM;
-                    case "arbitrary" -> ARBITRARY;
-                    default -> throw new IllegalArgumentException(
-                            "unknown sort '" + value + "'"
-                    );
-                };
-            } catch (IllegalArgumentException exception) {
-                throw exception;
-            }
+            return switch (value.toLowerCase()) {
+                case "nearest" -> NEAREST;
+                case "furthest" -> FURTHEST;
+                case "random" -> RANDOM;
+                case "arbitrary" -> ARBITRARY;
+                default -> throw new IllegalArgumentException(
+                        "unknown sort '" + value + "'"
+                );
+            };
         }
     }
 
-    private static final class DoubleRange {
-        private final Double min;
-        private final Double max;
-
-        private DoubleRange(Double min, Double max) {
-            this.min = min;
-            this.max = max;
-        }
+    private record DoubleRange(Double min, Double max) {
 
         private static DoubleRange parse(
-                String value,
-                String key
-        ) {
-            try {
-                int separator = value.indexOf("..");
+                    String value
+            ) {
+                try {
+                    int separator = value.indexOf("..");
 
-                if (separator < 0) {
-                    double exact = Double.parseDouble(value);
-                    return new DoubleRange(exact, exact);
+                    if (separator < 0) {
+                        double exact = Double.parseDouble(value);
+                        return new DoubleRange(exact, exact);
+                    }
+
+                    String left = value.substring(0, separator);
+                    String right = value.substring(separator + 2);
+
+                    Double min = left.isEmpty()
+                            ? null
+                            : Double.parseDouble(left);
+                    Double max = right.isEmpty()
+                            ? null
+                            : Double.parseDouble(right);
+
+                    if (min == null && max == null) {
+                        throw new NumberFormatException();
+                    }
+
+                    return new DoubleRange(min, max);
+                } catch (NumberFormatException exception) {
+                    throw new IllegalArgumentException(
+                            "invalid " + "distance" + " range '" + value + "'"
+                    );
                 }
-
-                String left = value.substring(0, separator);
-                String right = value.substring(separator + 2);
-
-                Double min = left.isEmpty()
-                        ? null
-                        : Double.parseDouble(left);
-                Double max = right.isEmpty()
-                        ? null
-                        : Double.parseDouble(right);
-
-                if (min == null && max == null) {
-                    throw new NumberFormatException();
-                }
-
-                return new DoubleRange(min, max);
-            } catch (NumberFormatException exception) {
-                throw new IllegalArgumentException(
-                        "invalid " + key + " range '" + value + "'"
-                );
             }
         }
-    }
 
     private static Entity findNearestPlayer(
             Minecraft client
@@ -887,7 +867,7 @@ public final class CensorBoxCommand {
             return List.of();
         }
 
-        return List.<Entity>of(
+        return List.of(
                 players.get(
                         ThreadLocalRandom.current()
                                 .nextInt(players.size())

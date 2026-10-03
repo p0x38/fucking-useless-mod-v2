@@ -284,7 +284,6 @@ public final class DialogueSoundManager {
             UUID uuid,
             List<String> configuredPool
     ) {
-        List<String> pool = configuredPool;
 
         long seed =
                 uuid.getMostSignificantBits()
@@ -296,8 +295,8 @@ public final class DialogueSoundManager {
         Random random =
                 new Random(mix64(seed));
 
-        return pool.get(
-                random.nextInt(pool.size())
+        return configuredPool.get(
+                random.nextInt(configuredPool.size())
         );
     }
 
