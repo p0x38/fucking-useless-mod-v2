@@ -67,6 +67,23 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
                 ChatTransformer::transform
         );
 
+        ClientSendMessageEvents.ALLOW_CHAT.register(
+                message -> {
+                    boolean handled =
+                            BlindSpotEventManager.talkToObservedSign(
+                                    message
+                            );
+
+                    DebugLogger.debug(
+                            "[BlindSpot] outgoing chat intercepted={} message={}",
+                            handled,
+                            message
+                    );
+
+                    return !handled;
+                }
+        );
+
         ClientReceiveMessageEvents.CHAT.register(
                 (message, signedMessage, sender, params, receptionTimestamp) -> {
                     DebugLogger.debug(
