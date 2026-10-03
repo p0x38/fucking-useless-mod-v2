@@ -2,6 +2,7 @@ package me.p0x38.fabric.client.mixins;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
+import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
@@ -13,9 +14,9 @@ public interface GameRendererMixin {
             float partialTicks,
             boolean applyEffects
     );
-}
 
     @Invoker("getProjectionMatrix")
-    org.joml.Matrix4f fuckingUselessMod$getProjectionMatrix(
+    Matrix4f fuckingUselessMod$getProjectionMatrix(
             float fov
     );
+}
