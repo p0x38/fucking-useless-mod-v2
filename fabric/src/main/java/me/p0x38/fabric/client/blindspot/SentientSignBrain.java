@@ -79,6 +79,37 @@ public final class SentientSignBrain {
         }
 
         /*
+         * A hidden-phase world change creates the new sign. Give the
+         * sign an actual first message instead of leaving the default "...".
+         */
+        if (latest.type() == Memory.Type.WORLD_CHANGED) {
+            String phase =
+                    latest.context("phase");
+
+            if ("hidden".equals(phase)) {
+                say(
+                        sign,
+                        choose(
+                                text("world_changed.1"),
+                                text("world_changed.2"),
+                                text("world_changed.3"),
+                                text("world_changed.4"),
+                                text("world_changed.5"),
+                                text("world_changed.6"),
+                                text("world_changed.7"),
+                                text("world_changed.8")
+                        ),
+                        gameTick,
+                        SentientSign.ReactionKind.META
+                );
+            }
+
+            sign.markMemoryProcessed(latest);
+            sign.markAction(gameTick);
+            return;
+        }
+
+        /*
          * Direct communication has priority over ambient thoughts.
          */
         if (latest.type() == Memory.Type.PLAYER_INTERACTED) {
