@@ -170,28 +170,46 @@ public final class SentientSignBrain {
             SentientSign sign
     ) {
         String normalized = normalize(message);
+        int interactionCount = sign.interactionCount();
+        int annoyanceCount = sign.annoyanceCount();
 
         if (isGreeting(normalized)) {
-            if (randomChance(0.75)) {
+            if (interactionCount == 1) {
                 return choose(
-                        text("greeting.1", username),
-                        text("greeting.2", username),
-                        text("greeting.3", username),
-                        text("greeting.4", username),
-                        text("greeting.5"),
-                        text("greeting.6")
+                        text("greeting.first.1", username),
+                        text("greeting.first.2", username),
+                        text("greeting.first.3", username),
+                        text("greeting.first.4", username)
+                );
+            }
+
+            if (interactionCount <= 3) {
+                return choose(
+                        text("greeting.again.1", username),
+                        text("greeting.again.2", username),
+                        text("greeting.again.3"),
+                        text("greeting.again.4")
                 );
             }
 
             return choose(
-                    text("greeting.short.1"),
-                    text("greeting.short.2"),
-                    text("greeting.short.3"),
-                    text("greeting.short.4")
+                    text("greeting.familiar.1", username),
+                    text("greeting.familiar.2"),
+                    text("greeting.familiar.3"),
+                    text("greeting.familiar.4")
             );
         }
 
         if (isIdentityQuestion(normalized)) {
+            if (interactionCount >= 5) {
+                return choose(
+                        text("identity.again.1"),
+                        text("identity.again.2"),
+                        text("identity.again.3"),
+                        text("identity.again.4")
+                );
+            }
+
             return choose(
                     text("identity.1"),
                     text("identity.2"),
@@ -212,6 +230,26 @@ public final class SentientSignBrain {
                     text("question.4"),
                     text("question.5"),
                     text("question.6")
+            );
+        }
+
+        if (annoyanceCount >= 6) {
+            return choose(
+                    text("annoyed.interaction.late.1"),
+                    text("annoyed.interaction.late.2"),
+                    text("annoyed.interaction.late.3"),
+                    text("annoyed.interaction.late.4"),
+                    text("annoyed.interaction.late.5")
+            );
+        }
+
+        if (annoyanceCount >= 3) {
+            return choose(
+                    text("annoyed.interaction.mid.1"),
+                    text("annoyed.interaction.mid.2"),
+                    text("annoyed.interaction.mid.3"),
+                    text("annoyed.interaction.mid.4"),
+                    text("annoyed.interaction.mid.5")
             );
         }
 
@@ -246,6 +284,16 @@ public final class SentientSignBrain {
                     text("interacted.curious.5"),
                     text("interacted.curious.6"),
                     text("interacted.curious.7")
+            );
+        }
+
+        if (interactionCount >= 10) {
+            return choose(
+                    text("interacted.familiar.1"),
+                    text("interacted.familiar.2"),
+                    text("interacted.familiar.3"),
+                    text("interacted.familiar.4"),
+                    text("interacted.familiar.5")
             );
         }
 
