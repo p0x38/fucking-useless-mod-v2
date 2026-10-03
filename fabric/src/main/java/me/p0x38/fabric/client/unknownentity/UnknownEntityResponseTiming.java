@@ -2,14 +2,17 @@ package me.p0x38.fabric.client.unknownentity;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+/** Calculates human-like thinking and typing delays for entity responses. */
 public final class UnknownEntityResponseTiming {
     private UnknownEntityResponseTiming() {}
 
+    /** Contains the calculated thinking and typing durations. */
     public record Timing(
             long thinkingTicks,
             long typingTicks
     ) {}
 
+    /** Calculates response delays from entity state, message content, and reaction kind. */
     public static Timing calculate(
             UnknownEntity entity,
             String message,
