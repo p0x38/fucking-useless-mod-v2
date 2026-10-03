@@ -254,6 +254,22 @@ public final class ChatEntity {
             ChatConnectionMode connectionMode,
             String username
     ) {
+        interact(
+                message,
+                gameTick,
+                connectionMode,
+                username,
+                0L
+        );
+    }
+
+    public void interact(
+            String message,
+            long gameTick,
+            ChatConnectionMode connectionMode,
+            String username,
+            long idleTicksBeforeInteraction
+    ) {
         if (message == null || message.isBlank()) {
             return;
         }
@@ -287,7 +303,14 @@ public final class ChatEntity {
                                 "connection",
                                 connectionMode.name(),
                                 "username",
-                                username == null ? "" : username
+                                username == null ? "" : username,
+                                "idleTicksBeforeInteraction",
+                                Long.toString(
+                                        Math.max(
+                                                0L,
+                                                idleTicksBeforeInteraction
+                                        )
+                                )
                         )
                 )
         );
@@ -414,16 +437,37 @@ public final class ChatEntity {
     }
 
     public PendingResponse pollDueResponse(long gameTick) {
-        PendingResponse response =
-                pendingResponses.peekFirst();
+        PendingResponse dueResponse = null;
 
-        if (response == null
-                || response.sendTick() > gameTick) {
+        for (PendingResponse response : pendingResponses) {
+            if (response.sendTick() <= gameTick
+                    && (dueResponse == null
+                    || response.sendTick() < dueResponse.sendTick())) {
+                dueResponse = response;
+            }
+        }
+
+        if (dueResponse == null) {
             return null;
         }
 
-        pendingResponses.removeFirst();
-        return response;
+        pendingResponses.remove(dueResponse);
+        return dueResponse;
+    }
+
+    public void clearPendingResponses() {
+        if (pendingResponses.isEmpty()) {
+            return;
+        }
+
+        int cleared = pendingResponses.size();
+        pendingResponses.clear();
+
+        DebugLogger.debug(
+                "[ChatEntity] cleared pending responses id={} count={}",
+                id(),
+                cleared
+        );
     }
 
     public int pendingResponseCount() {
