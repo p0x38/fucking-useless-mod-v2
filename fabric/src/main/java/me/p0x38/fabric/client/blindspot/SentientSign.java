@@ -47,7 +47,9 @@ public final class SentientSign {
 
     public BlockPos position() { return position; }
 
-    public String id() { return "sign-" + Long.toUnsignedString(position.asLong(), 36); }
+    public String id() {
+        return "sign-" + Long.toUnsignedString(position.asLong(), 36);
+    }
 
     public Mood mood() {
         return mood;
@@ -96,18 +98,20 @@ public final class SentientSign {
     public void observe(
             boolean looking,
             long gameTick,
-            SignConnectionMode connectionMode
+            SignConnectionMode connectionMode,
+            String username
     ) {
         this.connectionMode = connectionMode;
         boolean wasLooking = playerLooking;
 
         if (wasLooking != looking) {
             DebugLogger.debug(
-                    "[SentientSign] perception transition id={} looking={} tick={} connection={}",
+                    "[SentientSign] perception transition id={} looking={} tick={} connection={} username={}",
                     id(),
                     looking,
                     gameTick,
-                    connectionMode
+                    connectionMode,
+                    username
             );
         }
 
@@ -129,7 +133,12 @@ public final class SentientSign {
                             gameTick,
                             1.0f,
                             position,
-                            Map.of("connection", connectionMode.name())
+                            Map.of(
+                                    "connection",
+                                    connectionMode.name(),
+                                    "username",
+                                    username == null ? "" : username
+                            )
                     )
             );
 
@@ -146,7 +155,10 @@ public final class SentientSign {
                             gameTick,
                             1.0f,
                             position,
-                            Map.of()
+                            Map.of(
+                                    "username",
+                                    username == null ? "" : username
+                            )
                     )
             );
 
@@ -159,24 +171,50 @@ public final class SentientSign {
         updateMood();
     }
 
-    public void interact(String message, long gameTick, SignConnectionMode connectionMode) {
-        if (message == null || message.isBlank()) return;
+    public void interact(
+            String message,
+            long gameTick,
+            SignConnectionMode connectionMode,
+            String username
+    ) {
+        if (message == null || message.isBlank()) {
+            return;
+        }
+
         this.connectionMode = connectionMode;
         interactionCount++;
 
         DebugLogger.debug(
-                "[SentientSign] interaction id={} count={} tick={} message={}",
+                "[SentientSign] interaction id={} count={} tick={} connection={} username={} message={}",
                 id(),
                 interactionCount,
                 gameTick,
+                connectionMode,
+                username,
                 message.trim()
         );
 
         trust = Math.clamp(trust + 0.04f, 0.0f, 1.0f);
         curiosity = Math.clamp(curiosity + 0.05f, 0.0f, 1.0f);
         irritation = Math.clamp(irritation - 0.03f, 0.0f, 1.0f);
-        remember(new Memory(Memory.Type.PLAYER_INTERACTED, gameTick, 1.0f, position,
-                Map.of("message", message.trim(), "connection", connectionMode.name())));
+
+        remember(
+                new Memory(
+                        Memory.Type.PLAYER_INTERACTED,
+                        gameTick,
+                        1.0f,
+                        position,
+                        Map.of(
+                                "message",
+                                message.trim(),
+                                "connection",
+                                connectionMode.name(),
+                                "username",
+                                username == null ? "" : username
+                        )
+                )
+        );
+
         updateMood();
     }
 
