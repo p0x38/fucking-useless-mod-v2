@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/** Stores persistent client-side state for the Unknown Entity system. */
 public final class UnknownEntityPersistence {
     private static final Gson GSON =
             new GsonBuilder().setPrettyPrinting().create();
@@ -22,6 +23,7 @@ public final class UnknownEntityPersistence {
     private UnknownEntityPersistence() {
     }
 
+    /** Loads persistent state from the client configuration directory. */
     public static void load() {
         if (loaded) {
             return;
@@ -54,11 +56,13 @@ public final class UnknownEntityPersistence {
         }
     }
 
+    /** @return whether a previous direct interaction has been persisted. */
     public static boolean hasEverInteracted() {
         load();
         return everInteracted;
     }
 
+    /** Marks that the player has directly interacted and persists the state. */
     public static void markEverInteracted() {
         load();
 
