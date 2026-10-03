@@ -564,6 +564,13 @@ public final class ChatEntityBrain {
                 .replace("${username}", resolvedUsername);
     }
 
+    private static boolean isPerceptionMemory(
+            Memory memory
+    ) {
+        return memory.type() == Memory.Type.PLAYER_RETURNED
+                || memory.type() == Memory.Type.PLAYER_LOOKED_AWAY;
+    }
+
     private static boolean randomChance(double chance) {
         return ThreadLocalRandom.current()
                 .nextDouble()
