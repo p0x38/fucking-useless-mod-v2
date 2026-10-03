@@ -114,6 +114,16 @@ public final class ChatEntityBrain {
         }
 
         /*
+         * Location memories are background knowledge, not a direct reason
+         * to speak. Consume them so they don't become stuck as the latest
+         * unprocessed memory.
+         */
+        if (latest.type() == Memory.Type.PLAYER_LOCATION_UPDATED) {
+            entity.markMemoryProcessed(latest);
+            return;
+        }
+
+        /*
          * Direct communication has priority over ambient thoughts.
          */
         if (latest.type() == Memory.Type.PLAYER_INTERACTED) {

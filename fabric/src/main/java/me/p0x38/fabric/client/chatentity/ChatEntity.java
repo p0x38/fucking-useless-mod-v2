@@ -1,5 +1,6 @@
 package me.p0x38.fabric.client.chatentity;
 
+import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 
 import net.minecraft.core.BlockPos;
@@ -72,6 +73,8 @@ public final class ChatEntity {
 
     private final Deque<PendingResponse> pendingResponses =
             new ArrayDeque<>();
+
+    private BlockPos lastKnownPlayerBlockPosition;
 
     private final List<Memory> memories =
             new ArrayList<>();
@@ -307,6 +310,50 @@ public final class ChatEntity {
                 || reactionKind == ReactionKind.OUT_OF_PLACE) {
             uncontrolledReactionCount++;
         }
+    }
+
+    public void observeLocation(
+            long gameTick,
+            String dimension,
+            BlockPos playerBlockPosition,
+            double x,
+            double y,
+            double z
+    ) {
+        if (!Config.get().chatEntityLocationAwareness
+                || playerBlockPosition == null
+                || playerBlockPosition.equals(lastKnownPlayerBlockPosition)) {
+            return;
+        }
+
+        lastKnownPlayerBlockPosition =
+                playerBlockPosition.immutable();
+
+        remember(
+                new Memory(
+                        Memory.Type.PLAYER_LOCATION_UPDATED,
+                        gameTick,
+                        1.0f,
+                        playerBlockPosition,
+                        Map.of(
+                                "dimension",
+                                dimension,
+                                "x",
+                                Double.toString(x),
+                                "y",
+                                Double.toString(y),
+                                "z",
+                                Double.toString(z)
+                        )
+                )
+        );
+
+        DebugLogger.debug(
+                "[ChatEntity] location updated id={} dimension={} block={}",
+                id(),
+                dimension,
+                playerBlockPosition
+        );
     }
 
     public void queueResponse(

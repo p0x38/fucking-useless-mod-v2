@@ -4,6 +4,7 @@ import me.p0x38.fabric.client.chatentity.ChatConnectionMode;
 import me.p0x38.fabric.client.chatentity.ChatEntity;
 import me.p0x38.fabric.client.chatentity.ChatEntityBrain;
 import me.p0x38.fabric.client.chatentity.Memory;
+import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -88,6 +89,15 @@ public final class ChatEntityManager {
                 gameTick,
                 ChatConnectionMode.detect(client),
                 player.getGameProfile().name()
+        );
+
+        entity.observeLocation(
+                gameTick,
+                level.dimension().location().toString(),
+                player.blockPosition(),
+                player.getX(),
+                player.getY(),
+                player.getZ()
         );
 
         processPendingResponses(

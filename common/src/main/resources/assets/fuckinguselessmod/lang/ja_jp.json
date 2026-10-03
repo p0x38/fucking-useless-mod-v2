@@ -367,5 +367,8 @@
   "text.fuckinguselessmod.config.value.mode.replace": "置換",
   "text.fuckinguselessmod.config.value.text_case.lowercase": "小文字",
   "text.fuckinguselessmod.config.value.text_case.preserve": "そのまま",
-  "text.fuckinguselessmod.config.value.text_case.uppercase": "大文字"
+  "text.fuckinguselessmod.config.value.text_case.uppercase": "大文字",
+  "text.fuckinguselessmod.config.category.chat_entity": "チャットエンティティ",
+  "text.fuckinguselessmod.config.option.chatEntityLocationAwareness": "チャットエンティティの位置認識を許可",
+  "text.fuckinguselessmod.config.description.chatEntityLocationAwareness": "チャットエンティティがMinecraft内のあなたの座標とディメンションを記憶できるようにします。ゲーム内の位置情報のみを使用します。"
 }

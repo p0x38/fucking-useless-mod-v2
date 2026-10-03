@@ -17,6 +17,7 @@ public record Memory(
         PLAYER_RETURNED,
         PLAYER_LEFT,
         PLAYER_INTERACTED,
+        PLAYER_LOCATION_UPDATED,
         PLAYER_IGNORED,
         CHAT_ENTITY_SPOKE,
         CHAT_ENTITY_MOVED,
