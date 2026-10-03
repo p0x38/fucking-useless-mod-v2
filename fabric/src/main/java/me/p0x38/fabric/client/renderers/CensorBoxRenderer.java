@@ -1235,18 +1235,74 @@ public final class CensorBoxRenderer {
             Vec3 target,
             Entity entity
     ) {
-        BlockHitResult hit =
-                level.clip(
-                        new ClipContext(
-                                cameraPosition,
-                                target,
-                                ClipContext.Block.OUTLINE,
-                                ClipContext.Fluid.NONE,
-                                entity
-                        )
-                );
+        final int maxTransparentBlocks = 16;
+        final double epsilon = 0.001;
 
-        return hit.getType() == HitResult.Type.MISS;
+        Vec3 direction =
+                target.subtract(cameraPosition);
+
+        double distance =
+                direction.length();
+
+        if (distance <= epsilon) {
+            return true;
+        }
+
+        Vec3 rayDirection =
+                direction.scale(1.0 / distance);
+
+        Vec3 rayStart =
+                cameraPosition;
+
+        for (int skippedBlocks = 0;
+             skippedBlocks < maxTransparentBlocks;
+             skippedBlocks++) {
+            BlockHitResult hit =
+                    level.clip(
+                            new ClipContext(
+                                    rayStart,
+                                    target,
+                                    ClipContext.Block.OUTLINE,
+                                    ClipContext.Fluid.NONE,
+                                    entity
+                            )
+                    );
+
+            if (hit.getType() == HitResult.Type.MISS) {
+                return true;
+            }
+
+            var blockPos =
+                    hit.getBlockPos();
+
+            var state =
+                    level.getBlockState(blockPos);
+
+            /*
+             * Non-opaque blocks don't hide the censor box.
+             *
+             * This lets the visibility ray pass through things such as
+             * grass and other translucent / non-full-cube blocks.
+             */
+            if (state.isSolidRender()) {
+                return false;
+            }
+
+            /*
+             * Move just beyond the block we hit, then continue the ray.
+             * Without this epsilon the next clip can hit the exact same
+             * block forever.
+             */
+            Vec3 hitPosition =
+                    hit.getLocation();
+
+            rayStart =
+                    hitPosition.add(
+                            rayDirection.scale(epsilon)
+                    );
+        }
+
+        return false;
     }
 
     private static Entity findEntity(
