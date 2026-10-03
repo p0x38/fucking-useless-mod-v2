@@ -19,6 +19,12 @@ CHAT_ENTITY_MOVED,
         context = Map.copyOf(context);
     }
 
+    /**
+     * Returns a value stored in this memory's context map.
+     *
+     * @param key context key to look up
+     * @return the associated value, or {@code null} when absent
+     */
     public String context(String key) {
         return context.get(key);
     }
