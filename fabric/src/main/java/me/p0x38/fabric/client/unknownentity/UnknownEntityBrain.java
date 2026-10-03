@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
+/** Handles perception-driven behavior, dialogue selection, and response scheduling. */
 public final class UnknownEntityBrain {
     private static final String TEXT_PREFIX =
             "text.fuckinguselessmod.chat.entity.";
@@ -44,6 +45,7 @@ public final class UnknownEntityBrain {
     private UnknownEntityBrain() {
     }
 
+    /** Schedules the entity's initial greeting. */
     public static void initialGreeting(
             UnknownEntity entity,
             long gameTick
@@ -57,6 +59,7 @@ public final class UnknownEntityBrain {
         entity.markAction(gameTick);
     }
 
+    /** Rarely schedules a non-response ambient message after the first chat. */
     public static void firstChatAmbient(
             UnknownEntity entity,
             long gameTick
@@ -91,6 +94,7 @@ public final class UnknownEntityBrain {
         entity.markAction(gameTick);
     }
 
+    /** Processes the next unhandled memory and updates entity behavior. */
     public static void think(
             UnknownEntity entity,
             ClientLevel level
