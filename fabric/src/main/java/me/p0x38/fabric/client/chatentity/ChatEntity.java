@@ -4,7 +4,9 @@ import me.p0x38.fuckinguselessmod.util.DebugLogger;
 
 import net.minecraft.core.BlockPos;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,15 @@ public final class ChatEntity {
         ANNOYED,
         META
     }
+
+    public record PendingResponse(
+            String message,
+            ReactionKind reactionKind,
+            long thinkingUntilTick,
+            long sendTick
+    ) {}
+
+    private static final int MAX_PENDING_RESPONSES = 4;
 
     private final BlockPos origin;
 
@@ -58,6 +69,9 @@ public final class ChatEntity {
 
     private String currentMessage = "...";
     private boolean active;
+
+    private final Deque<PendingResponse> pendingResponses =
+            new ArrayDeque<>();
 
     private final List<Memory> memories =
             new ArrayList<>();
@@ -293,6 +307,114 @@ public final class ChatEntity {
                 || reactionKind == ReactionKind.OUT_OF_PLACE) {
             uncontrolledReactionCount++;
         }
+    }
+
+    public void queueResponse(
+            String message,
+            ReactionKind reactionKind,
+            long currentTick,
+            long thinkingTicks,
+            long typingTicks
+    ) {
+        if (message == null || message.isBlank()) {
+            return;
+        }
+
+        if (pendingResponses.size() >= MAX_PENDING_RESPONSES) {
+            pendingResponses.removeFirst();
+
+            DebugLogger.debug(
+                    "[ChatEntity] dropped oldest pending response id={} queueSize={}",
+                    id(),
+                    pendingResponses.size()
+            );
+        }
+
+        long safeThinkingTicks = Math.max(1, thinkingTicks);
+        long safeTypingTicks = Math.max(1, typingTicks);
+
+        long thinkingUntilTick =
+                currentTick + safeThinkingTicks;
+
+        long sendTick =
+                thinkingUntilTick + safeTypingTicks;
+
+        PendingResponse response =
+                new PendingResponse(
+                        message,
+                        reactionKind,
+                        thinkingUntilTick,
+                        sendTick
+                );
+
+        pendingResponses.addLast(response);
+
+        DebugLogger.debug(
+                "[ChatEntity] response queued id={} now={} thinkingUntil={} sendTick={} thinkingTicks={} typingTicks={} kind={} message={}",
+                id(),
+                currentTick,
+                thinkingUntilTick,
+                sendTick,
+                safeThinkingTicks,
+                safeTypingTicks,
+                reactionKind,
+                message
+        );
+    }
+
+    public PendingResponse pollDueResponse(long gameTick) {
+        PendingResponse response =
+                pendingResponses.peekFirst();
+
+        if (response == null
+                || response.sendTick() > gameTick) {
+            return null;
+        }
+
+        pendingResponses.removeFirst();
+        return response;
+    }
+
+    public int pendingResponseCount() {
+        return pendingResponses.size();
+    }
+
+    public boolean isResponseTyping(long gameTick) {
+        PendingResponse response =
+                pendingResponses.peekFirst();
+
+        return response != null
+                && gameTick >= response.thinkingUntilTick()
+                && gameTick < response.sendTick();
+    }
+
+    public void deliverResponse(
+            PendingResponse response,
+            long gameTick
+    ) {
+        recordReaction(response.reactionKind());
+        setCurrentMessage(response.message());
+
+        remember(
+                new Memory(
+                        Memory.Type.CHAT_ENTITY_SPOKE,
+                        gameTick,
+                        1.0f,
+                        origin,
+                        Map.of(
+                                "message",
+                                response.message()
+                        )
+                )
+        );
+
+        DebugLogger.debug(
+                "[ChatEntity] response delivered id={} tick={} kind={} message={}",
+                id(),
+                gameTick,
+                response.reactionKind(),
+                response.message()
+        );
     }
 
     public void setCurrentMessage(String message) {

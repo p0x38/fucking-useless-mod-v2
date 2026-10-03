@@ -6,7 +6,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class ChatEntityBrain {
@@ -32,8 +31,9 @@ public final class ChatEntityBrain {
         }
 
         /*
-         * Direct player messages are immediate. Ambient reactions still
-         * respect the normal speech cooldown.
+         * Direct player messages are scheduled immediately, but the actual
+         * chat delivery happens after a thinking phase and a typing/composition
+         * phase. Ambient reactions still respect the normal speech cooldown.
          */
         if (latest.type() != Memory.Type.PLAYER_INTERACTED
                 && !entity.canAct(gameTick)) {
@@ -524,27 +524,29 @@ public final class ChatEntityBrain {
             long gameTick,
             ChatEntity.ReactionKind reactionKind
     ) {
+        ChatEntityResponseTiming.Timing timing =
+                ChatEntityResponseTiming.calculate(
+                        entity,
+                        message,
+                        reactionKind
+                );
+
         DebugLogger.debug(
-                "[ChatEntityBrain] speaking id={} tick={} message={}",
+                "[ChatEntityBrain] scheduling speech id={} tick={} thinkingTicks={} typingTicks={} kind={} message={}",
                 entity.id(),
                 gameTick,
+                timing.thinkingTicks(),
+                timing.typingTicks(),
+                reactionKind,
                 message
         );
 
-        entity.recordReaction(reactionKind);
-        entity.setCurrentMessage(message);
-
-        entity.remember(
-                new Memory(
-                        Memory.Type.CHAT_ENTITY_SPOKE,
-                        gameTick,
-                        1.0f,
-                        entity.origin(),
-                        Map.of(
-                                "message",
-                                message
-                        )
-                )
+        entity.queueResponse(
+                message,
+                reactionKind,
+                gameTick,
+                timing.thinkingTicks(),
+                timing.typingTicks()
         );
     }
 

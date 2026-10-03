@@ -89,6 +89,12 @@ public final class ChatEntityManager {
                 player.getGameProfile().name()
         );
 
+        processPendingResponses(
+                entity,
+                level,
+                gameTick
+        );
+
         if (looking) {
             hiddenSince = Long.MIN_VALUE;
             entityActivatedWhileHidden = false;
@@ -200,16 +206,45 @@ public final class ChatEntityManager {
         return ENTITIES.get(observedOrigin);
     }
 
-    private static void think(ChatEntity entity, ClientLevel level) {
-        String before = entity.currentMessage();
+    private static void think(
+            ChatEntity entity,
+            ClientLevel level
+    ) {
+        ChatEntityBrain.think(
+                entity,
+                level
+        );
+    }
 
-        ChatEntityBrain.think(entity, level);
+    private static void processPendingResponses(
+            ChatEntity entity,
+            ClientLevel level,
+            long gameTick
+    ) {
+        ChatEntity.PendingResponse response =
+                entity.pollDueResponse(gameTick);
 
-        if (!java.util.Objects.equals(before, entity.currentMessage())) {
-            showChatEntityMessage(
-                    entity.currentMessage()
-            );
+        if (response == null) {
+            return;
         }
+
+        entity.deliverResponse(
+                response,
+                gameTick
+        );
+
+        showChatEntityMessage(
+                response.message()
+        );
+
+        /*
+         * The brain can now observe CHAT_ENTITY_SPOKE because the response
+         * has actually been delivered to the player.
+         */
+        think(
+                entity,
+                level
+        );
     }
 
     private static void showChatEntityMessage(String message) {
