@@ -96,7 +96,7 @@ public final class ChatEntityBrain {
                 && randomChance(0.35)) {
             say(
                     entity,
-                    chooseText("self_aware", 8),
+                    chooseText("self_aware", 20),
                     gameTick,
                     ChatEntity.ReactionKind.META
             );
@@ -115,7 +115,7 @@ public final class ChatEntityBrain {
         if ("hidden".equals(memory.context("phase"))) {
             say(
                     entity,
-                    chooseText("world_changed", 8),
+                    chooseText("world_changed", 20),
                     gameTick,
                     ChatEntity.ReactionKind.META
             );
@@ -245,7 +245,7 @@ public final class ChatEntityBrain {
                 && randomChance(0.25)) {
             say(
                     entity,
-                    chooseText("curious", 8),
+                    chooseText("curious", 18),
                     gameTick
             );
 
@@ -292,15 +292,15 @@ public final class ChatEntityBrain {
                 classifyInteraction(normalized);
 
         return switch (kind) {
-            case CONTROL -> chooseText("control", 6);
-            case UNSETTLING -> chooseText("unsettling", 8);
-            case ACTIVITY -> chooseText("activity", 6);
-            case WELLBEING -> chooseText("wellbeing", 6);
-            case NULL -> chooseText("null", 8);
-            case CONFUSED -> chooseText("confused", 6);
-            case INSULT -> chooseText("insult", 6);
-            case THANKS -> chooseText("thanks", 6);
-            case APOLOGY -> chooseText("apology", 6);
+            case CONTROL -> chooseText("control", 14);
+            case UNSETTLING -> chooseText("unsettling", 16);
+            case ACTIVITY -> chooseText("activity", 10);
+            case WELLBEING -> chooseText("wellbeing", 10);
+            case NULL -> chooseText("null", 16);
+            case CONFUSED -> chooseText("confused", 14);
+            case INSULT -> chooseText("insult", 14);
+            case THANKS -> chooseText("thanks", 14);
+            case APOLOGY -> chooseText("apology", 14);
             case GREETING ->
                     chooseGreetingResponse(
                             interactionCount,
@@ -310,7 +310,7 @@ public final class ChatEntityBrain {
                     interactionCount >= 5
                             ? chooseText("identity.again", 4)
                             : chooseText("identity", 8);
-            case QUESTION -> chooseText("question", 6);
+            case QUESTION -> chooseText("question", 16);
             case NORMAL -> chooseNormalResponse(
                     interactionCount,
                     annoyanceCount,
@@ -336,7 +336,7 @@ public final class ChatEntityBrain {
                                 ? 0.18
                                 : 0.08
                 )) {
-            return chooseText("out_of_place", 8);
+            return chooseText("out_of_place", 18);
         }
 
         if (annoyanceCount >= 6) {
@@ -355,7 +355,7 @@ public final class ChatEntityBrain {
 
         if (sillyMode
                 && mood == ChatEntity.Mood.PLAYFUL) {
-            return chooseText("playful", 6);
+            return chooseText("playful", 16);
         }
 
         if (mood == ChatEntity.Mood.ANNOYED) {
