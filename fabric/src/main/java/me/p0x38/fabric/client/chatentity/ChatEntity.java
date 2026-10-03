@@ -131,6 +131,12 @@ public final class ChatEntity {
         return List.copyOf(memories);
     }
 
+    public Memory latestMemory() {
+        return memories.isEmpty()
+                ? null
+                : memories.getLast();
+    }
+
     public boolean hasMemory(Memory.Type type) {
         return memories.stream()
                 .anyMatch(memory ->
