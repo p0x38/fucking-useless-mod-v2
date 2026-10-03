@@ -3,6 +3,7 @@ package me.p0x38.fabric.client.blindspot;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.Component;
 
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -48,14 +49,14 @@ public final class SentientSignBrain {
                     sign,
                     sign.mood() == SentientSign.Mood.CURIOUS
                             ? choose(
-                                    "tell me more.",
-                                    "why?",
+                                    text("interacted.curious.1"),
+                                    text("interacted.curious.2"),
                                     "i'm listening."
                             )
                             : choose(
-                                    "i heard you.",
-                                    "interesting.",
-                                    "keep talking."
+                                    text("interacted.default.1"),
+                                    text("interacted.default.2"),
+                                    text("interacted.default.3")
                             ),
                     gameTick
             );
@@ -71,7 +72,7 @@ public final class SentientSignBrain {
                 && randomChance(0.10)) {
             say(
                     sign,
-                    "...",
+                    text("seen"),
                     gameTick
             );
 
@@ -90,8 +91,8 @@ public final class SentientSignBrain {
                     choose(
                             "you're back",
                             "i knew you'd return",
-                            "you came back",
-                            "i remember you"
+                            text("returned.3"),
+                            text("returned.4")
                     ),
                     gameTick
             );
@@ -111,10 +112,10 @@ public final class SentientSignBrain {
             say(
                     sign,
                     choose(
-                            "why did you leave?",
-                            "i saw that",
-                            "you keep looking away",
-                            "are you watching me?"
+                            text("curious.1"),
+                            text("curious.2"),
+                            text("curious.3"),
+                            text("curious.4")
                     ),
                     gameTick
             );
@@ -135,8 +136,8 @@ public final class SentientSignBrain {
                     sign,
                     choose(
                             "i wasn't here before",
-                            "you remember incorrectly",
-                            "there has always been a sign here"
+                            text("annoyed.2"),
+                            text("annoyed.3")
                     ),
                     gameTick
             );
@@ -169,6 +170,12 @@ public final class SentientSignBrain {
                         )
                 )
         );
+    }
+
+    private static String text(String key) {
+        return Component.translatable(
+                "text.fuckinguselessmod.blindspot.sign." + key
+        ).getString();
     }
 
     private static boolean randomChance(double chance) {
