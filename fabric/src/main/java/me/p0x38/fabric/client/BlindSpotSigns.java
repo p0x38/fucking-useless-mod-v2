@@ -83,7 +83,7 @@ public final class BlindSpotSigns {
                 true
         );
 
-        level.addBlockEntity(sign);
+        level.setBlockEntity(sign);
 
         SUPPORT_TO_SIGN.put(
                 supportPosition.immutable(),
