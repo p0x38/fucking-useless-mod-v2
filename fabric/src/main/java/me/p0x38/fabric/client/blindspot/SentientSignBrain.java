@@ -338,7 +338,7 @@ public final class SentientSignBrain {
                         : username;
 
         return text(key)
-                .replace("<username>", resolvedUsername);
+                .replace("${username}", resolvedUsername);
     }
 
     private static boolean randomChance(double chance) {
