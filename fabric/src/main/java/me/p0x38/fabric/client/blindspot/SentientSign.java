@@ -21,6 +21,11 @@ public final class SentientSign {
 
     private int awareness = 0;
     private int suspicion = 0;
+    private float curiosity = 0.15f;
+    private float trust = 0.5f;
+    private float irritation = 0.0f;
+    private int interactionCount = 0;
+    private SignConnectionMode connectionMode = SignConnectionMode.DISCONNECTED;
 
     private boolean hasBeenSeen;
     private boolean playerLooking;
@@ -38,17 +43,22 @@ public final class SentientSign {
         this.position = position;
     }
 
-    public BlockPos position() {
-        return position;
-    }
+    public BlockPos position() { return position; }
+
+    public String id() { return "sign-" + Long.toUnsignedString(position.asLong(), 36); }
 
     public Mood mood() {
         return mood;
     }
 
-    public String currentMessage() {
-        return currentMessage;
-    }
+    public String currentMessage() { return currentMessage; }
+    public int awareness() { return awareness; }
+    public int suspicion() { return suspicion; }
+    public float curiosity() { return curiosity; }
+    public float trust() { return trust; }
+    public float irritation() { return irritation; }
+    public int interactionCount() { return interactionCount; }
+    public SignConnectionMode connectionMode() { return connectionMode; }
 
     public List<Memory> memories() {
         return List.copyOf(memories);
@@ -83,8 +93,10 @@ public final class SentientSign {
 
     public void observe(
             boolean looking,
-            long gameTick
+            long gameTick,
+            SignConnectionMode connectionMode
     ) {
+        this.connectionMode = connectionMode;
         boolean wasLooking = playerLooking;
 
         playerLooking = looking;
@@ -105,7 +117,7 @@ public final class SentientSign {
                             gameTick,
                             1.0f,
                             position,
-                            Map.of()
+                            Map.of("connection", connectionMode.name())
                     )
             );
 
@@ -135,6 +147,18 @@ public final class SentientSign {
         updateMood();
     }
 
+    public void interact(String message, long gameTick, SignConnectionMode connectionMode) {
+        if (message == null || message.isBlank()) return;
+        this.connectionMode = connectionMode;
+        interactionCount++;
+        trust = Math.clamp(trust + 0.04f, 0.0f, 1.0f);
+        curiosity = Math.clamp(curiosity + 0.05f, 0.0f, 1.0f);
+        irritation = Math.clamp(irritation - 0.03f, 0.0f, 1.0f);
+        remember(new Memory(Memory.Type.PLAYER_INTERACTED, gameTick, 1.0f, position,
+                Map.of("message", message.trim(), "connection", connectionMode.name())));
+        updateMood();
+    }
+
     public boolean canAct(long gameTick) {
         return gameTick - lastActionTick >= 10;
     }
@@ -156,12 +180,12 @@ public final class SentientSign {
     }
 
     private void updateMood() {
-        if (suspicion >= 70) {
+        if (irritation >= 0.65f || suspicion >= 70) {
             mood = Mood.ANNOYED;
             return;
         }
 
-        if (awareness >= 50) {
+        if (trust >= 0.78f && curiosity >= 0.5f) {\n            mood = Mood.PLAYFUL;\n            return;\n        }\n\n        if (curiosity >= 0.45f || awareness >= 30) {
             mood = Mood.CURIOUS;
             return;
         }
