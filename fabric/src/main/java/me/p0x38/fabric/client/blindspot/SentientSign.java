@@ -27,6 +27,9 @@ public final class SentientSign {
     private float trust = 0.5f;
     private float irritation = 0.0f;
     private int interactionCount = 0;
+    private int annoyanceCount = 0;
+    private int seenCount = 0;
+    private int returnCount = 0;
     private SignConnectionMode connectionMode = SignConnectionMode.DISCONNECTED;
 
     private boolean hasBeenSeen;
@@ -62,6 +65,9 @@ public final class SentientSign {
     public float trust() { return trust; }
     public float irritation() { return irritation; }
     public int interactionCount() { return interactionCount; }
+    public int annoyanceCount() { return annoyanceCount; }
+    public int seenCount() { return seenCount; }
+    public int returnCount() { return returnCount; }
     public SignConnectionMode connectionMode() { return connectionMode; }
 
     public List<Memory> memories() {
@@ -106,12 +112,15 @@ public final class SentientSign {
 
         if (wasLooking != looking) {
             DebugLogger.debug(
-                    "[SentientSign] perception transition id={} looking={} tick={} connection={} username={}",
+                    "[SentientSign] perception transition id={} looking={} tick={} connection={} username={} seenCount={} annoyanceCount={} returnCount={}",
                     id(),
                     looking,
                     gameTick,
                     connectionMode,
-                    username
+                    username,
+                    seenCount,
+                    annoyanceCount,
+                    returnCount
             );
         }
 
@@ -122,10 +131,19 @@ public final class SentientSign {
             hasBeenSeen = true;
             lastSeenTick = gameTick;
 
+            boolean hasLookedAwayBefore =
+                    hasMemory(Memory.Type.PLAYER_LOOKED_AWAY);
+
             Memory.Type memoryType =
-                    hasMemory(Memory.Type.PLAYER_LOOKED_AWAY)
+                    hasLookedAwayBefore
                             ? Memory.Type.PLAYER_RETURNED
                             : Memory.Type.PLAYER_SEEN;
+
+            seenCount++;
+
+            if (hasLookedAwayBefore) {
+                returnCount++;
+            }
 
             remember(
                     new Memory(
@@ -149,6 +167,8 @@ public final class SentientSign {
         }
 
         if (wasLooking && !looking) {
+            annoyanceCount++;
+
             remember(
                     new Memory(
                             Memory.Type.PLAYER_LOOKED_AWAY,
