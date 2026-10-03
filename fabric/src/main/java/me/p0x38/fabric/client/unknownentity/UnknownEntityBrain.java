@@ -169,7 +169,7 @@ public final class UnknownEntityBrain {
 
         say(
                 entity,
-                chooseText("silly", 3),
+                chooseText("silly", 12),
                 gameTick,
                 ReactionKind.PLAYFUL
         );
