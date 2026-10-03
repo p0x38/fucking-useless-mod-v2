@@ -29,6 +29,8 @@ public final class SentientSign {
     private long lastSeenTick = Long.MIN_VALUE;
     private long lastActionTick = Long.MIN_VALUE;
 
+    private String currentMessage = "...";
+
     private final List<Memory> memories =
             new ArrayList<>();
 
@@ -42,6 +44,10 @@ public final class SentientSign {
 
     public Mood mood() {
         return mood;
+    }
+
+    public String currentMessage() {
+        return currentMessage;
     }
 
     public List<Memory> memories() {
@@ -84,9 +90,6 @@ public final class SentientSign {
         playerLooking = looking;
         playerLookingAway = !looking;
 
-        /*
-         * The player has just started looking at the sign.
-         */
         if (!wasLooking && looking) {
             hasBeenSeen = true;
             lastSeenTick = gameTick;
@@ -112,9 +115,6 @@ public final class SentientSign {
             );
         }
 
-        /*
-         * The player has just stopped looking at the sign.
-         */
         if (wasLooking && !looking) {
             remember(
                     new Memory(
@@ -145,6 +145,10 @@ public final class SentientSign {
         if (memories.size() > 128) {
             memories.removeFirst();
         }
+    }
+
+    public void setCurrentMessage(String message) {
+        currentMessage = message;
     }
 
     public void markAction(long gameTick) {
