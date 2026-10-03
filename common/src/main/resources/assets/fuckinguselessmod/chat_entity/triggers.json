@@ -40,6 +40,14 @@
       "\\bdo\\s+(?:you|u)\\s+have\\s+a\\s+name\\b",
       "\\bare\\s+(?:you|u)\\s+(?:alive|real|sentient|conscious)\\b"
     ],
+    "location": [
+      "\\bwhere\\s+(?:are|r)\\s+(?:you|u)\\b",
+      "\\bwhere['’]?re\\s+(?:you|u)\\b",
+      "\\bwhere\\s+(?:are|r)\\s+(?:you|u)\\s+(?:at|now|located)\\b",
+      "\\bwhere\\s+(?:do|does)\\s+(?:you|u)\\s+stay\\b",
+      "\\bwhere\\s+(?:can|could)\\s+(?:i|we)\\s+find\\s+(?:you|u)\\b",
+      "\\bwhere\\s+(?:is|are)\\s+(?:you|u)\\b"
+    ],
     "activity": [
       "\\bwhat\\s+(?:(?:are|r)\\s+)?(?:you|u)\\s+(?:doing|up\\s+to)\\b",
       "\\bwhat['’]?re\\s+(?:you|u)\\s+(?:doing|up\\s+to)\\b",
