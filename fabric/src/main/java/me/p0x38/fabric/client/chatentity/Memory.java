@@ -19,6 +19,8 @@ public record Memory(
         PLAYER_INTERACTED,
         PLAYER_LOCATION_UPDATED,
         PLAYER_IDLE,
+        PLAYER_DAMAGED,
+        PLAYER_DIED,
         PLAYER_IGNORED,
         CHAT_ENTITY_SPOKE,
         CHAT_ENTITY_MOVED,
