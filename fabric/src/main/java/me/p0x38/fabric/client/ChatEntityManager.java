@@ -78,7 +78,9 @@ public final class ChatEntityManager {
         );
 
         long gameTick = level.getGameTime();
-        boolean looking = observedOrigin.equals(lookedAt);
+        boolean looking =
+                lookedAt != null
+                        && observedOrigin.equals(lookedAt);
 
         entity.observe(
                 looking,
