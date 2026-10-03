@@ -1,5 +1,6 @@
 package me.p0x38.fabric.client.chatentity;
 
+import me.p0x38.fuckinguselessmod.Config;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -284,11 +285,10 @@ public final class ChatEntityBrain {
          * connected to the conversation. This becomes more common
          * as it grows familiar with the player.
          */
-        if (!isQuestion(normalized)
+        if (Config.get().chatEntitySillyMode
+                && !isQuestion(normalized)
                 && !isGreeting(normalized)
-                && randomChance(
-                        entity.interactionCount() >= 10 ? 0.18 : 0.08
-                )) {
+                && randomChance(entity.interactionCount() >= 10 ? 0.18 : 0.08)) {
             return choose(
                     text("out_of_place.1"),
                     text("out_of_place.2"),
@@ -381,7 +381,7 @@ public final class ChatEntityBrain {
             );
         }
 
-        if (entity.mood() == ChatEntity.Mood.PLAYFUL) {
+        if (Config.get().chatEntitySillyMode && entity.mood() == ChatEntity.Mood.PLAYFUL) {
             return choose(
                     text("playful.1"),
                     text("playful.2"),
@@ -583,6 +583,6 @@ public final class ChatEntityBrain {
         return options[
                 ThreadLocalRandom.current()
                         .nextInt(options.length)
-        ];
+                ];
     }
 }

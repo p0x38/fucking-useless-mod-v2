@@ -569,6 +569,9 @@ public final class Config {
             return pool;
         }
 
+        @ConfigOption(name = "Enable Silly Mode", category = "Chat Entity")
+        public boolean chatEntitySillyMode = false;
+
         public void clamp() {
             zalgoChance = Math.clamp(zalgoChance, 0.0f, 1.0f);
             blockChance = Math.clamp(blockChance, 0.0f, 1.0f);
