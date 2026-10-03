@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.p0x38.fuckinguselessmod.util.DebugLogger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -20,8 +20,8 @@ import java.util.regex.PatternSyntaxException;
 
 public final class ChatEntityTriggerRegistry
         implements ResourceManagerReloadListener {
-    private static final ResourceLocation RESOURCE_ID =
-            ResourceLocation.fromNamespaceAndPath(
+    private static final Identifier RESOURCE_ID =
+            Identifier.fromNamespaceAndPath(
                     "fuckinguselessmod",
                     "chat_entity/triggers.json"
             );
@@ -175,7 +175,7 @@ public final class ChatEntityTriggerRegistry
 
         try {
             return Pattern.compile(
-                    "(?:" + combined + ")",
+                    combined.toString(),
                     REGEX_FLAGS
             );
         } catch (PatternSyntaxException exception) {
