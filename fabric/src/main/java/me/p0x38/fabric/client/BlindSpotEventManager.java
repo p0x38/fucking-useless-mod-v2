@@ -32,6 +32,7 @@ public final class BlindSpotEventManager {
      * sign target. Looking at another block makes this target hidden
      * instead of replacing it.
      */
+    private static ClientLevel observedLevel;
     private static BlockPos observedBlock;
 
     private static long hiddenSince = Long.MIN_VALUE;
@@ -49,6 +50,16 @@ public final class BlindSpotEventManager {
             reset();
             return;
         }
+
+        if (observedLevel != null && observedLevel != level) {
+            BlindSpotSigns.clear(observedLevel);
+            SIGNS.clear();
+            observedBlock = null;
+            hiddenSince = Long.MIN_VALUE;
+            changedWhileHidden = false;
+        }
+
+        observedLevel = level;
 
         Camera camera =
                 client.gameRenderer.getMainCamera();
@@ -273,6 +284,7 @@ public final class BlindSpotEventManager {
         }
 
         SIGNS.clear();
+        observedLevel = null;
         observedBlock = null;
         hiddenSince = Long.MIN_VALUE;
         changedWhileHidden = false;
