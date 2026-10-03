@@ -20,7 +20,7 @@ public class UnknownEntityRenderer extends HumanoidMobRenderer<
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(
                     FuckingUselessMod.MOD_ID,
-                    "textures/entity/WW91IG1pZ2h0.png"
+                    "textures/entity/blackpoint.png"
             );
 
     public UnknownEntityRenderer(EntityRendererProvider.Context context) {

@@ -56,7 +56,7 @@ public final class FuckingUselessModNeoForge {
             EntityAttributeCreationEvent event
     ) {
         event.put(
-                ModEntities.USELESS_ENTITY,
+                ModEntities.CHAT_ENTITY,
                 ChatEntity.createAttributes().build()
         );
     }
@@ -65,7 +65,7 @@ public final class FuckingUselessModNeoForge {
             EntityRenderersEvent.RegisterRenderers event
     ) {
         event.registerEntityRenderer(
-                ModEntities.USELESS_ENTITY,
+                ModEntities.CHAT_ENTITY,
                 UselessEntityRenderer::new
         );
     }

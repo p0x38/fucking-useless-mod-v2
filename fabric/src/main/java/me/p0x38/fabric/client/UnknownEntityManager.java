@@ -19,6 +19,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class UnknownEntityManager {
@@ -104,8 +105,7 @@ public final class UnknownEntityManager {
         );
 
         long gameTick = level.getGameTime();
-        boolean looking =
-                observedOrigin.equals(lookedAt);
+        boolean looking = Objects.equals(observedOrigin, lookedAt);
 
         updatePlayerActivity(
                 player,

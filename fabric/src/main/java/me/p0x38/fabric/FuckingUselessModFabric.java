@@ -12,7 +12,7 @@ public final class FuckingUselessModFabric implements ModInitializer {
         FuckingUselessMod.init();
 
         FabricDefaultAttributeRegistry.register(
-                ModEntities.USELESS_ENTITY,
+                ModEntities.CHAT_ENTITY,
                 ChatEntity.createAttributes()
         );
     }
