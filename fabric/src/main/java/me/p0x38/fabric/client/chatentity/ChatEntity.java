@@ -57,6 +57,7 @@ public final class ChatEntity {
     private Memory lastProcessedMemory;
 
     private String currentMessage = "...";
+    private boolean active;
 
     private final List<Memory> memories =
             new ArrayList<>();
@@ -76,6 +77,23 @@ public final class ChatEntity {
     }
 
     public String currentMessage() { return currentMessage; }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void activate() {
+        if (!active) {
+            active = true;
+
+            DebugLogger.debug(
+                    "[ChatEntity] activated id={} origin={}",
+                    id(),
+                    origin
+            );
+        }
+    }
+
     public int awareness() { return awareness; }
     public int suspicion() { return suspicion; }
     public float curiosity() { return curiosity; }
@@ -147,12 +165,8 @@ public final class ChatEntity {
         }
 
         playerLooking = looking;
-        playerLookingAway = !looking;
 
         if (!wasLooking && looking) {
-            hasBeenSeen = true;
-            lastSeenTick = gameTick;
-
             boolean hasLookedAwayBefore =
                     hasMemory(Memory.Type.PLAYER_LOOKED_AWAY);
 
