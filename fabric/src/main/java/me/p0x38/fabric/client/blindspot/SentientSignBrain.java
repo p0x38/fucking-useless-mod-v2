@@ -111,6 +111,8 @@ public final class SentientSignBrain {
             String message,
             long gameTick
     ) {
+        sign.setCurrentMessage(message);
+
         sign.remember(
                 new Memory(
                         Memory.Type.SIGN_SPOKE,
