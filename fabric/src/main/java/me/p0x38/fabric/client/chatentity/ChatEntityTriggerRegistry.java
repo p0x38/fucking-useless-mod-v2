@@ -21,7 +21,7 @@ import java.util.regex.PatternSyntaxException;
 
 public final class ChatEntityTriggerRegistry
         implements IdentifiableResourceReloadListener, ResourceManagerReloadListener {
-    private static final Identifier RESOURCE_ID =
+    public static final Identifier RESOURCE_ID =
             Identifier.fromNamespaceAndPath(
                     "fuckinguselessmod",
                     "chat_entity/triggers.json"
