@@ -8,6 +8,7 @@ import me.p0x38.fuckinguselessmod.util.DebugLogger;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -209,27 +210,15 @@ public final class BlindSpotEventManager {
             return false;
         }
 
-        BlockPos lookedAtBlock =
-                resolveLookedAtSupport(
-                        client.level,
-                        client.player,
-                        client.gameRenderer.getMainCamera()
-                );
-
-        if (!observedBlock.equals(lookedAtBlock)) {
-            DebugLogger.debug(
-                    "[BlindSpot] chat ignored: player is not looking at observed sign target observed={} lookedAt={}",
-                    observedBlock,
-                    lookedAtBlock
-            );
-            return false;
-        }
-
         SentientSign sign =
                 SIGNS.computeIfAbsent(
                         observedBlock,
                         SentientSign::new
                 );
+
+        if (!BlindSpotSigns.isPlaced(sign.position())) {
+            return false;
+        }
 
         long gameTick =
                 client.level.getGameTime();
@@ -237,25 +226,54 @@ public final class BlindSpotEventManager {
         SignConnectionMode connectionMode =
                 SignConnectionMode.detect(client);
 
+        String username =
+                client.player.getGameProfile().name();
+
+        String trimmedMessage =
+                message.trim();
+
         DebugLogger.debug(
                 "[BlindSpot] player communicated with sign={} tick={} connection={} message={}",
                 sign.id(),
                 gameTick,
                 connectionMode,
-                message.trim()
+                trimmedMessage
+        );
+
+        /*
+         * The sentient sign owns this chat while it exists. Echo the
+         * player's message locally because it never reaches the server.
+         */
+        client.gui.getChat().addMessage(
+                Component.literal(
+                        "<" + username + "> " + trimmedMessage
+                )
         );
 
         sign.interact(
-                message,
+                trimmedMessage,
                 gameTick,
                 connectionMode,
-                client.player.getGameProfile().name()
+                username
         );
 
-        thinkAndSync(
-                sign,
-                client.level
-        );
+        boolean responded =
+                thinkAndSync(
+                        sign,
+                        client.level
+                );
+
+        /*
+         * Direct interaction always has a response. If the selected
+         * dialogue happens to be identical to the previous message,
+         * still print it once rather than silently dropping it.
+         */
+        if (!responded) {
+            showSignChatMessage(
+                    client,
+                    sign.currentMessage()
+            );
+        }
 
         return true;
     }
@@ -304,42 +322,6 @@ public final class BlindSpotEventManager {
         }
 
         return SIGNS.get(observedBlock);
-    }
-
-    public static void handleSignInput(
-            BlockPos supportPosition,
-            String message
-    ) {
-        Minecraft client = Minecraft.getInstance();
-
-        if (client.level == null
-                || client.player == null
-                || message == null
-                || message.isBlank()) {
-            return;
-        }
-
-        SentientSign sign =
-                SIGNS.computeIfAbsent(
-                        supportPosition,
-                        SentientSign::new
-                );
-
-        long gameTick =
-                client.level.getGameTime();
-
-        sign.interact(
-                message,
-                gameTick,
-                SignConnectionMode.detect(client),
-                client.player.getGameProfile().name()
-        );
-
-        thinkAndSync(
-                sign,
-                client.level
-        );
-
     }
 
     private static BlockPos resolveLookedAtSupport(
@@ -458,7 +440,7 @@ public final class BlindSpotEventManager {
         return blockPos;
     }
 
-    private static void thinkAndSync(
+    private static boolean thinkAndSync(
             SentientSign sign,
             ClientLevel level
     ) {
@@ -470,28 +452,37 @@ public final class BlindSpotEventManager {
                 level
         );
 
-        /*
-         * The brain can act later, after its cooldown expires. Keep the
-         * actual client-side sign synchronized whenever that happens.
-         */
-        if (BlindSpotSigns.isPlaced(sign.position())
-                && !java.util.Objects.equals(
-                        before,
-                        sign.currentMessage()
-                )) {
+        if (!java.util.Objects.equals(
+                before,
+                sign.currentMessage()
+        )) {
             DebugLogger.debug(
-                    "[BlindSpot] syncing brain message to rendered sign id={} old={} new={}",
+                    "[BlindSpot] sign chat response id={} old={} new={}",
                     sign.id(),
                     before,
                     sign.currentMessage()
             );
 
-            BlindSpotSigns.update(
-                    level,
-                    sign.position(),
+            showSignChatMessage(
+                    Minecraft.getInstance(),
                     sign.currentMessage()
             );
+
+            return true;
         }
+
+        return false;
+    }
+
+    private static void showSignChatMessage(
+            Minecraft client,
+            String message
+    ) {
+        client.gui.getChat().addMessage(
+                Component.literal(
+                        "<Sign> " + message
+                )
+        );
     }
 
     private static void onHiddenChange(
@@ -540,12 +531,6 @@ public final class BlindSpotEventManager {
     ) {
         DebugLogger.debug(
                 "[BlindSpot] player returned to sign position={} message={}",
-                sign.position(),
-                sign.currentMessage()
-        );
-
-        BlindSpotSigns.update(
-                level,
                 sign.position(),
                 sign.currentMessage()
         );
