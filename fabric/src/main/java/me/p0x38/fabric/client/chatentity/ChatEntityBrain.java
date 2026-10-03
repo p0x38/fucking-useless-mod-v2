@@ -13,6 +13,9 @@ public final class ChatEntityBrain {
     private static final String TEXT_PREFIX =
             "text.fuckinguselessmod.chat.entity.";
 
+    private static final long LONG_IDLE_BEFORE_SLEEP_RESPONSE_TICKS =
+            60 * 60 * 20L;
+
     private enum InteractionKind {
         CONTROL,
         UNSETTLING,
@@ -26,7 +29,8 @@ public final class ChatEntityBrain {
         THANKS,
         APOLOGY,
         QUESTION,
-        NORMAL
+        NORMAL,
+        SLEEP
     }
 
     private ChatEntityBrain() {
@@ -49,7 +53,7 @@ public final class ChatEntityBrain {
             ChatEntity entity,
             long gameTick
     ) {
-        if (!randomChance(0.08)) {
+        if (!randomChance(0.05)) {
             return;
         }
 
@@ -99,6 +103,10 @@ public final class ChatEntityBrain {
                     handleWorldChanged(entity, latest, gameTick);
             case PLAYER_IDLE ->
                     handlePlayerIdle(entity, latest, gameTick);
+            case PLAYER_DAMAGED ->
+                    handlePlayerDamaged(entity, latest, gameTick);
+            case PLAYER_DIED ->
+                    handlePlayerDied(entity, latest, gameTick);
             case PLAYER_LOCATION_UPDATED ->
                     handleLocationUpdate(entity, latest);
             case PLAYER_INTERACTED ->
@@ -143,12 +151,26 @@ public final class ChatEntityBrain {
             long gameTick
     ) {
         if ("hidden".equals(memory.context("phase"))) {
-            say(
-                    entity,
-                    chooseText("world_changed", 20),
-                    gameTick,
-                    ChatEntity.ReactionKind.META
-            );
+            if ("true".equals(memory.context("firstEncounter"))) {
+                markProcessed(entity, memory, gameTick);
+                return;
+            }
+
+            if (randomChance(0.25)) {
+                say(
+                        entity,
+                        chooseText("quiet", 3),
+                        gameTick,
+                        ChatEntity.ReactionKind.META
+                );
+            } else {
+                say(
+                        entity,
+                        chooseText("world_changed", 20),
+                        gameTick,
+                        ChatEntity.ReactionKind.META
+                );
+            }
         }
 
         markProcessed(entity, memory, gameTick);
@@ -161,14 +183,23 @@ public final class ChatEntityBrain {
     ) {
         int stage = parseIdleStage(memory);
 
-        say(
-                entity,
-                chooseText("idle." + stage, 4),
-                gameTick,
-                stage >= 5
-                        ? ChatEntity.ReactionKind.META
-                        : ChatEntity.ReactionKind.NORMAL
-        );
+        if (stage == 1 && randomChance(0.35)) {
+            say(
+                    entity,
+                    chooseText("quiet", 3),
+                    gameTick,
+                    ChatEntity.ReactionKind.NORMAL
+            );
+        } else {
+            say(
+                    entity,
+                    chooseText("idle." + stage, 4),
+                    gameTick,
+                    stage >= 5
+                            ? ChatEntity.ReactionKind.META
+                            : ChatEntity.ReactionKind.NORMAL
+            );
+        }
 
         markProcessed(entity, memory, gameTick);
     }
@@ -197,6 +228,38 @@ public final class ChatEntityBrain {
         entity.markMemoryProcessed(memory);
     }
 
+    private static void handlePlayerDamaged(
+            ChatEntity entity,
+            Memory memory,
+            long gameTick
+    ) {
+        say(
+                entity,
+                chooseText("event.damage", 5),
+                gameTick,
+                ChatEntity.ReactionKind.NORMAL
+        );
+
+        markProcessed(entity, memory, gameTick);
+    }
+
+    private static void handlePlayerDied(
+            ChatEntity entity,
+            Memory memory,
+            long gameTick
+    ) {
+        if ("creeper".equals(memory.context("cause"))) {
+            say(
+                    entity,
+                    chooseText("event.creeper_death", 4),
+                    gameTick,
+                    ChatEntity.ReactionKind.META
+            );
+        }
+
+        markProcessed(entity, memory, gameTick);
+    }
+
     private static void handleInteraction(
             ChatEntity entity,
             Memory memory,
@@ -210,7 +273,8 @@ public final class ChatEntityBrain {
                 chooseInteractionResponse(
                         message,
                         username,
-                        entity
+                        entity,
+                        memory
                 ),
                 gameTick
         );
@@ -310,7 +374,8 @@ public final class ChatEntityBrain {
     private static String chooseInteractionResponse(
             String message,
             String username,
-            ChatEntity entity
+            ChatEntity entity,
+            Memory memory
     ) {
         String normalized = normalize(message);
         int interactionCount = entity.interactionCount();
@@ -331,6 +396,8 @@ public final class ChatEntityBrain {
             case INSULT -> chooseText("insult", 14);
             case THANKS -> chooseText("thanks", 14);
             case APOLOGY -> chooseText("apology", 14);
+            case SLEEP ->
+                    chooseSleepResponse(entity, memory);
             case GREETING ->
                     chooseGreetingResponse(
                             interactionCount,
@@ -350,6 +417,43 @@ public final class ChatEntityBrain {
         };
     }
 
+    private static String chooseSleepResponse(
+            ChatEntity entity,
+            Memory memory
+    ) {
+        long idleTicks =
+                parseLongContext(
+                        memory,
+                        "idleTicksBeforeInteraction"
+                );
+
+        if (idleTicks >= LONG_IDLE_BEFORE_SLEEP_RESPONSE_TICKS) {
+            return chooseText("sleep.returned", 6);
+        }
+
+        return chooseText("wellbeing", 10);
+    }
+
+    private static long parseLongContext(
+            Memory memory,
+            String key
+    ) {
+        String value = memory.context(key);
+
+        if (value == null) {
+            return 0L;
+        }
+
+        try {
+            return Math.max(
+                    0L,
+                    Long.parseLong(value)
+            );
+        } catch (NumberFormatException exception) {
+            return 0L;
+        }
+    }
+
     private static String chooseNullResponse(
             ChatEntity entity
     ) {
@@ -362,11 +466,15 @@ public final class ChatEntityBrain {
                                 ? 0.70
                                 : 0.55;
 
-        if (randomChance(formalChance)) {
-            return chooseText("null.formal", 8);
+        if (randomChance(0.005)) {
+            return chooseText("null.special", 1);
         }
 
-        return chooseText("null", 16);
+        if (randomChance(formalChance)) {
+            return chooseText("null.formal", 10);
+        }
+
+        return chooseText("null", 19);
     }
 
     private static String chooseNormalResponse(
@@ -380,7 +488,16 @@ public final class ChatEntityBrain {
          * Classification already ruled out greetings and questions.
          */
         if (randomChance(0.0035)) {
-            return chooseText("rare", 16);
+            if (randomChance(0.25)) {
+                return chooseText(
+                        randomChance(0.50)
+                                ? "arg"
+                                : "horror",
+                        6
+                );
+            }
+
+            return chooseText("rare", 33);
         }
 
         if (sillyMode
@@ -500,6 +617,10 @@ public final class ChatEntityBrain {
 
         if (ChatEntityTriggerRegistry.matches("wellbeing", normalized)) {
             return InteractionKind.WELLBEING;
+        }
+
+        if (ChatEntityTriggerRegistry.matches("sleep", normalized)) {
+            return InteractionKind.SLEEP;
         }
 
         if (ChatEntityTriggerRegistry.matches("null", normalized)) {
