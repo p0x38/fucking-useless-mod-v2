@@ -39,6 +39,7 @@ public final class InvestigateEntityGameTests {
 
         boolean[] targetSelected = {false};
         boolean[] reachedObservation = {false};
+        double[] observationDistanceSqr = {Double.MAX_VALUE};
 
         helper.onEachTick(() -> {
             InvestigateEntityGoal goal =
@@ -50,6 +51,11 @@ public final class InvestigateEntityGameTests {
 
             if (goal.getState() == InvestigationState.OBSERVING) {
                 reachedObservation[0] = true;
+                observationDistanceSqr[0] =
+                        Math.min(
+                                observationDistanceSqr[0],
+                                goal.distanceToTargetSqr()
+                        );
             }
         });
 
@@ -68,8 +74,7 @@ public final class InvestigateEntityGameTests {
             );
 
             helper.assertTrue(
-                    goal.distanceToTargetSqr() <= 16.0D
-                            || reachedObservation[0],
+                    observationDistanceSqr[0] <= 16.0D,
                     "Investigator did not approach the target"
             );
         });
