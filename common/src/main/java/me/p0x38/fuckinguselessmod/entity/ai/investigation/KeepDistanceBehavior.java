@@ -1,4 +1,6 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.investigation;
+
+import me.p0x38.fuckinguselessmod.entity.ai.goals.InvestigateEntityGoal;
 
 /**
  * Maintains a configurable distance range from the current target.

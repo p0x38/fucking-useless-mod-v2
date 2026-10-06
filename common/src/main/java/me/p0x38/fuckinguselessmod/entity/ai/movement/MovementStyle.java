@@ -1,4 +1,4 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.movement;
 
 /**
  * Defines the preferred movement style used by an AI goal.

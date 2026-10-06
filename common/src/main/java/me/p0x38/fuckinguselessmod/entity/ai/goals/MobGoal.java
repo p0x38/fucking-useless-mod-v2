@@ -1,4 +1,4 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.goals;
 
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;

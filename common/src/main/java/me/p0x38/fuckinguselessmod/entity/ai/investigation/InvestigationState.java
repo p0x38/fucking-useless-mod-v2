@@ -1,4 +1,4 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.investigation;
 
 /**
  * Represents the current state of an entity investigation.

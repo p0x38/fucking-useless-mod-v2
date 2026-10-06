@@ -1,5 +1,9 @@
 package me.p0x38.fuckinguselessmod.entity.goals;
 
+import me.p0x38.fuckinguselessmod.entity.ai.investigation.InvestigationMode;
+import me.p0x38.fuckinguselessmod.entity.ai.investigation.InvestigationSettings;
+import me.p0x38.fuckinguselessmod.entity.ai.movement.MovementStyle;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,25 +42,7 @@ class InvestigationSettingsTest {
 
     @Test
     void settingsCanBeChangedAtRuntime() {
-        InvestigationSettings settings = new InvestigationSettings();
-
-        settings.setMode(InvestigationMode.HIDE_AND_OBSERVE);
-        settings.setMovementStyle(MovementStyle.SNEAK);
-        settings.setSearchRange(32.0D);
-        settings.setSpeed(0.8D);
-        settings.setSprintSpeed(1.5D);
-        settings.setSneakSpeed(0.4D);
-        settings.setMinDistance(4.0D);
-        settings.setPreferredDistance(8.0D);
-        settings.setMaxDistance(14.0D);
-        settings.setHideDistance(10.0D);
-        settings.setInvestigationDuration(150);
-        settings.setMaxDuration(300);
-        settings.setTargetLossGraceTicks(60);
-        settings.setRepathIntervalTicks(5);
-        settings.setHideRepositionIntervalTicks(30);
-        settings.setRequireLineOfSight(true);
-        settings.setAllowTargetLoss(false);
+        InvestigationSettings settings = createSettings();
 
         assertEquals(InvestigationMode.HIDE_AND_OBSERVE, settings.getMode());
         assertEquals(MovementStyle.SNEAK, settings.getMovementStyle());
@@ -77,24 +63,32 @@ class InvestigationSettingsTest {
         assertFalse(settings.allowsTargetLoss());
     }
 
-    @Test
-    void numericValuesAreClamped() {
+    private static @NonNull InvestigationSettings createSettings() {
         InvestigationSettings settings = new InvestigationSettings();
 
-        settings.setSearchRange(-1.0D);
-        settings.setSpeed(-1.0D);
-        settings.setSprintSpeed(-1.0D);
-        settings.setSneakSpeed(-1.0D);
-        settings.setMinDistance(-1.0D);
-        settings.setPreferredDistance(-1.0D);
-        settings.setMaxDistance(-1.0D);
-        settings.setHideDistance(-1.0D);
+        settings.setMode(InvestigationMode.HIDE_AND_OBSERVE);
+        settings.setMovementStyle(MovementStyle.SNEAK);
+        settings.setSearchRange(32.0D);
+        settings.setSpeed(0.8D);
+        settings.setSprintSpeed(1.5D);
+        settings.setSneakSpeed(0.4D);
+        settings.setMinDistance(4.0D);
+        settings.setPreferredDistance(8.0D);
+        settings.setMaxDistance(14.0D);
+        settings.setHideDistance(10.0D);
+        settings.setInvestigationDuration(150);
+        settings.setMaxDuration(300);
+        settings.setTargetLossGraceTicks(60);
+        settings.setRepathIntervalTicks(5);
+        settings.setHideRepositionIntervalTicks(30);
+        settings.setRequireLineOfSight(true);
+        settings.setAllowTargetLoss(false);
+        return settings;
+    }
 
-        settings.setInvestigationDuration(-1);
-        settings.setMaxDuration(-1);
-        settings.setTargetLossGraceTicks(-1);
-        settings.setRepathIntervalTicks(-1);
-        settings.setHideRepositionIntervalTicks(-1);
+    @Test
+    void numericValuesAreClamped() {
+        InvestigationSettings settings = createInvestigationSettings();
 
         assertEquals(0.0D, settings.getSearchRange());
         assertEquals(0.0D, settings.getSpeed());
@@ -111,6 +105,26 @@ class InvestigationSettingsTest {
 
         assertEquals(1, settings.getRepathIntervalTicks());
         assertEquals(1, settings.getHideRepositionIntervalTicks());
+    }
+
+    private static @NonNull InvestigationSettings createInvestigationSettings() {
+        InvestigationSettings settings = new InvestigationSettings();
+
+        settings.setSearchRange(-1.0D);
+        settings.setSpeed(-1.0D);
+        settings.setSprintSpeed(-1.0D);
+        settings.setSneakSpeed(-1.0D);
+        settings.setMinDistance(-1.0D);
+        settings.setPreferredDistance(-1.0D);
+        settings.setMaxDistance(-1.0D);
+        settings.setHideDistance(-1.0D);
+
+        settings.setInvestigationDuration(-1);
+        settings.setMaxDuration(-1);
+        settings.setTargetLossGraceTicks(-1);
+        settings.setRepathIntervalTicks(-1);
+        settings.setHideRepositionIntervalTicks(-1);
+        return settings;
     }
 
     @Test

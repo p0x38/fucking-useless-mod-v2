@@ -1,5 +1,6 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.investigation;
 
+import me.p0x38.fuckinguselessmod.entity.ai.goals.InvestigateEntityGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

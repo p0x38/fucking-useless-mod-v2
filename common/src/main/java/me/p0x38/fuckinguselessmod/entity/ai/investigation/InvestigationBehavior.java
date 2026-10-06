@@ -1,4 +1,6 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.investigation;
+
+import me.p0x38.fuckinguselessmod.entity.ai.goals.InvestigateEntityGoal;
 
 /**
  * A strategy used by {@link InvestigateEntityGoal} to perform one investigation mode.

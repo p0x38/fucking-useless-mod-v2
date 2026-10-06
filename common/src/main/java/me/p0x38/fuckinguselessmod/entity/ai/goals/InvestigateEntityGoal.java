@@ -1,8 +1,10 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.goals;
 
+import me.p0x38.fuckinguselessmod.entity.ai.investigation.*;
+import me.p0x38.fuckinguselessmod.entity.ai.movement.MovementStyle;
+import me.p0x38.fuckinguselessmod.entity.ai.movement.MovementStyleController;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.Comparator;
 import java.util.EnumMap;

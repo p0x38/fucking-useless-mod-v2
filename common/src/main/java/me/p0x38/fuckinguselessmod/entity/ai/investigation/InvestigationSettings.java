@@ -1,4 +1,7 @@
-package me.p0x38.fuckinguselessmod.entity.goals;
+package me.p0x38.fuckinguselessmod.entity.ai.investigation;
+
+import me.p0x38.fuckinguselessmod.entity.ai.goals.InvestigateEntityGoal;
+import me.p0x38.fuckinguselessmod.entity.ai.movement.MovementStyle;
 
 import java.util.Objects;
 
