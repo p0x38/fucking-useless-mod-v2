@@ -4,6 +4,7 @@ import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import me.p0x38.fuckinguselessmod.config.ConfigScreen;
 import me.p0x38.fuckinguselessmod.entity.ModEntities;
 import me.p0x38.fuckinguselessmod.entity.ChatEntity;
+import me.p0x38.fuckinguselessmod.entity.NoiseEntity;
 import me.p0x38.fuckinguselessmod.transformers.ChatTransformer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -58,6 +59,10 @@ public final class FuckingUselessModNeoForge {
         event.put(
                 ModEntities.CHAT_ENTITY,
                 ChatEntity.createAttributes().build()
+        );
+        event.put(
+                ModEntities.NOISE_ENTITY,
+                NoiseEntity.createAttributes().build()
         );
     }
 
