@@ -6,5 +6,6 @@ import net.minecraft.resources.Identifier;
 /** Render state for a Noise Entity. */
 public final class NoiseEntityRenderState extends HumanoidRenderState {
     public Identifier noiseTextureLocation;
+    public boolean noiseArmor;
     public boolean alwaysUpdate;
 }
