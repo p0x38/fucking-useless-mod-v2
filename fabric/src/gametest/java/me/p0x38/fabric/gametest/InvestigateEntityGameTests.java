@@ -32,7 +32,9 @@ public final class InvestigateEntityGameTests {
         );
 
         investigator.setPos(
-                new Vec3(1.0D, 1.0D, 1.0D)
+                helper.absoluteVec(
+                        new Vec3(1.0D, 1.0D, 1.0D)
+                )
         );
 
         helper.getLevel().addFreshEntity(investigator);
