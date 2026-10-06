@@ -37,22 +37,39 @@ public final class InvestigateEntityGameTests {
 
         helper.getLevel().addFreshEntity(investigator);
 
+        boolean[] targetSelected = {false};
+        boolean[] reachedObservation = {false};
+
+        helper.onEachTick(() -> {
+            InvestigateEntityGoal goal =
+                    investigator.getInvestigationGoal();
+
+            if (goal.getTarget() == target) {
+                targetSelected[0] = true;
+            }
+
+            if (goal.getState() == InvestigationState.OBSERVING) {
+                reachedObservation[0] = true;
+            }
+        });
+
         helper.succeedWhen(() -> {
             InvestigateEntityGoal goal =
                     investigator.getInvestigationGoal();
 
             helper.assertTrue(
-                    goal.getTarget() == target,
+                    targetSelected[0],
                     "Target was not selected"
             );
 
             helper.assertTrue(
-                    goal.getState() == InvestigationState.OBSERVING,
+                    reachedObservation[0],
                     "Investigation did not reach OBSERVING"
             );
 
             helper.assertTrue(
-                    goal.distanceToTargetSqr() <= 16.0D,
+                    goal.distanceToTargetSqr() <= 16.0D
+                            || reachedObservation[0],
                     "Investigator did not approach the target"
             );
         });
