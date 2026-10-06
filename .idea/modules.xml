@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/fulm.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/fulm.common.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/fulm.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/fulm.common.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.gametest.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.gametest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.test.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/fulm.fabric.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/neoforge/fulm.neoforge.iml" filepath="$PROJECT_DIR$/.idea/modules/neoforge/fulm.neoforge.iml" />

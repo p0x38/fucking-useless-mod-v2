@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "fuckinguselessmod-test",
+  "version": "${version}",
+  "name": "Fucking Useless Mod (GameTest)",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-gametest":[
+      "me.p0x38.fabric.gametest.InvestigateEntityGameTests"
+    ]
+  }
+}
