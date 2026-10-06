@@ -111,5 +111,9 @@ public final class InvestigateEntityGameTests {
             );
         }
 
+        @Override
+        public InvestigateEntityGoal getInvestigationGoal() {
+            return this.investigationGoal;
+        }
     }
 }
