@@ -1,27 +1,35 @@
 package me.p0x38.fabric.client.renderers.noise;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import me.p0x38.fuckinguselessmod.FuckingUselessMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 
 import java.util.Random;
+import java.util.UUID;
 
 public final class DynamicNoiseTexture implements AutoCloseable {
     private static final int WIDTH = 64;
     private static final int HEIGHT = 64;
-    private static final Identifier TEXTURE_LOCATION =
+
+    private static final Identifier FALLBACK_TEXTURE_LOCATION =
             Identifier.fromNamespaceAndPath(
-                    "fuckinguselessmod",
-                    "dnoise"
+                    FuckingUselessMod.MOD_ID,
+                    "textures/entity/white.png"
             );
 
+    private final Identifier textureLocation;
     private final NativeImage image;
     private final DynamicTexture texture;
+    private final Random random;
 
-    private final Random random = new Random();
-
-    public DynamicNoiseTexture() {
+    public DynamicNoiseTexture(UUID entityId) {
+        this.textureLocation =
+                Identifier.fromNamespaceAndPath(
+                        FuckingUselessMod.MOD_ID,
+                        "dnoise/" + entityId
+                );
 
         this.image = new NativeImage(
                 NativeImage.Format.RGBA,
@@ -31,46 +39,53 @@ public final class DynamicNoiseTexture implements AutoCloseable {
         );
 
         this.texture = new DynamicTexture(
-                () -> "fuckinguselessmod_dnoise",
+                () -> "fuckinguselessmod_dnoise_" + entityId,
                 image
         );
 
+        this.random = new Random(entityId.getMostSignificantBits()
+                ^ entityId.getLeastSignificantBits());
+
         Minecraft.getInstance()
                 .getTextureManager()
-                .register(TEXTURE_LOCATION, texture);
+                .register(this.textureLocation, this.texture);
 
-        generateNoise();
-        texture.upload();
+        this.generateNoise();
+        this.texture.upload();
     }
 
     public Identifier getTextureLocation() {
-        return TEXTURE_LOCATION;
+        return this.textureLocation;
     }
 
-    public void generateNoise() {
+    public static Identifier getFallbackTextureLocation() {
+        return FALLBACK_TEXTURE_LOCATION;
+    }
+
+    private void generateNoise() {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                int value = random.nextInt(256);
+                int value = this.random.nextInt(256);
 
                 int argb =
                         0xFF000000
-                        | (value << 16)
-                        | (value << 8)
-                        | value;
+                                | (value << 16)
+                                | (value << 8)
+                                | value;
 
-                image.setPixelABGR(x, y, argb);
+                this.image.setPixelABGR(x, y, argb);
             }
         }
     }
 
     public void update() {
-        generateNoise();
-        texture.upload();
+        this.generateNoise();
+        this.texture.upload();
     }
 
     @Override
     public void close() {
-        texture.close();
-        image.close();
+        this.texture.close();
+        this.image.close();
     }
 }
