@@ -237,6 +237,15 @@ public final class InvestigateEntityGoal extends MobGoal<PathfinderMob> {
     }
 
     /**
+     * Changes the current investigation state.
+     *
+     * @param state new state
+     */
+    public void setState(InvestigationState state) {
+        this.state = Objects.requireNonNull(state, "state");
+    }
+
+    /**
      * Changes the investigation mode at runtime.
      *
      * @param mode new mode
