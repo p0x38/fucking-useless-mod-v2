@@ -17,6 +17,12 @@ public final class ModEntities {
                     .sized(.6f, 1.8f)
     );
 
+    public static final EntityType<NoiseEntity> NOISE_ENTITY = register(
+            "noise_entity",
+            EntityType.Builder.of(NoiseEntity::new, MobCategory.MISC)
+                    .sized(.6f, 1.8f)
+    );
+
     private ModEntities() {}
 
     // Keep this stuff empty unless we need to add stuff here

@@ -1,6 +1,7 @@
 package me.p0x38.fabric.client;
 
 import me.p0x38.fabric.client.commands.CensorBoxCommand;
+import me.p0x38.fabric.client.renderers.NoiseEntityRenderer;
 import me.p0x38.fabric.client.renderers.UnknownEntityRenderer;
 import me.p0x38.fabric.client.unknownentity.UnknownEntityTriggerRegistry;
 import me.p0x38.fabric.client.commands.ChatEntityCommand;
@@ -32,6 +33,7 @@ public final class FuckingUselessModFabricClient implements ClientModInitializer
         );
 
         EntityRenderers.register(ModEntities.CHAT_ENTITY, UnknownEntityRenderer::new);
+        EntityRenderers.register(ModEntities.NOISE_ENTITY, NoiseEntityRenderer::new);
 
         CensorBoxRenderer.initialize();
         CensorBoxCommand.initialize();
