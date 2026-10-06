@@ -28,7 +28,7 @@ public final class MovementStyleController {
             return;
         }
 
-        this.previousSneaking = this.mob.isSneaking();
+        this.previousSneaking = this.mob.isShiftKeyDown();
         this.previousSprinting = this.mob.isSprinting();
         this.captured = true;
     }
