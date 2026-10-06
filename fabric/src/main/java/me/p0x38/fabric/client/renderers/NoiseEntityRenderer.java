@@ -1,6 +1,8 @@
 package me.p0x38.fabric.client.renderers;
 
 import me.p0x38.fabric.client.renderers.noise.DynamicNoiseTexture;
+import me.p0x38.fabric.client.renderers.noise.NoiseArmorLayer;
+import me.p0x38.fabric.client.renderers.noise.NoiseEntityRenderState;
 import me.p0x38.fabric.client.renderers.noise.NoiseRenderMask;
 import me.p0x38.fuckinguselessmod.entity.NoiseEntity;
 import net.minecraft.client.model.HumanoidModel;
@@ -13,62 +15,90 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /** Client renderer for the Noise Entity using a humanoid model and armor layer. */
 public class NoiseEntityRenderer extends HumanoidMobRenderer<
         NoiseEntity,
-        HumanoidRenderState,
-        HumanoidModel<HumanoidRenderState>
+        NoiseEntityRenderState,
+        HumanoidModel<NoiseEntityRenderState>
         > {
-    private final DynamicNoiseTexture noiseTexture;
+    private final Map<UUID, DynamicNoiseTexture> noiseTextures = new HashMap<>();
     private final NoiseRenderMask noiseMask;
 
-    /** Creates the renderer and attaches the humanoid armor layer. */
     public NoiseEntityRenderer(EntityRendererProvider.Context context) {
         super(
                 context,
                 new HumanoidModel<>(
                         context.bakeLayer(ModelLayers.PLAYER)
                 ),
-                0.5f
+                0.5F
         );
 
-        this.addLayer(new HumanoidArmorLayer<>(
+        ArmorModelSet armorModels = ArmorModelSet.bake(
+                ModelLayers.PLAYER_ARMOR,
+                context.getModelSet(),
+                HumanoidModel::new
+        );
+
+        this.addLayer(new NoiseArmorLayer(
                 this,
-                ArmorModelSet.bake(
-                        ModelLayers.PLAYER_ARMOR,
-                        context.getModelSet(),
-                        HumanoidModel::new
-                ),
+                armorModels,
                 context.getEquipmentRenderer()
         ));
 
-        this.noiseTexture = new DynamicNoiseTexture();
-
         this.noiseMask = new NoiseRenderMask();
-        noiseMask.enable(NoiseRenderMask.Layer.BODY);
+        this.noiseMask.enable(NoiseRenderMask.Layer.BODY);
     }
 
-    /** @return a new humanoid render state. */
     @Override
-    public @NonNull HumanoidRenderState createRenderState() {
-        return new HumanoidRenderState();
+    public @NonNull NoiseEntityRenderState createRenderState() {
+        return new NoiseEntityRenderState();
     }
 
-    /** @return the texture used by the entity's base model. */
     @Override
-    public @NonNull Identifier getTextureLocation(@NonNull HumanoidRenderState state) {
-        return noiseTexture.getTextureLocation();
+    public void extractRenderState(
+            @NonNull NoiseEntity entity,
+            @NonNull NoiseEntityRenderState state,
+            float partialTicks
+    ) {
+        super.extractRenderState(entity, state, partialTicks);
+
+        DynamicNoiseTexture texture =
+                this.noiseTextures.computeIfAbsent(
+                        entity.getUUID(),
+                        ignored -> new DynamicNoiseTexture(entity.getUUID())
+                );
+
+        state.noiseTextureLocation = texture.getTextureLocation();
+        state.alwaysUpdate = entity.isAlwaysUpdate();
+        state.noiseArmor =
+                this.noiseMask.isEnabled(NoiseRenderMask.Layer.ARMOR);
+
+        if (state.alwaysUpdate) {
+            texture.update();
+        }
+    }
+
+    @Override
+    public @NonNull Identifier getTextureLocation(
+            @NonNull NoiseEntityRenderState state
+    ) {
+        if (this.noiseMask.isEnabled(NoiseRenderMask.Layer.BODY)) {
+            return state.noiseTextureLocation;
+        }
+
+        return DynamicNoiseTexture.getFallbackTextureLocation();
     }
 
     public NoiseRenderMask getNoiseMask() {
-        return noiseMask;
-    }
-
-    public void updateNoiseTexture() {
-        noiseTexture.update();
+        return this.noiseMask;
     }
 
     public void close() {
-        noiseTexture.close();
+        this.noiseTextures.values().forEach(DynamicNoiseTexture::close);
+        this.noiseTextures.clear();
     }
 }
