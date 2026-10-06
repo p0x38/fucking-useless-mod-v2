@@ -111,8 +111,5 @@ public final class InvestigateEntityGameTests {
             );
         }
 
-        private InvestigateEntityGoal getInvestigationGoal() {
-            return this.investigationGoal;
-        }
     }
 }
