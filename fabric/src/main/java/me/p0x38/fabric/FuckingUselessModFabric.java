@@ -1,8 +1,9 @@
 package me.p0x38.fabric;
 
 import me.p0x38.fuckinguselessmod.FuckingUselessMod;
-import me.p0x38.fuckinguselessmod.entity.ModEntities;
 import me.p0x38.fuckinguselessmod.entity.ChatEntity;
+import me.p0x38.fuckinguselessmod.entity.ModEntities;
+import me.p0x38.fuckinguselessmod.entity.NoiseEntity;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 
@@ -14,6 +15,11 @@ public final class FuckingUselessModFabric implements ModInitializer {
         FabricDefaultAttributeRegistry.register(
                 ModEntities.CHAT_ENTITY,
                 ChatEntity.createAttributes()
+        );
+
+        FabricDefaultAttributeRegistry.register(
+                ModEntities.NOISE_ENTITY,
+                NoiseEntity.createAttributes()
         );
     }
 }
