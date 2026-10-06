@@ -12,6 +12,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 /**
  * A reusable goal that causes a pathfinding mob to investigate a selected entity.
@@ -26,6 +27,7 @@ public final class InvestigateEntityGoal extends MobGoal<PathfinderMob> {
     private final InvestigationSettings settings;
     private final MovementStyleController movementController;
     private final Map<InvestigationMode, InvestigationBehavior> behaviors;
+    private ToIntFunction<Entity> targetPriority;
 
     private Entity target;
 
@@ -66,6 +68,28 @@ public final class InvestigateEntityGoal extends MobGoal<PathfinderMob> {
             Predicate<Entity> targetPredicate,
             InvestigationSettings settings
     ) {
+        this(
+                mob,
+                targetPredicate,
+                settings,
+                entity -> 0
+        );
+    }
+
+    /**
+     * Creates an investigation goal using custom settings and target priority.
+     *
+     * @param mob mob running the goal
+     * @param targetPredicate predicate used to determine valid targets
+     * @param settings mutable investigation settings
+     * @param targetPriority function returning the priority of each candidate
+     */
+    public InvestigateEntityGoal(
+            PathfinderMob mob,
+            Predicate<Entity> targetPredicate,
+            InvestigationSettings settings,
+            ToIntFunction<Entity> targetPriority
+    ) {
         super(Objects.requireNonNull(mob, "mob"));
 
         this.targetPredicate = Objects.requireNonNull(
@@ -76,6 +100,11 @@ public final class InvestigateEntityGoal extends MobGoal<PathfinderMob> {
         this.settings = Objects.requireNonNull(
                 settings,
                 "settings"
+        );
+
+        this.targetPriority = Objects.requireNonNull(
+                targetPriority,
+                "targetPriority"
         );
 
         this.movementController = new MovementStyleController(mob);
@@ -123,7 +152,7 @@ public final class InvestigateEntityGoal extends MobGoal<PathfinderMob> {
         }
 
         if (this.distanceToTargetSqr()
-                > this.settings.getSearchRange() * this.settings.getSearchRange()) {
+                > this.settings.getTrackingRange() * this.settings.getTrackingRange()) {
 
             if (!this.settings.allowsTargetLoss()) {
                 return false;
@@ -263,6 +292,27 @@ public final class InvestigateEntityGoal extends MobGoal<PathfinderMob> {
      */
     public void setMovementStyle(MovementStyle movementStyle) {
         this.settings.setMovementStyle(movementStyle);
+    }
+
+    /**
+     * Returns the function used to prioritize candidate targets.
+     *
+     * @return target priority function
+     */
+    public ToIntFunction<Entity> getTargetPriority() {
+        return this.targetPriority;
+    }
+
+    /**
+     * Changes the function used to prioritize candidate targets.
+     *
+     * @param targetPriority target priority function
+     */
+    public void setTargetPriority(ToIntFunction<Entity> targetPriority) {
+        this.targetPriority = Objects.requireNonNull(
+                targetPriority,
+                "targetPriority"
+        );
     }
 
     /**
@@ -443,26 +493,29 @@ public final class InvestigateEntityGoal extends MobGoal<PathfinderMob> {
     }
 
     private Entity findTarget() {
-        double searchRange = this.settings.getSearchRange();
-        double searchRangeSqr = searchRange * searchRange;
+        double acquisitionRange = this.settings.getAcquisitionRange();
+        double acquisitionRangeSqr = acquisitionRange * acquisitionRange;
 
         return this.mob.level()
                 .getEntitiesOfClass(
                         Entity.class,
-                        this.mob.getBoundingBox().inflate(searchRange),
+                        this.mob.getBoundingBox().inflate(acquisitionRange),
                         entity -> entity != this.mob
                                 && entity.isAlive()
                                 && this.targetPredicate.test(entity)
-                                && this.mob.distanceToSqr(entity) <= searchRangeSqr
+                                && this.mob.distanceToSqr(entity) <= acquisitionRangeSqr
                                 && (!this.settings.requiresLineOfSight()
                                 || this.mob.hasLineOfSight(entity))
                 )
                 .stream()
-                .min(
-                        Comparator.comparingDouble(
-                                this.mob::distanceToSqr
-                        )
+                .sorted(
+                        Comparator
+                                .comparingInt(this.targetPriority::applyAsInt)
+                                .reversed()
+                                .thenComparingDouble(this.mob::distanceToSqr)
                 )
+                .findFirst()
                 .orElse(null);
+
     }
 }
