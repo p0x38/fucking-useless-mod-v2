@@ -16,7 +16,8 @@ public final class InvestigationSettings {
     private InvestigationMode mode = InvestigationMode.APPROACH;
     private MovementStyle movementStyle = MovementStyle.WALK;
 
-    private double searchRange = 16.0D;
+    private double acquisitionRange = 16.0D;
+    private double trackingRange = 32.0D;
     private double speed = 1.0D;
     private double sprintSpeed = 1.3D;
     private double sneakSpeed = 0.6D;
@@ -54,12 +55,20 @@ public final class InvestigationSettings {
         );
     }
 
-    public double getSearchRange() {
-        return searchRange;
+    public double getAcquisitionRange() {
+        return acquisitionRange;
     }
 
-    public void setSearchRange(double searchRange) {
-        this.searchRange = Math.max(0.0D, searchRange);
+    public void setAcquisitionRange(double acquisitionRange) {
+        this.acquisitionRange = Math.max(0.0D, acquisitionRange);
+    }
+
+    public double getTrackingRange() {
+        return trackingRange;
+    }
+
+    public void setTrackingRange(double trackingRange) {
+        this.trackingRange = Math.max(0.0D, trackingRange);
     }
 
     public double getSpeed() {
